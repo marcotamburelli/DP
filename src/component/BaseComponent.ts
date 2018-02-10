@@ -8,7 +8,7 @@ export interface Scope {
   childScopes: { [index: string]: Scope };
 }
 
-export interface LocalProperties {
+export interface ScopeProperties {
   namespace?: string;
   id?: string;
   name?: string;
@@ -22,8 +22,8 @@ export abstract class BaseComponent<E extends Element, M> {
 
   private localScope: Scope;
 
-  protected constructor(protected element: E, protected localProperties: LocalProperties = {}) {
-    var { namespace, id, name } = localProperties;
+  protected constructor(protected element: E, protected scopeProperties: ScopeProperties = {}) {
+    var { namespace, id, name } = scopeProperties;
 
     if (namespace) {
       this.localScope = { namespace, idsMap: {}, namesMap: {}, childScopes: {} };
@@ -50,7 +50,7 @@ export abstract class BaseComponent<E extends Element, M> {
     var scope = this.getScope();
 
     if (scope) {
-      var { id, name } = this.localProperties;
+      var { id, name } = this.scopeProperties;
       var { idsMap, namesMap } = scope;
 
       if (id) {
@@ -67,7 +67,7 @@ export abstract class BaseComponent<E extends Element, M> {
     var scope = this.getScope();
 
     if (scope) {
-      var { id, name } = this.localProperties;
+      var { id, name } = this.scopeProperties;
       var { idsMap, namesMap } = scope;
 
       if (id) {

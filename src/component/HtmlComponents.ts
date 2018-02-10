@@ -1,22 +1,31 @@
 import { BaseComponent } from './BaseComponent';
 
-export class HtmlElementComponent<T> extends BaseComponent<HTMLInputElement, T> {
-  constructor(element: HTMLInputElement, id: string, name: string, private transformer: (value: string) => T) {
-    super(element, { id, name });
+export interface SimpleProperties {
+  id?: string;
+  name?: string;
+}
+
+export class HtmlElementComponent<T> extends BaseComponent<HTMLElement, T> {
+  constructor(element: HTMLElement, properties: SimpleProperties = {}, private transformer?: (value: string) => T) {
+    super(element, properties);
   }
 
   setModel(model: T) {
-    this.element.innerText = model.toString();
+    if (this.scopeProperties.name) {
+      this.element.innerText = model.toString();
+    }
   }
 
   getModel() {
-    return this.transformer(this.element.innerText);
+    if (this.scopeProperties.name) {
+      return this.transformer(this.element.innerText);
+    }
   }
 }
 
 export class TextInputComponent<T> extends BaseComponent<HTMLInputElement, T> {
-  constructor(element: HTMLInputElement, id: string, name: string, private transformer: (value: string) => T) {
-    super(element, { id, name });
+  constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => T) {
+    super(element, properties);
   }
 
   setModel(model: T) {
@@ -29,8 +38,8 @@ export class TextInputComponent<T> extends BaseComponent<HTMLInputElement, T> {
 }
 
 export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, boolean> {
-  constructor(element: HTMLInputElement, id: string, name: string) {
-    super(element, { id, name });
+  constructor(element: HTMLInputElement, properties: SimpleProperties = {}) {
+    super(element, properties);
   }
 
   setModel(model: boolean) {
@@ -42,9 +51,9 @@ export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, bool
   }
 }
 
-export class MultiSelectComponent<T> extends BaseComponent<HTMLSelectElement, T[] | T> {
-  constructor(element: HTMLSelectElement, id: string, name: string, private transformer: (value: string) => T) {
-    super(element, { id, name });
+export class SelectComponent<T> extends BaseComponent<HTMLSelectElement, T[] | T> {
+  constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => T) {
+    super(element, properties);
   }
 
   setModel(model: T[] | T = []) {
@@ -63,7 +72,7 @@ export class MultiSelectComponent<T> extends BaseComponent<HTMLSelectElement, T[
     for (let i = 0; i < options.length; i++) {
       const opt = options.item(i);
 
-      opt.selected = values[opt.value] === true;
+      opt.selected = (values[opt.value] === true);
     }
   }
 

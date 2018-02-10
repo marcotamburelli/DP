@@ -1,4 +1,4 @@
-import { BaseComponent, ChildComponent, GenericComponent, LocalProperties, Scope } from './BaseComponent';
+import { BaseComponent, ChildComponent, GenericComponent, ScopeProperties, Scope } from './BaseComponent';
 
 /**
  * Basic element.
@@ -83,8 +83,8 @@ export class ScopedComponent<E extends Element, M> extends BaseComponent<E, M> {
     return model;
   }
 
-  private constructor(element: E, localProperties: LocalProperties = { namespace: 'default' }) {
-    super(element, localProperties);
+  constructor(element: E, scopeProperties: ScopeProperties = { namespace: 'default' }) {
+    super(element, scopeProperties);
   }
 
   setModel(model: M) {
