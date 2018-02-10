@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
+    "jsx": "preserve",
     "module": "commonjs",
     "allowJs": true,
     "allowSyntheticDefaultImports": true
