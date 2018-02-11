@@ -1,6 +1,6 @@
 import { JSDOM } from 'jsdom';
 
-import { Hello } from '../src/Builder';
+import { XLib } from '../src/XLib';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
@@ -10,7 +10,7 @@ global['document'] = dom.window.document;
 describe('Checking single model', () => {
 
   it('Checking html', () => {
-    var div: Hello.ControlComponent<number> = Hello.define(
+    var div: XLib.ControlComponent<number> = XLib.define(
       'div',
       { 'name': 'val', 'value-type': 'number' }
     );
@@ -22,7 +22,7 @@ describe('Checking single model', () => {
   });
 
   it('Checking input', () => {
-    var input: Hello.ControlComponent<number> = Hello.define(
+    var input: XLib.ControlComponent<number> = XLib.define(
       'input',
       { 'name': 'val', 'value-type': 'number' }
     );
@@ -47,11 +47,11 @@ describe('Checking scoped component', () => {
   }
 
   it('Check model', () => {
-    var component = Hello.define(
+    var component = XLib.define(
       'div', { namespace: 'test' },
-      Hello.define('input', { 'name': 'name', 'value-type': 'string' }),
-      Hello.define('input', { 'name': 'age', 'value-type': 'number' })
-    ) as Hello.Container<TestModel>;
+      XLib.define('input', { 'name': 'name', 'value-type': 'string' }),
+      XLib.define('input', { 'name': 'age', 'value-type': 'number' })
+    ) as XLib.Container<TestModel>;
 
     component.setModel({ name: 'test', age: 123 });
 

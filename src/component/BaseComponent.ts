@@ -1,5 +1,6 @@
 import { Channel, Listener } from '../event/Channel';
 import { BaseEvent, EventType } from '../event/Event';
+import { HasChannel } from '../event/types';
 
 interface NamesMap { [name: string]: GenericComponent; };
 interface IdsMap { [id: string]: GenericComponent; };
@@ -20,7 +21,7 @@ export interface ScopeProperties {
 export type GenericComponent = BaseComponent<Element, any>;
 export type ChildComponent = GenericComponent | string;
 
-export abstract class BaseComponent<E extends Element, M> {
+export abstract class BaseComponent<E extends Element, M> implements HasChannel {
   protected parent: GenericComponent;
 
   private localScope: Scope;

@@ -6,12 +6,11 @@ import {
   TextInputComponent
 } from './component/HtmlComponents';
 import { ScopedComponent } from './component/ScopedComponent';
-import { HasModel, IsContainer } from './component/types';
 import { DOM_PROPERTIES, HTML, NATIVE_PROPERTIES, NODES, SCOPE_PROPERTIES, SPECIFIC_PROPERTIES } from './const';
 
-type Generator = HTML | ((props: Properties) => GenericComponent);
-interface Properties { [prop: string]: string; };
-type ChildDef = (ChildComponent | ChildComponent[]);
+export interface Properties { [prop: string]: string; };
+export type ChildDef = (ChildComponent | ChildComponent[]);
+export type Generator = HTML | ((props: Properties) => GenericComponent);
 
 namespace PropertiesUtil {
   export function getScopeProperties(properties: Properties) {
@@ -66,18 +65,7 @@ namespace PropertiesUtil {
   }
 }
 
-export namespace Hello {
-  export type Container<M> = GenericComponent & HasModel<M> & IsContainer;
-  export type ControlComponent<M> = GenericComponent & HasModel<M>;
-
-  function appendChildDef(parent: GenericComponent, child: ChildDef) {
-    if (Array.isArray(child)) {
-      child.forEach(c => parent.append(c));
-    } else {
-      parent.append(child);
-    }
-  }
-
+export namespace Builder {
   function createHtmlComponent(tag: HTML, properties: Properties) {
     var element = document.createElement(tag);
 
@@ -126,7 +114,15 @@ export namespace Hello {
     }
   }
 
-  function createComponent(tag: HTML, properties: Properties) {
+  export function appendChildDef(parent: GenericComponent, child: ChildDef) {
+    if (Array.isArray(child)) {
+      child.forEach(c => parent.append(c));
+    } else {
+      parent.append(child);
+    }
+  }
+
+  export function createComponent(tag: HTML, properties: Properties) {
     switch (tag) {
       case NODES.DIV:
       case NODES.LABEL:
@@ -143,17 +139,5 @@ export namespace Hello {
     }
 
     throw new Error(`'${tag}' not supported`);
-  }
-
-  export function define(generator: Generator, properties: Properties, ...children: ChildDef[]) {
-    if (typeof generator === 'function') {
-      var component = generator(properties);
-    } else {
-      component = createComponent(generator, properties);
-    }
-
-    children.forEach(child => appendChildDef(component, child));
-
-    return component as GenericComponent;
   }
 }

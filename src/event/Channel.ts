@@ -8,6 +8,8 @@ export interface Subscription {
   unsubscribe();
 }
 
+export type Listener = (payload) => void;
+
 interface SubscriptionsMap {
   [eventType: string]: {
     [id: string]: Listener
@@ -45,5 +47,3 @@ export class Channel {
     }
   }
 }
-
-export type Listener = (payload) => void;
