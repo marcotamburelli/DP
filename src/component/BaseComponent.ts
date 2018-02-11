@@ -1,3 +1,6 @@
+import { Channel, Listener } from '../event/Channel';
+import { BaseEvent, EventType } from '../event/Event';
+
 interface NamesMap { [name: string]: GenericComponent; };
 interface IdsMap { [id: string]: GenericComponent; };
 
@@ -21,6 +24,7 @@ export abstract class BaseComponent<E extends Element, M> {
   protected parent: GenericComponent;
 
   private localScope: Scope;
+  private channel = new Channel();
 
   protected constructor(protected element: E, protected scopeProperties: ScopeProperties = {}) {
     var { namespace } = scopeProperties;
@@ -122,5 +126,13 @@ export abstract class BaseComponent<E extends Element, M> {
 
   get domNode() {
     return this.element;
+  }
+
+  subscribeListener(eventType: EventType, listener: Listener) {
+    return this.channel.subscribe(eventType, listener);
+  }
+
+  emitEvent<P>(event: BaseEvent<P>) {
+    this.channel.emit(event);
   }
 }
