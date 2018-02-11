@@ -1,11 +1,12 @@
-import { BaseComponent, ChildComponent, GenericComponent, ScopeProperties, Scope } from './BaseComponent';
+import { BaseComponent, GenericComponent, Scope, ScopeProperties } from './BaseComponent';
+import { HasModel, IsContainer } from './types';
 
 /**
  * Basic element.
  * @template E The type of DOM node.
  * @template M The type of component model.
  */
-export class ScopedComponent<E extends Element, M> extends BaseComponent<E, M> {
+export class ScopedComponent<E extends Element, M> extends BaseComponent<E, M> implements HasModel<M>, IsContainer {
 
   private static searchByNameInScope(scope: Scope, name: string) {
     return ScopedComponent.searchInScope(scope, (s) => {
@@ -98,7 +99,7 @@ export class ScopedComponent<E extends Element, M> extends BaseComponent<E, M> {
   }
 
   getModel() {
-    return ScopedComponent.scopeToModel(this.getScope());
+    return ScopedComponent.scopeToModel(this.getScope()) as M;
   }
 
   queryByName(name: string) {

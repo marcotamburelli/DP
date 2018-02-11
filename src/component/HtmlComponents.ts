@@ -1,16 +1,17 @@
 import { BaseComponent } from './BaseComponent';
+import { HasModel } from './types';
 
 export interface SimpleProperties {
   id?: string;
   name?: string;
 }
 
-export class HtmlElementComponent<T> extends BaseComponent<HTMLElement, T> {
-  constructor(element: HTMLElement, properties: SimpleProperties = {}, private transformer?: (value: string) => T) {
+export class HtmlElementComponent<M> extends BaseComponent<HTMLElement, M> implements HasModel<M> {
+  constructor(element: HTMLElement, properties: SimpleProperties = {}, private transformer?: (value: string) => M) {
     super(element, properties);
   }
 
-  setModel(model: T) {
+  setModel(model: M) {
     if (this.scopeProperties.name) {
       this.element.innerText = model.toString();
     }
@@ -23,12 +24,12 @@ export class HtmlElementComponent<T> extends BaseComponent<HTMLElement, T> {
   }
 }
 
-export class TextInputComponent<T> extends BaseComponent<HTMLInputElement, T> {
-  constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => T) {
+export class TextInputComponent<M> extends BaseComponent<HTMLInputElement, M> implements HasModel<M> {
+  constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
     super(element, properties);
   }
 
-  setModel(model: T) {
+  setModel(model: M) {
     this.element.value = model.toString();
   }
 
@@ -37,7 +38,7 @@ export class TextInputComponent<T> extends BaseComponent<HTMLInputElement, T> {
   }
 }
 
-export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, boolean> {
+export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, boolean> implements HasModel<boolean> {
   constructor(element: HTMLInputElement, properties: SimpleProperties = {}) {
     super(element, properties);
   }
@@ -51,12 +52,12 @@ export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, bool
   }
 }
 
-export class SelectComponent<T> extends BaseComponent<HTMLSelectElement, T[] | T> {
-  constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => T) {
+export class SelectComponent<M> extends BaseComponent<HTMLSelectElement, M[] | M> implements HasModel<M[] | M> {
+  constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
     super(element, properties);
   }
 
-  setModel(model: T[] | T = []) {
+  setModel(model: M[] | M = []) {
     const { options } = this.element;
 
     var values = {} as { [index: string]: boolean };
@@ -77,7 +78,7 @@ export class SelectComponent<T> extends BaseComponent<HTMLSelectElement, T[] | T
   }
 
   getModel() {
-    var model = [] as T[];
+    var model = [] as M[];
     const { options } = this.element;
 
     for (let i = 0; i < options.length; i++) {

@@ -8,7 +8,7 @@ export const NODES = {
   OPTION: 'option'
 };
 
-export type HTML = 'div' | 'label' | 'span' | 'option';
+export type HTML = 'div' | 'label' | 'span' | 'input' | 'button' | 'select' | 'option';
 
 export const SCOPE_PROPERTIES = {
   NAMESPACE: 'namespace',
@@ -27,4 +27,4 @@ export const DOM_PROPERTIES = {
 
 export const NATIVE_PROPERTIES = {
   TYPE: 'type'
-}
+};

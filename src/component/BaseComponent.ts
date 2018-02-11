@@ -23,7 +23,7 @@ export abstract class BaseComponent<E extends Element, M> {
   private localScope: Scope;
 
   protected constructor(protected element: E, protected scopeProperties: ScopeProperties = {}) {
-    var { namespace, id, name } = scopeProperties;
+    var { namespace } = scopeProperties;
 
     if (namespace) {
       this.localScope = { namespace, idsMap: {}, namesMap: {}, childScopes: {} };
@@ -86,7 +86,7 @@ export abstract class BaseComponent<E extends Element, M> {
 
       this.pullChildScope(child);
       this.element.appendChild(child.domNode);
-      this.registerInScope();
+      child.registerInScope();
     } else {
       this.element.appendChild(document.createTextNode(child));
     }
@@ -115,7 +115,7 @@ export abstract class BaseComponent<E extends Element, M> {
     var scope = this.getScope();
     var childScope = child.localScope;
 
-    if (childScope && scope) {
+    if (scope && childScope && childScope.namespace) {
       delete scope.childScopes[childScope.namespace];
     }
   }

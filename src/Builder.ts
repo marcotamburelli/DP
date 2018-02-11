@@ -6,6 +6,7 @@ import {
   TextInputComponent
 } from './component/HtmlComponents';
 import { ScopedComponent } from './component/ScopedComponent';
+import { HasModel, IsContainer } from './component/types';
 import { DOM_PROPERTIES, HTML, NATIVE_PROPERTIES, NODES, SCOPE_PROPERTIES, SPECIFIC_PROPERTIES } from './const';
 
 type Generator = HTML | ((props: Properties) => GenericComponent);
@@ -66,6 +67,8 @@ namespace PropertiesUtil {
 }
 
 export namespace Hello {
+  export type Container<M> = GenericComponent & HasModel<M> & IsContainer;
+  export type ControlComponent<M> = GenericComponent & HasModel<M>;
 
   function appendChildDef(parent: GenericComponent, child: ChildDef) {
     if (Array.isArray(child)) {
@@ -146,9 +149,11 @@ export namespace Hello {
     if (typeof generator === 'function') {
       var component = generator(properties);
     } else {
-      createComponent(generator, properties);
+      component = createComponent(generator, properties);
     }
 
     children.forEach(child => appendChildDef(component, child));
+
+    return component as GenericComponent;
   }
 }
