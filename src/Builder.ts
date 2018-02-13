@@ -1,4 +1,4 @@
-import { ChildComponent, GenericComponent, ScopeProperties } from './component/BaseComponent';
+import { ChildComponent, GenericComponent } from './component/BaseComponent';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
@@ -6,70 +6,32 @@ import {
   TextInputComponent
 } from './component/HtmlComponents';
 import { ScopedComponent } from './component/ScopedComponent';
-import { DOM_PROPERTIES, HTML, NATIVE_PROPERTIES, NODES, SCOPE_PROPERTIES, SPECIFIC_PROPERTIES } from './const';
+import { NATIVE_PROPERTIES, NODES } from './util/const';
+import { NativeUtil } from './util/NativeUtil';
+import { PropertiesUtil } from './util/PropertiesUtil';
+import { HTML, Properties } from './util/types';
 
-export interface Properties { [prop: string]: string; };
 export type ChildDef = (ChildComponent | ChildComponent[]);
-export type Generator = HTML | ((props: Properties) => GenericComponent);
+export type Generator = HTML | ((props: Properties) => GenericComponent) | GenericComponent;
 
-namespace PropertiesUtil {
-  export function getScopeProperties(properties: Properties) {
-    return {
-      namespace: properties[SCOPE_PROPERTIES.NAMESPACE],
-      id: properties[SCOPE_PROPERTIES.ID],
-      name: properties[SCOPE_PROPERTIES.NAME]
-    } as ScopeProperties;
-  }
+namespace DomFactory {
+  export function createElement<E extends HTMLElement>(tag: HTML, properties: Properties) {
+    var element = document.createElement(tag);
 
-  export function getTransformer(properties: Properties) {
-    var type = properties[SPECIFIC_PROPERTIES.VALUE_TYPE];
+    var styleProps = PropertiesUtil.getStyleProperties(properties);
+    var nativeProps = PropertiesUtil.getNativeProperties(properties);
 
-    switch (type) {
-      case 'number': return (value: string) => parseInt(value);
-      case 'number.float': return (value: string) => parseFloat(value);
-      default: return (value: string) => value;
-    }
-  }
+    styleProps.class && NativeUtil.applyClass(element, styleProps.class);
+    styleProps.style && NativeUtil.applyStyle(element, styleProps.style);
+    NativeUtil.applyProperties(element, nativeProps);
 
-  export function getDomProperties(properties: Properties) {
-    return {
-      class: properties[DOM_PROPERTIES.CLASS],
-      style: properties[DOM_PROPERTIES.STYLE]
-    };
-  }
-
-  export function getNativeProperties(properties: Properties) {
-    var nativeProps = { ...properties } as Properties;
-
-    delete nativeProps[SCOPE_PROPERTIES.NAMESPACE];
-    delete nativeProps[SCOPE_PROPERTIES.ID];
-    delete nativeProps[SPECIFIC_PROPERTIES.VALUE_TYPE];
-    delete nativeProps[DOM_PROPERTIES.CLASS];
-    delete nativeProps[DOM_PROPERTIES.STYLE];
-
-    return nativeProps;
-  }
-
-  export function setElementProperties(properties: Properties, element: HTMLElement) {
-    var domProperties = PropertiesUtil.getDomProperties(properties);
-    var nativeProperties = PropertiesUtil.getNativeProperties(properties);
-
-    domProperties.class && domProperties.class.split(' ')
-      .forEach(_class => element.classList.add(_class));
-
-    // TODO Missing styles
-
-    Object.keys(nativeProperties).forEach(prop => {
-      element[prop] = nativeProperties[prop];
-    });
+    return element as E;
   }
 }
 
 export namespace Builder {
   function createHtmlComponent(tag: HTML, properties: Properties) {
-    var element = document.createElement(tag);
-
-    PropertiesUtil.setElementProperties(properties, element);
+    var element = DomFactory.createElement(tag, properties);
 
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
@@ -81,9 +43,7 @@ export namespace Builder {
   }
 
   function createInputComponent(properties: Properties) {
-    var element = document.createElement('input');
-
-    PropertiesUtil.setElementProperties(properties, element);
+    var element = DomFactory.createElement<HTMLInputElement>('input', properties);
 
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
@@ -101,9 +61,7 @@ export namespace Builder {
   }
 
   function createSelectComponent(properties: Properties) {
-    var element = document.createElement('select');
-
-    PropertiesUtil.setElementProperties(properties, element);
+    var element = DomFactory.createElement<HTMLSelectElement>('select', properties);
 
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 

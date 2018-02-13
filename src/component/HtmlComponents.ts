@@ -1,3 +1,4 @@
+import { MODEL_UPDATED } from '../event/Event';
 import { BaseComponent } from './BaseComponent';
 import { HasModel } from './types';
 
@@ -24,9 +25,21 @@ export class HtmlElementComponent<M> extends BaseComponent<HTMLElement, M> imple
   }
 }
 
-export class TextInputComponent<M> extends BaseComponent<HTMLInputElement, M> implements HasModel<M> {
+abstract class NamedComponent<M> extends BaseComponent<HTMLInputElement | HTMLSelectElement, M> implements HasModel<M> {
+  constructor(element: HTMLInputElement | HTMLSelectElement, properties: SimpleProperties = {}) {
+    super(element, properties);
+  }
+
+  protected registerDomName(namespace: string, name: string) {
+    this.element.name = `${namespace}.${name}`;
+  }
+}
+
+export class TextInputComponent<M> extends NamedComponent<M>  {
   constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
     super(element, properties);
+
+    element.addEventListener('keyup', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: M) {
@@ -38,23 +51,27 @@ export class TextInputComponent<M> extends BaseComponent<HTMLInputElement, M> im
   }
 }
 
-export class CheckBoxInputComponent extends BaseComponent<HTMLInputElement, boolean> implements HasModel<boolean> {
+export class CheckBoxInputComponent extends NamedComponent<boolean> {
   constructor(element: HTMLInputElement, properties: SimpleProperties = {}) {
     super(element, properties);
+
+    element.addEventListener('change', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: boolean) {
-    this.element.checked = model;
+    (this.element as HTMLInputElement).checked = model;
   }
 
   getModel() {
-    return this.element.checked;
+    return (this.element as HTMLInputElement).checked;
   }
 }
 
 export class SelectComponent<M> extends BaseComponent<HTMLSelectElement, M[] | M> implements HasModel<M[] | M> {
   constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
     super(element, properties);
+
+    element.addEventListener('select', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: M[] | M = []) {

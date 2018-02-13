@@ -1,7 +1,7 @@
 import { JSDOM } from 'jsdom';
 
 import { ScopeProperties } from '../../src/component/BaseComponent';
-import { TextInputComponent } from '../../src/component/HtmlComponents';
+import { HtmlElementComponent, TextInputComponent } from '../../src/component/HtmlComponents';
 import { ScopedComponent } from '../../src/component/ScopedComponent';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
@@ -51,15 +51,21 @@ describe('Scoped component', () => {
   });
 
   it('Check nested scope', () => {
-    const element = document.createElement('div');
-    const childElement = document.createElement('div');
+    const element0 = document.createElement('div');
+    const element1 = document.createElement('div');
+    const element2 = document.createElement('div');
+    const element3 = document.createElement('div');
 
-    const component = new Scoped(element, { namespace: 'test.0' });
-    const child = new Scoped(childElement, { namespace: 'test.1' });
+    const component0 = new Scoped(element0, { namespace: 'test.0' });
+    const component1 = new HtmlElementComponent(element1);
+    const component2 = new Scoped(element2, { namespace: 'test.1' });
+    const component3 = new HtmlElementComponent(element3);
 
-    component.append(child);
+    component0.append(component1);
+    component1.append(component2);
+    component2.append(component3);
 
-    expect(component.scope).toEqual({
+    expect(component0.scope).toEqual({
       namespace: 'test.0',
       idsMap: {},
       namesMap: {},

@@ -47,6 +47,13 @@ export abstract class BaseComponent<E extends Element, M> implements HasChannel 
     }
   }
 
+  protected registerDomName(namespace: string, name: string) {
+  }
+
+  protected registerDomIdId(namespace: string, id: string) {
+    this.element.id = `${namespace}.${id}`;
+  }
+
   abstract setModel(model: M);
 
   abstract getModel();
@@ -56,14 +63,18 @@ export abstract class BaseComponent<E extends Element, M> implements HasChannel 
 
     if (scope) {
       var { id, name } = this.scopeProperties;
-      var { idsMap, namesMap } = scope;
+      var { namespace, idsMap, namesMap } = scope;
 
       if (id) {
         idsMap[id] = this;
+
+        this.registerDomIdId(namespace, id);
       }
 
       if (name) {
         namesMap[name] = this;
+
+        this.registerDomName(namespace, name);
       }
     }
   }
@@ -87,6 +98,10 @@ export abstract class BaseComponent<E extends Element, M> implements HasChannel 
 
   append(child: ChildComponent) {
     if (child instanceof BaseComponent) {
+      if (child.parent) {
+        throw new Error('Element already appended');
+      }
+
       child.parent = this;
 
       this.pullChildScope(child);
