@@ -1,11 +1,11 @@
 import { ChildComponent, GenericComponent } from './component/BaseComponent';
+import { Container } from './component/Container';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
   SelectComponent,
-  TextInputComponent
+  TextInputComponent,
 } from './component/HtmlComponents';
-import { ScopedComponent } from './component/ScopedComponent';
 import { NATIVE_PROPERTIES, NODES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
 import { PropertiesUtil } from './util/PropertiesUtil';
@@ -32,19 +32,21 @@ namespace DomFactory {
 export namespace Builder {
   function createHtmlComponent(tag: HTML, properties: Properties) {
     var element = DomFactory.createElement(tag, properties);
-
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
     if (scopeProperties.namespace) {
-      return new ScopedComponent(element, scopeProperties);
+      return new Container(element, scopeProperties);
     } else {
-      return new HtmlElementComponent<string | number>(element, scopeProperties, PropertiesUtil.getTransformer(properties));
+      return new HtmlElementComponent<string | number>(
+        element,
+        scopeProperties,
+        PropertiesUtil.getTransformer(properties)
+      );
     }
   }
 
   function createInputComponent(properties: Properties) {
     var element = DomFactory.createElement<HTMLInputElement>('input', properties);
-
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
     if (scopeProperties.namespace) {
@@ -62,14 +64,13 @@ export namespace Builder {
 
   function createSelectComponent(properties: Properties) {
     var element = DomFactory.createElement<HTMLSelectElement>('select', properties);
-
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
-    if (scopeProperties.namespace) {
-      return new ScopedComponent(element, scopeProperties);
-    } else {
-      return new SelectComponent<string | number>(element, scopeProperties, PropertiesUtil.getTransformer(properties));
-    }
+    // if (scopeProperties.namespace) {
+    //   return new Container(element, scopeProperties);
+    // } else {
+    return new SelectComponent<string | number>(element, scopeProperties, PropertiesUtil.getTransformer(properties));
+    // }
   }
 
   export function appendChildDef(parent: GenericComponent, child: ChildDef) {

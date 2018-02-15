@@ -1,8 +1,8 @@
 import { JSDOM } from 'jsdom';
 
 import { ScopeProperties } from '../../src/component/BaseComponent';
+import { Container } from '../../src/component/Container';
 import { HtmlElementComponent, TextInputComponent } from '../../src/component/HtmlComponents';
-import { ScopedComponent } from '../../src/component/ScopedComponent';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
@@ -11,29 +11,24 @@ global['document'] = dom.window.document;
 
 describe('Scoped component', () => {
 
-  class Scoped<M> extends ScopedComponent<Element, M> {
+  class Scoped<M> extends Container<M, Element> {
     constructor(element: Element, props: ScopeProperties) {
       super(element, props);
     }
 
-    get scope() {
-      return this.getScope();
+    get context() {
+      return this.getContext();
     }
   }
 
-  it('Check scope', () => {
+  it('Check context namespace', () => {
     const element = document.createElement('div');
     const component = new Scoped(element, { namespace: 'test' });
 
-    expect(component.scope).toEqual({
-      namespace: 'test',
-      idsMap: {},
-      namesMap: {},
-      childScopes: {}
-    });
+    expect(component.context.namespace).toBe('test');
   });
 
-  it('Check names in scope', () => {
+  it('Check names in context', () => {
     const element = document.createElement('div');
     const childElement = document.createElement('input');
 
@@ -42,15 +37,11 @@ describe('Scoped component', () => {
 
     component.append(child);
 
-    expect(component.scope).toEqual({
-      namespace: 'test',
-      idsMap: { ['id']: child },
-      namesMap: { ['name']: child },
-      childScopes: {}
-    });
+    expect(component.queryById('id').domNode).toEqual(childElement);
+    expect(component.queryByName('name').domNode).toEqual(childElement);
   });
 
-  it('Check nested scope', () => {
+  it('Check nested contexts', () => {
     const element0 = document.createElement('div');
     const element1 = document.createElement('div');
     const element2 = document.createElement('div');
@@ -65,19 +56,7 @@ describe('Scoped component', () => {
     component1.append(component2);
     component2.append(component3);
 
-    expect(component0.scope).toEqual({
-      namespace: 'test.0',
-      idsMap: {},
-      namesMap: {},
-      childScopes: {
-        ['test.1']: {
-          namespace: 'test.1',
-          idsMap: {},
-          namesMap: {},
-          childScopes: {}
-        }
-      }
-    });
+    expect(component0.context.getChildContext('test.1')).not.toBeNull();
   });
 
 });

@@ -1,6 +1,7 @@
 import { Builder, ChildDef, Generator } from './Builder';
 import { BaseComponent, GenericComponent } from './component/BaseComponent';
-import { HasModel, IsContainer } from './component/types';
+import { IsContainer } from './component/Container';
+import { HasModel } from './component/Context';
 import { HasChannel } from './event/types';
 import { UseCase } from './UseCase';
 import { Properties } from './util/types';

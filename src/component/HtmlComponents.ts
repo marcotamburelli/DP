@@ -1,81 +1,70 @@
-import { MODEL_UPDATED } from '../event/Event';
 import { BaseComponent } from './BaseComponent';
-import { HasModel } from './types';
+import { DomWrapper, DomWrappers } from './DomWrappers';
 
 export interface SimpleProperties {
   id?: string;
   name?: string;
 }
 
-export class HtmlElementComponent<M> extends BaseComponent<HTMLElement, M> implements HasModel<M> {
+export class HtmlElementComponent<M> extends BaseComponent<M, HTMLElement>  {
   constructor(element: HTMLElement, properties: SimpleProperties = {}, private transformer?: (value: string) => M) {
-    super(element, properties);
+    super(DomWrappers.simple(element), properties);
   }
 
   setModel(model: M) {
     if (this.scopeProperties.name) {
-      this.element.innerText = model.toString();
+      this.domWrapper.domElement.innerText = model.toString();
     }
   }
 
   getModel() {
     if (this.scopeProperties.name) {
-      return this.transformer(this.element.innerText);
+      return this.transformer(this.domWrapper.domElement.innerText);
     }
   }
 }
 
-abstract class NamedComponent<M> extends BaseComponent<HTMLInputElement | HTMLSelectElement, M> implements HasModel<M> {
-  constructor(element: HTMLInputElement | HTMLSelectElement, properties: SimpleProperties = {}) {
-    super(element, properties);
-  }
-
-  protected registerDomName(namespace: string, name: string) {
-    this.element.name = `${namespace}.${name}`;
-  }
-}
-
-export class TextInputComponent<M> extends NamedComponent<M>  {
+export class TextInputComponent<M> extends BaseComponent<M, HTMLInputElement>  {
   constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
-    super(element, properties);
+    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties);
 
-    element.addEventListener('keyup', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
+    // domWrapper.domElement.addEventListener('keyup', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: M) {
-    this.element.value = model.toString();
+    this.domWrapper.domElement.value = model.toString();
   }
 
   getModel() {
-    return this.transformer(this.element.value);
+    return this.transformer(this.domWrapper.domElement.value);
   }
 }
 
-export class CheckBoxInputComponent extends NamedComponent<boolean> {
+export class CheckBoxInputComponent extends BaseComponent<boolean, HTMLInputElement> {
   constructor(element: HTMLInputElement, properties: SimpleProperties = {}) {
-    super(element, properties);
+    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties);
 
-    element.addEventListener('change', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
+    // element.addEventListener('change', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: boolean) {
-    (this.element as HTMLInputElement).checked = model;
+    (this.domWrapper.domElement as HTMLInputElement).checked = model;
   }
 
   getModel() {
-    return (this.element as HTMLInputElement).checked;
+    return (this.domWrapper.domElement as HTMLInputElement).checked;
   }
 }
 
-export class SelectComponent<M> extends BaseComponent<HTMLSelectElement, M[] | M> implements HasModel<M[] | M> {
+export class SelectComponent<M> extends BaseComponent<M[] | M, HTMLSelectElement>  {
   constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
-    super(element, properties);
+    super(DomWrappers.input(element) as DomWrapper<HTMLSelectElement>, properties);
 
-    element.addEventListener('select', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
+    // element.addEventListener('select', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
   setModel(model: M[] | M = []) {
-    const { options } = this.element;
+    const { options } = this.domWrapper.domElement;
 
     var values = {} as { [index: string]: boolean };
 
@@ -96,7 +85,7 @@ export class SelectComponent<M> extends BaseComponent<HTMLSelectElement, M[] | M
 
   getModel() {
     var model = [] as M[];
-    const { options } = this.element;
+    const { options } = this.domWrapper.domElement;
 
     for (let i = 0; i < options.length; i++) {
       const opt = options.item(i);
@@ -106,7 +95,7 @@ export class SelectComponent<M> extends BaseComponent<HTMLSelectElement, M[] | M
       }
     }
 
-    if (this.element.multiple) {
+    if (this.domWrapper.domElement.multiple) {
       return model;
     } else {
       return model[0];

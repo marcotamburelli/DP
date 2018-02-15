@@ -1,16 +1,8 @@
 import { Channel, Listener } from '../event/Channel';
 import { BaseEvent, EventType } from '../event/Event';
 import { HasChannel } from '../event/types';
-
-interface NamesMap { [name: string]: GenericComponent; };
-interface IdsMap { [id: string]: GenericComponent; };
-
-export interface Scope {
-  namespace: string;
-  idsMap: IdsMap;
-  namesMap: NamesMap;
-  childScopes: { [index: string]: Scope };
-}
+import { Context, HasModel } from './Context';
+import { DomWrapper } from './DomWrappers';
 
 export interface ScopeProperties {
   namespace?: string;
@@ -18,83 +10,38 @@ export interface ScopeProperties {
   name?: string;
 }
 
-export type GenericComponent = BaseComponent<Element, any>;
+export type GenericComponent = BaseComponent<any, Element>;
 export type ChildComponent = GenericComponent | string;
 
-export abstract class BaseComponent<E extends Element, M> implements HasChannel {
+export abstract class BaseComponent<M, E extends Element> implements HasChannel, HasModel<M> {
   protected parent: GenericComponent;
 
-  private localScope: Scope;
+  private localContext: Context<E>;
   private channel = new Channel();
 
-  protected constructor(protected element: E, protected scopeProperties: ScopeProperties = {}) {
+  protected constructor(protected domWrapper: DomWrapper<E>, protected scopeProperties: ScopeProperties = {}) {
     var { namespace } = scopeProperties;
 
     if (namespace) {
-      this.localScope = { namespace, idsMap: {}, namesMap: {}, childScopes: {} };
-    }
+      this.localContext = new Context(namespace, domWrapper);
 
-    this.registerInScope();
+      this.localContext.register(scopeProperties, this);
+    }
   }
 
-  protected getScope(): Scope {
-    if (this.localScope) {
-      return this.localScope;
+  protected getContext(): Context<Element> {
+    if (this.localContext) {
+      return this.localContext;
     }
 
     if (this.parent) {
-      return this.parent.getScope();
+      return this.parent.getContext();
     }
-  }
-
-  protected registerDomName(namespace: string, name: string) {
-  }
-
-  protected registerDomIdId(namespace: string, id: string) {
-    this.element.id = `${namespace}.${id}`;
   }
 
   abstract setModel(model: M);
 
-  abstract getModel();
-
-  private registerInScope() {
-    var scope = this.getScope();
-
-    if (scope) {
-      var { id, name } = this.scopeProperties;
-      var { namespace, idsMap, namesMap } = scope;
-
-      if (id) {
-        idsMap[id] = this;
-
-        this.registerDomIdId(namespace, id);
-      }
-
-      if (name) {
-        namesMap[name] = this;
-
-        this.registerDomName(namespace, name);
-      }
-    }
-  }
-
-  private unregisterInScope() {
-    var scope = this.getScope();
-
-    if (scope) {
-      var { id, name } = this.scopeProperties;
-      var { idsMap, namesMap } = scope;
-
-      if (id) {
-        delete idsMap[id];
-      }
-
-      if (name) {
-        delete namesMap[name];
-      }
-    }
-  }
+  abstract getModel(): M;
 
   append(child: ChildComponent) {
     if (child instanceof BaseComponent) {
@@ -104,20 +51,26 @@ export abstract class BaseComponent<E extends Element, M> implements HasChannel 
 
       child.parent = this;
 
-      this.pullChildScope(child);
-      this.element.appendChild(child.domNode);
-      child.registerInScope();
+      this.integrateChildContext(child);
+      this.domWrapper.appendChild(child.domWrapper);
     } else {
-      this.element.appendChild(document.createTextNode(child));
+      this.domWrapper.appendChild(child);
     }
   }
 
-  private pullChildScope(child: GenericComponent) {
-    var scope = this.getScope();
-    var childScope = child.localScope;
+  private integrateChildContext(child: GenericComponent) {
+    var context = this.getContext();
 
-    if (childScope && scope) {
-      scope.childScopes[childScope.namespace] = childScope;
+    if (!context) {
+      return;
+    }
+
+    var childContext = child.localContext;
+
+    if (childContext) {
+      context.pushChildContext(childContext);
+    } else {
+      context.register(child.scopeProperties, child);
     }
   }
 
@@ -127,21 +80,27 @@ export abstract class BaseComponent<E extends Element, M> implements HasChannel 
     }
 
     this.parent.detachChildScope(this);
-    this.parent.element.removeChild(this.element);
-    this.unregisterInScope();
+    this.domWrapper.detach();
   }
 
   private detachChildScope(child: GenericComponent) {
-    var scope = this.getScope();
-    var childScope = child.localScope;
+    var context = this.getContext();
 
-    if (scope && childScope && childScope.namespace) {
-      delete scope.childScopes[childScope.namespace];
+    if (!context) {
+      return;
+    }
+
+    var childScope = child.localContext;
+
+    if (childScope) {
+      context.removeChildContext(childScope.namespace);
+    } else {
+      context.unregister(child.scopeProperties);
     }
   }
 
   get domNode() {
-    return this.element;
+    return this.domWrapper.domElement;
   }
 
   subscribeListener(eventType: EventType, listener: Listener) {
