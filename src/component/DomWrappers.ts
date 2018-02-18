@@ -1,9 +1,9 @@
-export interface DomWrapper<E extends Element> {
+export interface DomWrapper<E extends Node> {
   readonly domElement?: E;
 
-  appendChild<F extends Element>(child: DomWrapper<F> | string);
+  appendChild<F extends Node>(child: DomWrapper<F> | string);
 
-  provideParent<P extends Element>(parent: DomWrapper<P>);
+  provideParent<P extends Node>(parent: DomWrapper<P>);
 
   detach();
 
@@ -25,11 +25,15 @@ export namespace DomWrappers {
     return new ArrayWrapper();
   }
 
+  export function text(text = '') {
+    return new TextWrapper(document.createTextNode(text));
+  }
+
   class SimpleDomWrapper<E extends Element> implements DomWrapper<E> {
     constructor(public readonly domElement: E) {
     }
 
-    appendChild<F extends Element>(child: string | DomWrapper<F>) {
+    appendChild<F extends Node>(child: string | DomWrapper<F>) {
       if (typeof child === 'string') {
         this.domElement.appendChild(document.createTextNode(child));
       } else {
@@ -40,7 +44,7 @@ export namespace DomWrappers {
       }
     }
 
-    provideParent<P extends Element>(parent: DomWrapper<P>) {
+    provideParent<P extends Node>(parent: DomWrapper<P>) {
     }
 
     detach() {
@@ -70,13 +74,13 @@ export namespace DomWrappers {
   const START_PLACEHOLDER = 'START';
   const END_PLACEHOLDER = 'END';
 
-  class ArrayWrapper implements DomWrapper<any> {
-    private domParent: Element;
+  class ArrayWrapper implements DomWrapper<Node> {
+    private domParent: Node;
 
     private startPlaceholder = document.createComment(START_PLACEHOLDER);
     private endPlaceholder = document.createComment(END_PLACEHOLDER);
 
-    appendChild<F extends Element>(child: string | DomWrapper<F>) {
+    appendChild<F extends Node>(child: string | DomWrapper<F>) {
       if (!this.domParent) {
         throw new Error('Array requires to be attached to a parent element, in order to add children');
       }
@@ -91,7 +95,7 @@ export namespace DomWrappers {
       }
     }
 
-    provideParent<P extends Element>(parent: DomWrapper<P>) {
+    provideParent<P extends Node>(parent: DomWrapper<P>) {
       if (parent instanceof ArrayWrapper) {
         this.domParent = parent.domParent;
 
@@ -116,6 +120,29 @@ export namespace DomWrappers {
 
       this.domParent.removeChild(this.startPlaceholder);
       this.domParent.removeChild(this.endPlaceholder);
+    }
+
+    registerDomId(namespace: string, id: string) {
+    }
+
+    registerDomName(namespace: string, name: string) {
+    }
+  }
+
+  class TextWrapper implements DomWrapper<Text> {
+    constructor(public readonly domElement: Text) {
+    }
+
+    appendChild<F extends Node>(child: string | DomWrapper<F>) {
+    }
+
+    provideParent<P extends Node>(parent: DomWrapper<P>) {
+    }
+
+    detach() {
+      var domParent = this.domElement.parentNode;
+
+      domParent && domParent.removeChild(this.domElement);
     }
 
     registerDomId(namespace: string, id: string) {

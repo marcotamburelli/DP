@@ -66,6 +66,7 @@ export namespace Builder {
     var element = DomFactory.createElement<HTMLSelectElement>('select', properties);
     var scopeProperties = PropertiesUtil.getScopeProperties(properties);
 
+    // TODO The select box requires a test, especially in case options are provided as array
     // if (scopeProperties.namespace) {
     //   return new Container(element, scopeProperties);
     // } else {

@@ -4,7 +4,7 @@ import { DomWrapper } from './DomWrappers';
 interface NamesMap { [name: string]: HasModel<any>; };
 interface IdsMap { [id: string]: HasModel<any>; };
 
-export class Context<E extends Element> {
+export class Context<E extends Node> {
   private idsMap: IdsMap = {};
   private namesMap: NamesMap = {};
   private childContexts: { [index: string]: Context<any> } = {};

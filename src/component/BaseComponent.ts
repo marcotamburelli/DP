@@ -11,10 +11,10 @@ export interface ScopeProperties {
   name?: string;
 }
 
-export type GenericComponent = BaseComponent<any, Element>;
+export type GenericComponent = BaseComponent<any, Node>;
 export type ChildComponent = GenericComponent | string;
 
-export abstract class BaseComponent<M, E extends Element> implements HasChannel, HasModel<M> {
+export abstract class BaseComponent<M, E extends Node> implements HasChannel, HasModel<M> {
   protected parent: GenericComponent;
   protected localContext: Context<E>;
 
@@ -40,7 +40,7 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
     return child.scopeProperties;
   }
 
-  protected getContext(): Context<Element> {
+  protected getContext(): Context<Node> {
     if (this.localContext) {
       return this.localContext;
     }
