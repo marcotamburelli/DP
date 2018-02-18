@@ -26,7 +26,9 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
     if (namespace) {
       this.localContext = new Context(namespace, this.domWrapper);
 
-      this.localContext.register(scopeProperties, this);
+      const { id } = scopeProperties;
+
+      this.localContext.register({id}, this);
     }
   }
 
@@ -78,9 +80,9 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
 
     if (childContext) {
       context.pushChildContext(childContext);
-    } else {
-      context.register(child.scopeProperties, child);
     }
+
+    context.register(child.scopeProperties, child);
   }
 
   detach() {
@@ -103,9 +105,9 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
 
     if (childScope) {
       context.removeChildContext(childScope.namespace);
-    } else {
-      context.unregister(child.scopeProperties);
     }
+
+    context.unregister(child.scopeProperties);
   }
 
   get domNode() {

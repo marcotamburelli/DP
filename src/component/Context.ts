@@ -33,12 +33,6 @@ export class Context<E extends Element> {
       }
     }
 
-    // for (const namespace in this.childContexts) {
-    //   if (this.childContexts.hasOwnProperty(namespace)) {
-    //     model = { ...model, ...this.childContexts[namespace].extractModel() };
-    //   }
-    // }
-
     return model as M;
   }
 

@@ -82,7 +82,7 @@ describe('Checking Array', () => {
     const div = document.createElement('div');
 
     const root = new Container(div, { namespace: 'root' });
-    const array = new ListContainer<any>(flatGenerator, { name: 'values' });
+    const array = new ListContainer<any>(flatGenerator, { namespace: 'namespace', name: 'values' });
 
     root.append(array);
     root.setModel({ values: ['value_1', 'value_2'] });

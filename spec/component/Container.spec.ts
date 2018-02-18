@@ -11,52 +11,50 @@ global['document'] = dom.window.document;
 
 describe('Scoped component', () => {
 
-  class Scoped<M> extends Container<M, Element> {
-    constructor(element: Element, props: ScopeProperties) {
-      super(element, props);
-    }
+  function propertiesGenerator(name: string, id: string) {
+    const controlElement = document.createElement('div');
 
-    get context() {
-      return this.getContext();
-    }
+    return new HtmlElementComponent(controlElement, { id, name }, (value) => value);
   }
 
-  it('Check context namespace', () => {
+  it('Check simple properties', () => {
     const element = document.createElement('div');
-    const component = new Scoped(element, { namespace: 'test' });
+    const container = new Container(element, { namespace: 'test' });
 
-    expect(component.context.namespace).toBe('test');
+    const control1 = propertiesGenerator('name_1', '1');
+    const control2 = propertiesGenerator('name_2', '2');
+
+    container.append(control1);
+    container.append(control2);
+
+    container.setModel({ 'name_1': 'value_1', 'name_2': 'value_2' });
+
+    expect(container.getModel()).toEqual({ 'name_1': 'value_1', 'name_2': 'value_2' });
+
+    control2.detach();
+
+    expect(container.getModel()).toEqual({ 'name_1': 'value_1' });
   });
 
-  it('Check names in context', () => {
+  it('Check object properties', () => {
     const element = document.createElement('div');
-    const childElement = document.createElement('input');
+    const childElement = document.createElement('div');
 
-    const component = new Scoped(element, { namespace: 'test' });
-    const child = new TextInputComponent(childElement, { id: 'id', name: 'name' }, (value) => value);
+    const container = new Container(element, { namespace: 'test' });
+    const childContainer = new Container(childElement, { namespace: 'child', name: 'obj' });
 
-    component.append(child);
+    container.append(childContainer);
 
-    expect(component.queryById('id').domNode).toEqual(childElement);
-    expect(component.queryByName('name').domNode).toEqual(childElement);
-  });
+    childContainer.append(propertiesGenerator('name_1', '1'));
+    childContainer.append(propertiesGenerator('name_2', '2'));
 
-  it('Check nested contexts', () => {
-    const element0 = document.createElement('div');
-    const element1 = document.createElement('div');
-    const element2 = document.createElement('div');
-    const element3 = document.createElement('div');
+    container.setModel({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
 
-    const component0 = new Scoped(element0, { namespace: 'test.0' });
-    const component1 = new HtmlElementComponent(element1);
-    const component2 = new Scoped(element2, { namespace: 'test.1' });
-    const component3 = new HtmlElementComponent(element3);
+    expect(container.getModel()).toEqual({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
 
-    component0.append(component1);
-    component1.append(component2);
-    component2.append(component3);
+    childContainer.detach();
 
-    expect(component0.context.getChildContext('test.1')).not.toBeNull();
+    expect(container.getModel()).toEqual({});
   });
 
 });
