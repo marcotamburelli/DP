@@ -29,17 +29,38 @@ describe('Checking Array', () => {
     return container;
   }
 
-  function containerGen(model: { val: string }, idx: number) {
-    const element = document.createElement('div');
-    const controlElement = document.createElement('div');
+  function contextlessGen(idx: number) {
+    const div = document.createElement('div');
 
-    const container = new Container(element, { namespace: 'element' });
-    const child = new HtmlElementComponent(controlElement, { id: `${idx}`, name: 'val' }, (value) => value);
+    div.id = `id-${idx}`;
+    div.innerText = `div-${idx}`;
 
-    container.append(child);
-
-    return container;
+    return new HtmlElementComponent(div, {}, (value) => value);
   }
+
+  it('Append HTML children', () => {
+    const div = document.createElement('div');
+
+    const root = new HtmlElementComponent(div);
+    const array = new ListContainer<any>(propertiesGenerator, { namespace: 'namespace', name: 'values' });
+
+    const child1 = contextlessGen(0);
+    const child2 = contextlessGen(1);
+
+    root.append(array);
+
+    array.append(child1);
+    array.append(child2);
+
+    expect(div.querySelector<HTMLDivElement>('#id-0').innerText).toBe('div-0');
+    expect(div.querySelector<HTMLDivElement>('#id-1').innerText).toBe('div-1');
+
+    child1.detach();
+
+    expect(div.querySelector<HTMLDivElement>('#id-0')).toBeNull();
+    expect(array.queryByIdx(0)).toBe(child2);
+    expect(array.queryByIdx(1)).toBeUndefined();
+  });
 
   it('Checking model', () => {
     const div = document.createElement('div');
