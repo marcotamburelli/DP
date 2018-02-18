@@ -11,13 +11,25 @@ global['document'] = dom.window.document;
 
 describe('Checking Array', () => {
 
-  function generator(model: { val: string }, idx: number) {
+  function flatGenerator(model: { val: string }, idx: number) {
     const div = document.createElement('div');
 
     return new HtmlElementComponent(div, { id: `${idx}`, name: 'val' }, (value) => value);
   }
 
-  function containerGenerator(model: { val: string }, idx: number) {
+  function propertiesGenerator(model: { val: string }, idx: number) {
+    const element = document.createElement('div');
+    const controlElement = document.createElement('div');
+
+    const container = new Container(element, { namespace: 'element' });
+    const child = new HtmlElementComponent(controlElement, { id: `${idx}`, name: 'val' }, (value) => value);
+
+    container.append(child);
+
+    return container;
+  }
+
+  function containerGen(model: { val: string }, idx: number) {
     const element = document.createElement('div');
     const controlElement = document.createElement('div');
 
@@ -33,10 +45,10 @@ describe('Checking Array', () => {
     const div = document.createElement('div');
 
     const root = new HtmlElementComponent(div);
-    const array = new ListContainer<any>({ namespace: 'namespace', name: 'values' }, containerGenerator);
+    const array = new ListContainer<any>(propertiesGenerator, { namespace: 'namespace', name: 'values' });
 
-    const child1 = containerGenerator(null, 0);
-    const child2 = containerGenerator(null, 1);
+    const child1 = propertiesGenerator(null, 0);
+    const child2 = propertiesGenerator(null, 1);
 
     child1.setModel({ val: 'value_1' });
     child2.setModel({ val: 'value_2' });
@@ -57,7 +69,7 @@ describe('Checking Array', () => {
     const div = document.createElement('div');
 
     const root = new HtmlElementComponent(div);
-    const array = new ListContainer<any>({ namespace: 'namespace', name: 'values' }, generator);
+    const array = new ListContainer<any>(flatGenerator, { namespace: 'namespace', name: 'values' });
 
     root.append(array);
 
@@ -66,11 +78,23 @@ describe('Checking Array', () => {
     expect(array.getModel()).toEqual(['value_1', 'value_2']);
   });
 
+  it('Checking building complex structure', () => {
+    const div = document.createElement('div');
+
+    const root = new Container(div, { namespace: 'root' });
+    const array = new ListContainer<any>(flatGenerator, { name: 'values' });
+
+    root.append(array);
+    root.setModel({ values: ['value_1', 'value_2'] });
+
+    expect(root.getModel()).toEqual({ values: ['value_1', 'value_2'] });
+  });
+
   it('Checking building with container generator', () => {
     const div = document.createElement('div');
 
     const root = new HtmlElementComponent(div);
-    const array = new ListContainer<any>({ namespace: 'namespace', name: 'values' }, containerGenerator);
+    const array = new ListContainer<any>(propertiesGenerator, { namespace: 'namespace', name: 'values' });
 
     root.append(array);
 

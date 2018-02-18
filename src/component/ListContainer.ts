@@ -1,22 +1,18 @@
 import { BaseComponent, GenericComponent, ScopeProperties } from './BaseComponent';
-import { IsContainer } from './Components';
+import { IsList } from './Components';
 import { Context } from './Context';
 import { DomWrappers } from './DomWrappers';
 
 export type ComponentGenerator<M> = ((model: M, idx?: number) => GenericComponent);
 
-export class ListContainer<M> extends BaseComponent<M[], any> implements IsContainer {
-  private children: { elementContext: Context<any>, child: GenericComponent }[];
+export class ListContainer<M> extends BaseComponent<M[], any> implements IsList {
+  private childContextProperties: { elementContext: Context<any>, child: GenericComponent }[];
   private idx = 0;
 
-  constructor(scopeProperties: ScopeProperties = { namespace: 'default' }, private generator: ComponentGenerator<M>) {
+  constructor(private generator: ComponentGenerator<M>, scopeProperties: ScopeProperties = {}) {
     super(DomWrappers.array(), scopeProperties);
 
-    this.children = [];
-  }
-
-  protected createContext(namespace: string) {
-    return new Context(namespace, this.domWrapper);
+    this.childContextProperties = [];
   }
 
   protected integrateChildContext(child: GenericComponent) {
@@ -26,7 +22,7 @@ export class ListContainer<M> extends BaseComponent<M[], any> implements IsConta
       return;
     }
 
-    const childContext = this.extractLocalContext(child);
+    const childContext = this.extractLocalContextFrom(child);
     const elementContext = new Context<any>(`${this.scopeProperties.namespace}.${++this.idx}`);
 
     if (childContext) {
@@ -36,20 +32,20 @@ export class ListContainer<M> extends BaseComponent<M[], any> implements IsConta
     }
 
     context.pushChildContext(elementContext);
-    this.children.push({ elementContext, child });
+    this.childContextProperties.push({ elementContext, child });
   }
 
   protected detachChildScope(child: GenericComponent) {
-    for (var i = 0; i < this.children.length; i++) {
-      if (this.children[i].child === child) {
-        this.localContext.removeChildContext(this.children[i].elementContext.namespace);
-        this.children.splice(i, 1);
+    for (var i = 0; i < this.childContextProperties.length; i++) {
+      if (this.childContextProperties[i].child === child) {
+        this.localContext.removeChildContext(this.childContextProperties[i].elementContext.namespace);
+        this.childContextProperties.splice(i, 1);
       }
     }
   }
 
   setModel(model: M[]) {
-    [...this.children].forEach(({ child }) => child.detach());
+    [...this.childContextProperties].forEach(({ child }) => child.detach());
 
     model.forEach((m, i) => {
       const child = this.generator(m, i);
@@ -57,17 +53,17 @@ export class ListContainer<M> extends BaseComponent<M[], any> implements IsConta
       this.append(child);
     });
 
-    // this.children.forEach(({ elementContext }, i) => elementContext.updateModel(model[i]));
-    this.children.forEach(({ child }, i) => child.setModel(model[i]));
+    this.childContextProperties.forEach(({ child }, i) => child.setModel(model[i]));
   }
 
   getModel() {
-    // return this.children.map(({ elementContext }) => elementContext.extractModel<M>());
-    return this.children.map(({ child }) => child.getModel());
+    return this.childContextProperties.map(({ child }) => child.getModel());
   }
 
-  queryByName(name: string) {
-    return this.getContext().getByName<M, GenericComponent>(name);
+  queryByIdx(idx: number) {
+    const childContextProp = this.childContextProperties[idx];
+
+    return childContextProp && childContextProp.child;
   }
 
   queryById(id: string) {

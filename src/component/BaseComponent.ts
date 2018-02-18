@@ -24,22 +24,18 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
     var { namespace } = scopeProperties;
 
     if (namespace) {
-      this.localContext = this.createContext(namespace);
+      this.localContext = new Context(namespace, this.domWrapper);
 
       this.localContext.register(scopeProperties, this);
     }
   }
 
-  protected extractLocalContext(child: GenericComponent) {
+  protected extractLocalContextFrom(child: GenericComponent) {
     return child.localContext;
   }
 
   protected extractScopeProperties(child: GenericComponent) {
     return child.scopeProperties;
-  }
-
-  protected createContext(namespace: string): Context<E> {
-    return new Context(namespace, this.domWrapper);
   }
 
   protected getContext(): Context<Element> {

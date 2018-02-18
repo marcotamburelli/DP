@@ -6,6 +6,12 @@ export interface IsContainer {
   queryById(id: string): GenericComponent;
 }
 
+export interface IsList {
+  queryByIdx(idx: number): GenericComponent;
+
+  queryById(id: string);
+}
+
 export interface HasModel<M> {
   getModel(): M;
 
