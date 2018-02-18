@@ -33,11 +33,11 @@ export class Context<E extends Element> {
       }
     }
 
-    for (const namespace in this.childContexts) {
-      if (this.childContexts.hasOwnProperty(namespace)) {
-        model = { ...model, ...this.childContexts[namespace].extractModel() };
-      }
-    }
+    // for (const namespace in this.childContexts) {
+    //   if (this.childContexts.hasOwnProperty(namespace)) {
+    //     model = { ...model, ...this.childContexts[namespace].extractModel() };
+    //   }
+    // }
 
     return model as M;
   }
@@ -52,35 +52,30 @@ export class Context<E extends Element> {
     }
   }
 
-  private search<M>(extract: (context: Context<any>) => HasModel<M>) {
-    var h = extract(this);
+  getById<M, H extends HasModel<M>>(id: string) {
+    var hasModel = this.idsMap[id] as H;
 
-    if (h) {
-      return h;
+    if (hasModel) {
+      return hasModel;
     }
 
     for (const namespace in this.childContexts) {
       if (this.childContexts.hasOwnProperty(namespace)) {
-        h = this.childContexts[namespace].search(extract);
+        hasModel = this.childContexts[namespace].getById(id);
 
-        if (h) {
-          return h;
+        if (hasModel) {
+          return hasModel;
         }
       }
     }
   }
 
-  getById<M, H extends HasModel<M>>(id: string) {
-    return this.search((context) => {
-      return context.idsMap[id];
-    }) as H;
-  }
-
   getByName<M, H extends HasModel<M>>(name: string) {
-    // FIXME Each name should be resolved in the scope of this context
-    return this.search((context) => {
-      return context.namesMap[name];
-    }) as H;
+    var hasModel = this.namesMap[name] as H;
+
+    if (hasModel) {
+      return hasModel;
+    }
   }
 
   register({ id, name }: { id?: string, name?: string }, hasModel: HasModel<any>) {

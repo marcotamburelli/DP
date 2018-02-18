@@ -61,9 +61,9 @@ describe('Checking Array', () => {
 
     root.append(array);
 
-    array.setModel([{ val: 'value_1' }, { val: 'value_2' }]);
+    array.setModel(['value_1', 'value_2']);
 
-    expect(array.getModel()).toEqual([{ val: 'value_1' }, { val: 'value_2' }]);
+    expect(array.getModel()).toEqual(['value_1', 'value_2']);
   });
 
   it('Checking building with container generator', () => {

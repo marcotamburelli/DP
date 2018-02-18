@@ -57,11 +57,13 @@ export class ListContainer<M> extends BaseComponent<M[], any> implements IsConta
       this.append(child);
     });
 
-    this.children.forEach(({ elementContext }, i) => elementContext.updateModel(model[i]));
+    // this.children.forEach(({ elementContext }, i) => elementContext.updateModel(model[i]));
+    this.children.forEach(({ child }, i) => child.setModel(model[i]));
   }
 
   getModel() {
-    return this.children.map(({ elementContext }) => elementContext.extractModel<M>());
+    // return this.children.map(({ elementContext }) => elementContext.extractModel<M>());
+    return this.children.map(({ child }) => child.getModel());
   }
 
   queryByName(name: string) {
