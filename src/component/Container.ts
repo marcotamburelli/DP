@@ -1,11 +1,6 @@
 import { BaseComponent, GenericComponent, ScopeProperties } from './BaseComponent';
+import { IsContainer } from './Components';
 import { DomWrappers } from './DomWrappers';
-
-export interface IsContainer {
-  queryByName(name: string): GenericComponent;
-
-  queryById(id: string): GenericComponent;
-}
 
 /**
  * Basic element.

@@ -4,7 +4,7 @@ import {
   CheckBoxInputComponent,
   HtmlElementComponent,
   SelectComponent,
-  TextInputComponent,
+  TextInputComponent
 } from './component/HtmlComponents';
 import { NATIVE_PROPERTIES, NODES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
@@ -12,7 +12,7 @@ import { PropertiesUtil } from './util/PropertiesUtil';
 import { HTML, Properties } from './util/types';
 
 export type ChildDef = (ChildComponent | ChildComponent[]);
-export type Generator = HTML | ((props: Properties) => GenericComponent) | GenericComponent;
+export type Definition = HTML | ((props: Properties) => GenericComponent) | GenericComponent;
 
 namespace DomFactory {
   export function createElement<E extends HTMLElement>(tag: HTML, properties: Properties) {

@@ -18,7 +18,7 @@ export class HtmlElementComponent<M> extends BaseComponent<M, HTMLElement>  {
   }
 
   getModel() {
-    if (this.scopeProperties.name) {
+    if (this.scopeProperties.name && this.transformer) {
       return this.transformer(this.domWrapper.domElement.innerText);
     }
   }

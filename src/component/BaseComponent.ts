@@ -1,7 +1,8 @@
 import { Channel, Listener } from '../event/Channel';
 import { BaseEvent, EventType } from '../event/Event';
 import { HasChannel } from '../event/types';
-import { Context, HasModel } from './Context';
+import { HasModel } from './Components';
+import { Context } from './Context';
 import { DomWrapper } from './DomWrappers';
 
 export interface ScopeProperties {
@@ -15,18 +16,30 @@ export type ChildComponent = GenericComponent | string;
 
 export abstract class BaseComponent<M, E extends Element> implements HasChannel, HasModel<M> {
   protected parent: GenericComponent;
+  protected localContext: Context<E>;
 
-  private localContext: Context<E>;
   private channel = new Channel();
 
   protected constructor(protected domWrapper: DomWrapper<E>, protected scopeProperties: ScopeProperties = {}) {
     var { namespace } = scopeProperties;
 
     if (namespace) {
-      this.localContext = new Context(namespace, domWrapper);
+      this.localContext = this.createContext(namespace);
 
       this.localContext.register(scopeProperties, this);
     }
+  }
+
+  protected extractLocalContext(child: GenericComponent) {
+    return child.localContext;
+  }
+
+  protected extractScopeProperties(child: GenericComponent) {
+    return child.scopeProperties;
+  }
+
+  protected createContext(namespace: string): Context<E> {
+    return new Context(namespace, this.domWrapper);
   }
 
   protected getContext(): Context<Element> {
@@ -58,7 +71,7 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
     }
   }
 
-  private integrateChildContext(child: GenericComponent) {
+  protected integrateChildContext(child: GenericComponent) {
     var context = this.getContext();
 
     if (!context) {
@@ -83,7 +96,7 @@ export abstract class BaseComponent<M, E extends Element> implements HasChannel,
     this.domWrapper.detach();
   }
 
-  private detachChildScope(child: GenericComponent) {
+  protected detachChildScope(child: GenericComponent) {
     var context = this.getContext();
 
     if (!context) {

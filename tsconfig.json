@@ -4,10 +4,17 @@
     "jsx": "preserve",
     "module": "commonjs",
     "allowJs": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "types": [
+      "node",
+      "jasmine"
+    ],
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "spec/**/*"
   ],
   "exclude": [
     "node_modules",

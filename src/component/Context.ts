@@ -1,10 +1,5 @@
+import { HasModel } from './Components';
 import { DomWrapper } from './DomWrappers';
-
-export interface HasModel<M> {
-  getModel(): M;
-
-  setModel(model: M);
-}
 
 interface NamesMap { [name: string]: HasModel<any>; };
 interface IdsMap { [id: string]: HasModel<any>; };
@@ -14,7 +9,7 @@ export class Context<E extends Element> {
   private namesMap: NamesMap = {};
   private childContexts: { [index: string]: Context<any> } = {};
 
-  constructor(public readonly namespace, private domWrapper: DomWrapper<E>) {
+  constructor(public readonly namespace, private domWrapper?: DomWrapper<E>) {
   }
 
   pushChildContext(context: Context<any>) {
@@ -82,6 +77,7 @@ export class Context<E extends Element> {
   }
 
   getByName<M, H extends HasModel<M>>(name: string) {
+    // FIXME Each name should be resolved in the scope of this context
     return this.search((context) => {
       return context.namesMap[name];
     }) as H;
@@ -91,13 +87,13 @@ export class Context<E extends Element> {
     if (id) {
       this.idsMap[id] = hasModel;
 
-      this.domWrapper.registerDomId(this.namespace, id);
+      this.domWrapper && this.domWrapper.registerDomId(this.namespace, id);
     }
 
     if (name) {
       this.namesMap[name] = hasModel;
 
-      this.domWrapper.registerDomName(this.namespace, name);
+      this.domWrapper && this.domWrapper.registerDomName(this.namespace, name);
     }
   }
 
