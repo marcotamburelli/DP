@@ -45,6 +45,10 @@ export class ListContainer<M> extends BaseComponent<M[], any> implements IsList 
   }
 
   setModel(model: M[]) {
+    if (!this.generator) {
+      return;
+    }
+
     [...this.childContextProperties].forEach(({ child }) => child.detach());
 
     model.forEach((m, i) => {

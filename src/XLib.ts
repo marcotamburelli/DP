@@ -9,6 +9,14 @@ export namespace XLib {
   export type Container<M> = GenericComponent & HasModel<M> & IsContainer;
   export type ControlComponent<M> = GenericComponent & HasModel<M>;
 
+  export function List(props: Properties) {
+    return Builder.createList(props);
+  }
+
+  export function Text(props: Properties) {
+    return Builder.createText(props);
+  }
+
   export function define(definition: Definition, properties: Properties, ...children: ChildDef[]) {
     if (typeof definition === 'function') {
       var component = definition(properties);

@@ -15,7 +15,8 @@ export const SCOPE_PROPERTIES = {
 };
 
 export const SPECIFIC_PROPERTIES = {
-  VALUE_TYPE: 'value-type'
+  VALUE_TYPE: 'value-type',
+  GENERATOR: 'generator'
 };
 
 export const STYLE_PROPERTIES = {

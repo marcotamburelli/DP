@@ -6,6 +6,8 @@ import {
   SelectComponent,
   TextInputComponent
 } from './component/HtmlComponents';
+import { ListContainer } from './component/ListContainer';
+import { TextComponent } from './component/TextComponent';
 import { NATIVE_PROPERTIES, NODES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
 import { PropertiesUtil } from './util/PropertiesUtil';
@@ -94,10 +96,18 @@ export namespace Builder {
       case NODES.INPUT:
         return createInputComponent(properties);
 
-      case NODES.OPTION:
+      case NODES.SELECT:
         return createSelectComponent(properties);
     }
 
     throw new Error(`'${tag}' not supported`);
+  }
+
+  export function createList(properties: Properties) {
+    return new ListContainer(PropertiesUtil.getGenerator(properties), PropertiesUtil.getScopeProperties(properties));
+  }
+
+  export function createText(properties: Properties) {
+    return new TextComponent(PropertiesUtil.getScopeProperties(properties));
   }
 }

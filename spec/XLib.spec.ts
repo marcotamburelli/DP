@@ -46,6 +46,11 @@ describe('Checking scoped component', () => {
     age: number;
   }
 
+  interface TypeModel {
+    type: string;
+    name: string;
+  }
+
   it('Check model', () => {
     var component = XLib.define(
       'div', { namespace: 'test' },
@@ -65,6 +70,35 @@ describe('Checking scoped component', () => {
     ageInput.value = '456';
 
     expect(component.getModel()).toEqual({ name: 'test test', age: 456 });
+  });
+
+  it('Check select with array', () => {
+    function generator(model: { id: string, text: string }) {
+      return XLib.define('option', { value: model.id }, model.text);
+    }
+
+    var component = XLib.define(
+      'div', { namespace: 'test' },
+      XLib.define(
+        'select', { 'name': 'type', 'value-type': 'string' },
+        XLib.List({ generator, id: 'list' })),
+      XLib.define('input', { 'name': 'name', 'value-type': 'string' })
+    ) as XLib.Container<TypeModel>;
+
+    component.queryById('list').setModel([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
+    component.setModel({ name: 'text_name', type: 'a' });
+
+    var typeSelect = component.queryByName('type').domNode as HTMLSelectElement;
+    var nameInput = component.queryByName('name').domNode as HTMLInputElement;
+
+    expect(typeSelect.value).toBe('a');
+    expect(nameInput.value).toBe('text_name');
+
+    typeSelect.value = 'test test';
+    typeSelect.options.item(1).selected = true;
+    // nameInput.value = 'b';
+
+    expect(component.getModel()).toEqual({ name: 'test test', type: 'b' });
   });
 
 });

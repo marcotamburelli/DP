@@ -1,4 +1,5 @@
 import { ScopeProperties } from '../component/BaseComponent';
+import { ComponentGenerator } from '../component/ListContainer';
 import { SCOPE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './const';
 import { Properties } from './types';
 
@@ -21,6 +22,14 @@ export namespace PropertiesUtil {
     }
   }
 
+  export function getGenerator<M>(properties: Properties) {
+    var generator = properties[SPECIFIC_PROPERTIES.GENERATOR];
+
+    if (typeof generator === 'function') {
+      return generator as ComponentGenerator<M>;
+    }
+  }
+
   export function getStyleProperties(properties: Properties) {
     return {
       class: properties[STYLE_PROPERTIES.CLASS],
@@ -34,6 +43,7 @@ export namespace PropertiesUtil {
     delete nativeProps[SCOPE_PROPERTIES.NAMESPACE];
     delete nativeProps[SCOPE_PROPERTIES.ID];
     delete nativeProps[SPECIFIC_PROPERTIES.VALUE_TYPE];
+    delete nativeProps[SPECIFIC_PROPERTIES.GENERATOR];
     delete nativeProps[STYLE_PROPERTIES.CLASS];
     delete nativeProps[STYLE_PROPERTIES.STYLE];
 
