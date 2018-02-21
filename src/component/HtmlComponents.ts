@@ -1,79 +1,69 @@
-import { BaseComponent } from './BaseComponent';
+import { DataDrivenComponentImpl } from './BaseComponent';
+import { DataNodeProperties } from './DataNode';
 import { DomWrapper, DomWrappers } from './DomWrappers';
 
-export interface SimpleProperties {
-  id?: string;
-  name?: string;
-}
-
-export class HtmlElementComponent<M> extends BaseComponent<M, HTMLElement>  {
-  constructor(element: HTMLElement, properties: SimpleProperties = {}, private transformer?: (value: string) => M) {
+export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElement> {
+  constructor(element: HTMLElement, properties: DataNodeProperties = {}, private transformer?: (value: string) => D) {
     super(DomWrappers.simple(element), properties);
   }
 
-  setModel(model: M) {
-    if (this.scopeProperties.name) {
-      this.domWrapper.domElement.innerText = model.toString();
+  setData(data: D) {
+    if (this.dataNode.name) {
+      this.domWrapper.domElement.textContent = data.toString();
     }
   }
 
-  getModel() {
-    if (this.scopeProperties.name && this.transformer) {
-      return this.transformer(this.domWrapper.domElement.innerText);
+  getData() {
+    if (this.dataNode.name && this.transformer) {
+      return this.transformer(this.domWrapper.domElement.textContent);
     }
   }
 }
 
-export class TextInputComponent<M> extends BaseComponent<M, HTMLInputElement>  {
-  constructor(element: HTMLInputElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
+export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement>  {
+  constructor(element: HTMLInputElement, properties: DataNodeProperties = {}, private transformer: (value: string) => D) {
     super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties);
-
-    // domWrapper.domElement.addEventListener('keyup', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
-  setModel(model: M) {
-    this.domWrapper.domElement.value = model.toString();
+  setData(data: D) {
+    this.domWrapper.domElement.value = data.toString();
   }
 
-  getModel() {
+  getData() {
     return this.transformer(this.domWrapper.domElement.value);
   }
 }
 
-export class CheckBoxInputComponent extends BaseComponent<boolean, HTMLInputElement> {
-  constructor(element: HTMLInputElement, properties: SimpleProperties = {}) {
+export class CheckBoxInputComponent extends DataDrivenComponentImpl<boolean, HTMLInputElement> {
+  constructor(element: HTMLInputElement, properties: DataNodeProperties = {}) {
     super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties);
-
-    // element.addEventListener('change', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
-  setModel(model: boolean) {
-    (this.domWrapper.domElement as HTMLInputElement).checked = model;
+  setData(data: boolean) {
+    (this.domWrapper.domElement as HTMLInputElement).checked = data;
   }
 
-  getModel() {
+  getData() {
     return (this.domWrapper.domElement as HTMLInputElement).checked;
   }
 }
 
-export class SelectComponent<M> extends BaseComponent<M[] | M, HTMLSelectElement>  {
-  constructor(element: HTMLSelectElement, properties: SimpleProperties = {}, private transformer: (value: string) => M) {
+export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSelectElement> {
+  constructor(element: HTMLSelectElement, properties: DataNodeProperties = {}, private transformer: (value: string) => D) {
     super(DomWrappers.input(element) as DomWrapper<HTMLSelectElement>, properties);
-
-    // element.addEventListener('select', () => this.emitEvent({ type: MODEL_UPDATED, payload: this.getModel() }));
   }
 
-  setModel(model: M[] | M = []) {
+  setData(data: D[] | D = []) {
     const { options } = this.domWrapper.domElement;
 
     var values = {} as { [index: string]: boolean };
 
-    if (Array.isArray(model)) {
-      for (const t of model) {
+    if (Array.isArray(data)) {
+      for (const t of data) {
         values[t.toString()] = true;
       }
     } else {
-      values[model.toString()] = true;
+      values[data.toString()] = true;
     }
 
     for (let i = 0; i < options.length; i++) {
@@ -83,22 +73,22 @@ export class SelectComponent<M> extends BaseComponent<M[] | M, HTMLSelectElement
     }
   }
 
-  getModel() {
-    var model = [] as M[];
+  getData() {
+    var data = [] as D[];
     const { options } = this.domWrapper.domElement;
 
     for (let i = 0; i < options.length; i++) {
       const opt = options.item(i);
 
       if (opt.selected) {
-        model.push(this.transformer(opt.value));
+        data.push(this.transformer(opt.value));
       }
     }
 
     if (this.domWrapper.domElement.multiple) {
-      return model;
+      return data;
     } else {
-      return model[0];
+      return data[0];
     }
   }
 }

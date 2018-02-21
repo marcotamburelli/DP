@@ -1,9 +1,9 @@
 import { JSDOM } from 'jsdom';
 
-import { ScopeProperties } from '../../src/component/BaseComponent';
 import { Container } from '../../src/component/Container';
-import { HtmlElementComponent, TextInputComponent } from '../../src/component/HtmlComponents';
+import { HtmlElementComponent } from '../../src/component/HtmlComponents';
 
+// import { ScopeProperties } from '../../src/component/BaseComponent';
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
 // tslint:disable-next-line:no-string-literal
@@ -19,7 +19,7 @@ describe('Scoped component', () => {
 
   it('Check simple properties', () => {
     const element = document.createElement('div');
-    const container = new Container(element, { namespace: 'test' });
+    const container = new Container(element, { name: 'test' });
 
     const control1 = propertiesGenerator('name_1', '1');
     const control2 = propertiesGenerator('name_2', '2');
@@ -27,34 +27,34 @@ describe('Scoped component', () => {
     container.append(control1);
     container.append(control2);
 
-    container.setModel({ 'name_1': 'value_1', 'name_2': 'value_2' });
+    container.setData({ 'name_1': 'value_1', 'name_2': 'value_2' });
 
-    expect(container.getModel()).toEqual({ 'name_1': 'value_1', 'name_2': 'value_2' });
+    expect(container.getData()).toEqual({ 'name_1': 'value_1', 'name_2': 'value_2' });
 
-    control2.detach();
+    container.remove(control2);
 
-    expect(container.getModel()).toEqual({ 'name_1': 'value_1' });
+    expect(container.getData()).toEqual({ 'name_1': 'value_1' });
   });
 
   it('Check object properties', () => {
     const element = document.createElement('div');
     const childElement = document.createElement('div');
 
-    const container = new Container(element, { namespace: 'test' });
-    const childContainer = new Container(childElement, { namespace: 'child', name: 'obj' });
+    const container = new Container(element);
+    const childContainer = new Container(childElement, { name: 'obj' });
 
     container.append(childContainer);
 
     childContainer.append(propertiesGenerator('name_1', '1'));
     childContainer.append(propertiesGenerator('name_2', '2'));
 
-    container.setModel({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
+    container.setData({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
 
-    expect(container.getModel()).toEqual({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
+    expect(container.getData()).toEqual({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
 
-    childContainer.detach();
+    container.remove(childContainer);
 
-    expect(container.getModel()).toEqual({});
+    expect(container.getData()).toEqual({});
   });
 
 });

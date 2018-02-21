@@ -8,8 +8,7 @@ export const NODES = {
   OPTION: 'option'
 };
 
-export const SCOPE_PROPERTIES = {
-  NAMESPACE: 'namespace',
+export const DATA_NODE_PROPERTIES = {
   ID: 'id',
   NAME: 'name'
 };

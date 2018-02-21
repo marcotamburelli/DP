@@ -1,113 +1,51 @@
 import { Channel, Listener } from '../event/Channel';
 import { BaseEvent, EventType } from '../event/Event';
 import { HasChannel } from '../event/types';
-import { HasModel } from './Components';
-import { Context } from './Context';
+import { Component, IsDataDriven } from './Components';
+import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
 
-export interface ScopeProperties {
-  namespace?: string;
-  id?: string;
-  name?: string;
-}
+export type ChildComponent = BaseComponent<any> | string;
+export type DomBasedComponent = BaseComponent<any>;
 
-export type GenericComponent = BaseComponent<any, Node>;
-export type ChildComponent = GenericComponent | string;
-
-export abstract class BaseComponent<M, E extends Node> implements HasChannel, HasModel<M> {
-  protected parent: GenericComponent;
-  protected localContext: Context<E>;
-
+export abstract class BaseComponent<N extends Node> implements Component, HasChannel {
   private channel = new Channel();
 
-  protected constructor(protected domWrapper: DomWrapper<E>, protected scopeProperties: ScopeProperties = {}) {
-    var { namespace } = scopeProperties;
+  protected parentDomComponent: DomBasedComponent;
 
-    if (namespace) {
-      this.localContext = new Context(namespace, this.domWrapper);
+  protected abstract readonly dataNode: DataNode;
 
-      const { id } = scopeProperties;
-
-      this.localContext.register({id}, this);
-    }
+  protected constructor(protected domWrapper: DomWrapper<N>) {
   }
 
-  protected extractLocalContextFrom(child: GenericComponent) {
-    return child.localContext;
+  get parent() {
+    return this.parentDomComponent;
   }
-
-  protected extractScopeProperties(child: GenericComponent) {
-    return child.scopeProperties;
-  }
-
-  protected getContext(): Context<Node> {
-    if (this.localContext) {
-      return this.localContext;
-    }
-
-    if (this.parent) {
-      return this.parent.getContext();
-    }
-  }
-
-  abstract setModel(model: M);
-
-  abstract getModel(): M;
 
   append(child: ChildComponent) {
     if (child instanceof BaseComponent) {
-      if (child.parent) {
+      if (child.parentDomComponent) {
         throw new Error('Element already appended');
       }
 
-      child.parent = this;
+      child.parentDomComponent = this;
 
-      this.integrateChildContext(child);
+      this.dataNode.append(child.dataNode);
       this.domWrapper.appendChild(child.domWrapper);
     } else {
       this.domWrapper.appendChild(child);
     }
   }
 
-  protected integrateChildContext(child: GenericComponent) {
-    var context = this.getContext();
-
-    if (!context) {
-      return;
+  remove(child: DomBasedComponent) {
+    if (child.parent !== this) {
+      throw new Error('Impossible to detach a not child component');
     }
 
-    var childContext = child.localContext;
+    delete child.parentDomComponent;
 
-    if (childContext) {
-      context.pushChildContext(childContext);
-    }
-
-    context.register(child.scopeProperties, child);
-  }
-
-  detach() {
-    if (!this.parent) {
-      return;
-    }
-
-    this.parent.detachChildScope(this);
-    this.domWrapper.detach();
-  }
-
-  protected detachChildScope(child: GenericComponent) {
-    var context = this.getContext();
-
-    if (!context) {
-      return;
-    }
-
-    var childScope = child.localContext;
-
-    if (childScope) {
-      context.removeChildContext(childScope.namespace);
-    }
-
-    context.unregister(child.scopeProperties);
+    this.dataNode.remove(child.dataNode);
+    child.domWrapper.detach();
   }
 
   get domNode() {
@@ -121,4 +59,18 @@ export abstract class BaseComponent<M, E extends Node> implements HasChannel, Ha
   emitEvent<P>(event: BaseEvent<P>) {
     this.channel.emit(event);
   }
+}
+
+export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
+  protected dataNode: DataNode;
+
+  protected constructor(domWrapper: DomWrapper<N>, dataNodeProps: DataNodeProperties = { name: 'default' }) {
+    super(domWrapper);
+
+    this.dataNode = new DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);
+  }
+
+  abstract getData(): D;
+
+  abstract setData(data: D);
 }

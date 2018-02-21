@@ -1,19 +1,28 @@
-import { GenericComponent } from './BaseComponent';
+
+export interface Component {
+  readonly parent: Component;
+
+  queryByName?<C extends Component>(name: string): C;
+
+  queryByIdx?<C extends Component>(idx: number): C;
+
+  queryById?<C extends Component>(id: string): C;
+}
 
 export interface IsContainer {
-  queryByName(name: string): GenericComponent;
+  queryByName<C extends Component>(name: string): C;
 
-  queryById(id: string): GenericComponent;
+  queryById<C extends Component>(id: string): C;
 }
 
 export interface IsList {
-  queryByIdx(idx: number): GenericComponent;
+  queryByIdx<C extends Component>(idx: number): C;
 
-  queryById(id: string);
+  queryById<C extends Component>(id: string): C;
 }
 
-export interface HasModel<M> {
-  getModel(): M;
+export interface IsDataDriven<D> {
+  getData(): D;
 
-  setModel(model: M);
+  setData(data: D);
 }

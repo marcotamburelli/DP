@@ -11,14 +11,15 @@ describe('Checking single model', () => {
 
   it('Checking html', () => {
     var div: XLib.ControlComponent<number> = XLib.define(
-      'div',
-      { 'name': 'val', 'value-type': 'number' }
+      'div', { 'name': 'val', 'value-type': 'number' },
+      '321'
     );
-    const nativeDiv = div.domNode as HTMLDivElement;
 
-    div.setModel(123);
+    expect(div.getData()).toBe(321);
 
-    expect(nativeDiv.innerText).toBe('123');
+    div.setData(123);
+
+    expect((div.domNode as HTMLDivElement).textContent).toBe('123');
   });
 
   it('Checking input', () => {
@@ -28,13 +29,13 @@ describe('Checking single model', () => {
     );
     var nativeInput = input.domNode as HTMLInputElement;
 
-    input.setModel(123);
+    input.setData(123);
 
     expect(nativeInput.value).toBe('123');
 
     nativeInput.value = '456';
 
-    expect(input.getModel()).toBe(456);
+    expect(input.getData()).toBe(456);
   });
 
 });
@@ -52,16 +53,16 @@ describe('Checking scoped component', () => {
   }
 
   it('Check model', () => {
-    var component = XLib.define(
-      'div', { namespace: 'test' },
+    var component: XLib.Container<TestModel> = XLib.define(
+      'div', null,
       XLib.define('input', { 'name': 'name', 'value-type': 'string' }),
       XLib.define('input', { 'name': 'age', 'value-type': 'number' })
-    ) as XLib.Container<TestModel>;
+    );
 
-    component.setModel({ name: 'test', age: 123 });
+    component.setData({ name: 'test', age: 123 });
 
-    var nameInput = component.queryByName('name').domNode as HTMLInputElement;
-    var ageInput = component.queryByName('age').domNode as HTMLInputElement;
+    var nameInput = component.queryByName<XLib.Container<HTMLInputElement>>('name').domNode;
+    var ageInput = component.queryByName<XLib.Container<HTMLInputElement>>('age').domNode;
 
     expect(nameInput.value).toBe('test');
     expect(ageInput.value).toBe('123');
@@ -69,7 +70,7 @@ describe('Checking scoped component', () => {
     nameInput.value = 'test test';
     ageInput.value = '456';
 
-    expect(component.getModel()).toEqual({ name: 'test test', age: 456 });
+    expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
   it('Check select with array', () => {
@@ -77,28 +78,27 @@ describe('Checking scoped component', () => {
       return XLib.define('option', { value: model.id }, model.text);
     }
 
-    var component = XLib.define(
-      'div', { namespace: 'test' },
+    var component: XLib.Container<TypeModel> = XLib.define(
+      'div', null,
       XLib.define(
         'select', { 'name': 'type', 'value-type': 'string' },
         XLib.List({ generator, id: 'list' })),
       XLib.define('input', { 'name': 'name', 'value-type': 'string' })
-    ) as XLib.Container<TypeModel>;
+    );
 
-    component.queryById('list').setModel([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
-    component.setModel({ name: 'text_name', type: 'a' });
+    component.queryById<XLib.List<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
+    component.setData({ name: 'text_name', type: 'a' });
 
-    var typeSelect = component.queryByName('type').domNode as HTMLSelectElement;
-    var nameInput = component.queryByName('name').domNode as HTMLInputElement;
+    var typeSelect = component.queryByName<XLib.ControlComponent<string>>('type').domNode as HTMLSelectElement;
+    var nameInput = component.queryByName<XLib.ControlComponent<string>>('name').domNode as HTMLInputElement;
 
     expect(typeSelect.value).toBe('a');
     expect(nameInput.value).toBe('text_name');
 
-    typeSelect.value = 'test test';
+    nameInput.value = 'test test';
     typeSelect.options.item(1).selected = true;
-    // nameInput.value = 'b';
 
-    expect(component.getModel()).toEqual({ name: 'test test', type: 'b' });
+    expect(component.getData()).toEqual({ name: 'test test', type: 'b' });
   });
 
 });

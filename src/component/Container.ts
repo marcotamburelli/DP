@@ -1,29 +1,30 @@
-import { BaseComponent, GenericComponent, ScopeProperties } from './BaseComponent';
-import { IsContainer } from './Components';
+import { DataDrivenComponentImpl } from './BaseComponent';
+import { Component, IsContainer } from './Components';
+import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './DomWrappers';
 
 /**
  * Basic element.
  * @template E The type of DOM node.
  */
-export class Container<M, E extends Element> extends BaseComponent<M, E> implements IsContainer {
-  constructor(element: E, scopeProperties: ScopeProperties = { namespace: 'default' }) {
-    super(DomWrappers.simple(element), scopeProperties);
+export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, E> implements IsContainer {
+  constructor(element: E, dataNodeProps?: DataNodeProperties) {
+    super(DomWrappers.simple(element), dataNodeProps);
   }
 
-  setModel(model: M) {
-    this.getContext().updateModel(model);
+  setData(data: D) {
+    this.dataNode.setData(data);
   }
 
-  getModel() {
-    return this.getContext().extractModel<M>();
+  getData() {
+    return this.dataNode.getData();
   }
 
-  queryByName(name: string) {
-    return this.getContext().getByName<M, GenericComponent>(name);
+  queryByName<C extends Component>(name: string) {
+    return this.dataNode.getByName(name) as C;
   }
 
-  queryById(id: string) {
-    return this.getContext().getById<M, GenericComponent>(id);
+  queryById<C extends Component>(id: string) {
+    return this.dataNode.getById(id) as C;
   }
 }

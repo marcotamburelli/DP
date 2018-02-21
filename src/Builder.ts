@@ -1,10 +1,10 @@
-import { ChildComponent, GenericComponent } from './component/BaseComponent';
+import { ChildComponent, DomBasedComponent, BaseComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
   SelectComponent,
-  TextInputComponent
+  TextInputComponent,
 } from './component/HtmlComponents';
 import { ListContainer } from './component/ListContainer';
 import { TextComponent } from './component/TextComponent';
@@ -13,8 +13,8 @@ import { NativeUtil } from './util/NativeUtil';
 import { PropertiesUtil } from './util/PropertiesUtil';
 import { HTML, Properties } from './util/types';
 
-export type ChildDef = (ChildComponent | ChildComponent[]);
-export type Definition = HTML | ((props: Properties) => GenericComponent) | GenericComponent;
+export type ChildDef = (ChildComponent | DomBasedComponent[]);
+export type Definition = HTML | ((props: Properties) => DomBasedComponent) | DomBasedComponent;
 
 namespace DomFactory {
   export function createElement<E extends HTMLElement>(tag: HTML, properties: Properties) {
@@ -32,41 +32,40 @@ namespace DomFactory {
 }
 
 export namespace Builder {
+  function createContainer(tag: HTML, properties: Properties) {
+    var element = DomFactory.createElement(tag, properties);
+    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
+
+    return new Container(element, dataNodeProperties);
+  }
+
   function createHtmlComponent(tag: HTML, properties: Properties) {
     var element = DomFactory.createElement(tag, properties);
-    var scopeProperties = PropertiesUtil.getScopeProperties(properties);
+    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
 
-    if (scopeProperties.namespace) {
-      return new Container(element, scopeProperties);
-    } else {
-      return new HtmlElementComponent<string | number>(
-        element,
-        scopeProperties,
-        PropertiesUtil.getTransformer(properties)
-      );
-    }
+    return new HtmlElementComponent<string | number>(
+      element,
+      dataNodeProperties,
+      PropertiesUtil.getTransformer(properties)
+    );
   }
 
   function createInputComponent(properties: Properties) {
     var element = DomFactory.createElement<HTMLInputElement>('input', properties);
-    var scopeProperties = PropertiesUtil.getScopeProperties(properties);
-
-    if (scopeProperties.namespace) {
-      throw new Error(`'input' cannot have a namespace`);
-    }
+    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
 
     switch (properties[NATIVE_PROPERTIES.TYPE]) {
       case 'checkbox':
-        return new CheckBoxInputComponent(element, scopeProperties);
+        return new CheckBoxInputComponent(element, dataNodeProperties);
 
       default:
-        return new TextInputComponent<string | number>(element, scopeProperties, PropertiesUtil.getTransformer(properties));
+        return new TextInputComponent<string | number>(element, dataNodeProperties, PropertiesUtil.getTransformer(properties));
     }
   }
 
   function createSelectComponent(properties: Properties) {
     var element = DomFactory.createElement<HTMLSelectElement>('select', properties);
-    var scopeProperties = PropertiesUtil.getScopeProperties(properties);
+    var scopeProperties = PropertiesUtil.getDataNodeProperties(properties);
 
     // TODO The select box requires a test, especially in case options are provided as array
     // if (scopeProperties.namespace) {
@@ -76,17 +75,25 @@ export namespace Builder {
     // }
   }
 
-  export function appendChildDef(parent: GenericComponent, child: ChildDef) {
+  export function appendChildDef(parent: DomBasedComponent, child: ChildDef) {
     if (Array.isArray(child)) {
-      child.forEach(c => parent.append(c));
+      child.forEach(c => {
+        if (!(c instanceof BaseComponent)) {
+          throw new Error('Invalid element to append');
+        }
+
+        parent.append(c);
+      });
     } else {
       parent.append(child);
     }
   }
 
-  export function createComponent(tag: HTML, properties: Properties) {
+  export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {
     switch (tag) {
       case NODES.DIV:
+        return (hasChildren ? createContainer : createHtmlComponent)(tag, properties)
+
       case NODES.LABEL:
       case NODES.OPTION:
       case NODES.SPAN:
@@ -104,10 +111,10 @@ export namespace Builder {
   }
 
   export function createList(properties: Properties) {
-    return new ListContainer(PropertiesUtil.getGenerator(properties), PropertiesUtil.getScopeProperties(properties));
+    return new ListContainer(PropertiesUtil.getGenerator(properties), PropertiesUtil.getDataNodeProperties(properties));
   }
 
   export function createText(properties: Properties) {
-    return new TextComponent(PropertiesUtil.getScopeProperties(properties));
+    return new TextComponent(PropertiesUtil.getDataNodeProperties(properties));
   }
 }

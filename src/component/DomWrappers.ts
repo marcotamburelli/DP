@@ -1,5 +1,5 @@
-export interface DomWrapper<E extends Node> {
-  readonly domElement?: E;
+export interface DomWrapper<N extends Node> {
+  readonly domElement?: N;
 
   appendChild<F extends Node>(child: DomWrapper<F> | string);
 

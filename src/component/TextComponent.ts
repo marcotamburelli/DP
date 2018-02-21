@@ -1,19 +1,20 @@
-import { BaseComponent, ScopeProperties } from './BaseComponent';
+import { DataDrivenComponentImpl } from './BaseComponent';
+import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './DomWrappers';
 
-export class TextComponent extends BaseComponent<string, Text> {
-  constructor(scopeProperties: ScopeProperties = {}) {
-    super(DomWrappers.text(), scopeProperties);
+export class TextComponent extends DataDrivenComponentImpl<string, Text>  {
+  constructor(dataNodeProps?: DataNodeProperties) {
+    super(DomWrappers.text(), dataNodeProps);
   }
 
-  setModel(model: string) {
-    if (this.scopeProperties.name) {
-      this.domWrapper.domElement.data = model;
+  setData(data: string) {
+    if (this.dataNode.name) {
+      this.domWrapper.domElement.data = data;
     }
   }
 
-  getModel() {
-    if (this.scopeProperties.name) {
+  getData() {
+    if (this.dataNode.name) {
       return this.domWrapper.domElement.data;
     }
   }

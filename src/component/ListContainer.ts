@@ -1,76 +1,65 @@
-import { BaseComponent, GenericComponent, ScopeProperties } from './BaseComponent';
-import { IsList } from './Components';
-import { Context } from './Context';
+import { BaseComponent, ChildComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
+import { Component, IsDataDriven, IsList } from './Components';
+import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './DomWrappers';
 
-export type ComponentGenerator<M> = ((model: M, idx?: number) => GenericComponent);
+export type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponent & IsDataDriven<D>);
 
-export class ListContainer<M> extends BaseComponent<M[], any> implements IsList {
-  private childContextProperties: { elementContext: Context<any>, child: GenericComponent }[];
+export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implements IsList {
+  private children: (Component | IsDataDriven<any>)[];
   private idx = 0;
 
-  constructor(private generator: ComponentGenerator<M>, scopeProperties: ScopeProperties = {}) {
-    super(DomWrappers.array(), scopeProperties);
+  constructor(private generator: ComponentGenerator<M>, dataNodeProps?: DataNodeProperties) {
+    super(DomWrappers.array(), dataNodeProps);
 
-    this.childContextProperties = [];
+    this.children = [];
   }
 
-  protected integrateChildContext(child: GenericComponent) {
-    const context = this.getContext();
+  append(child: ChildComponent) {
+    super.append(child);
 
-    if (!context) {
-      return;
+    if (child instanceof BaseComponent) {
+      this.children.push(child);
     }
-
-    const childContext = this.extractLocalContextFrom(child);
-    const elementContext = new Context<any>(`${this.scopeProperties.namespace}.${++this.idx}`);
-
-    if (childContext) {
-      elementContext.pushChildContext(childContext);
-    } else {
-      elementContext.register(this.extractScopeProperties(child) || {}, child);
-    }
-
-    context.pushChildContext(elementContext);
-    this.childContextProperties.push({ elementContext, child });
   }
 
-  protected detachChildScope(child: GenericComponent) {
-    for (var i = 0; i < this.childContextProperties.length; i++) {
-      if (this.childContextProperties[i].child === child) {
-        this.localContext.removeChildContext(this.childContextProperties[i].elementContext.namespace);
-        this.childContextProperties.splice(i, 1);
+  remove(child: DomBasedComponent) {
+    super.remove(child);
+
+    for (var i = 0; i < this.children.length; i++) {
+      if (this.children[i] === child) {
+        this.children.splice(i, 1);
       }
     }
   }
 
-  setModel(model: M[]) {
+  setData(data: M[]) {
     if (!this.generator) {
       return;
     }
 
-    [...this.childContextProperties].forEach(({ child }) => child.detach());
+    while (this.children.length) {
+      super.remove(this.children.pop() as DomBasedComponent);
+    }
 
-    model.forEach((m, i) => {
-      const child = this.generator(m, i);
+    data.forEach((dataItem, i) => {
+      const child = this.generator(dataItem, i);
 
+      child.setData(dataItem);
       this.append(child);
     });
-
-    this.childContextProperties.forEach(({ child }, i) => child.setModel(model[i]));
   }
 
-  getModel() {
-    return this.childContextProperties.map(({ child }) => child.getModel());
+  getData() {
+    // return this.children.map(child => BaseComponent.extractDataNodeFrom(child as DomBasedComponent).getData());
+    return this.children.map(child => (child as IsDataDriven<any>).getData());
   }
 
-  queryByIdx(idx: number) {
-    const childContextProp = this.childContextProperties[idx];
-
-    return childContextProp && childContextProp.child;
+  queryByIdx<C extends Component>(idx: number) {
+    return this.children[idx] as C;
   }
 
-  queryById(id: string) {
-    return this.getContext().getById<M, GenericComponent>(id);
+  queryById<C extends Component>(id: string) {
+    return this.dataNode.getById(id) as C;
   }
 }

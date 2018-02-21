@@ -1,15 +1,14 @@
-import { ScopeProperties } from '../component/BaseComponent';
+import { DataNodeProperties } from '../component/DataNode';
 import { ComponentGenerator } from '../component/ListContainer';
-import { SCOPE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './const';
+import { DATA_NODE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './const';
 import { Properties } from './types';
 
 export namespace PropertiesUtil {
-  export function getScopeProperties(properties: Properties) {
+  export function getDataNodeProperties(properties: Properties) {
     return {
-      namespace: properties[SCOPE_PROPERTIES.NAMESPACE],
-      id: properties[SCOPE_PROPERTIES.ID],
-      name: properties[SCOPE_PROPERTIES.NAME]
-    } as ScopeProperties;
+      id: properties[DATA_NODE_PROPERTIES.ID],
+      name: properties[DATA_NODE_PROPERTIES.NAME]
+    } as DataNodeProperties;
   }
 
   export function getTransformer(properties: Properties) {
@@ -40,8 +39,7 @@ export namespace PropertiesUtil {
   export function getNativeProperties(properties: Properties) {
     var nativeProps = { ...properties } as Properties;
 
-    delete nativeProps[SCOPE_PROPERTIES.NAMESPACE];
-    delete nativeProps[SCOPE_PROPERTIES.ID];
+    delete nativeProps[DATA_NODE_PROPERTIES.ID];
     delete nativeProps[SPECIFIC_PROPERTIES.VALUE_TYPE];
     delete nativeProps[SPECIFIC_PROPERTIES.GENERATOR];
     delete nativeProps[STYLE_PROPERTIES.CLASS];
