@@ -13,19 +13,19 @@ export interface DomWrapper<N extends Node> {
 };
 
 export namespace DomWrappers {
-  export function simple<E extends Element>(element: E) {
+  export function simple<E extends Element>(element: E): DomWrapper<E> {
     return new SimpleDomWrapper(element);
   }
 
-  export function input(element: HTMLInputElement | HTMLSelectElement) {
+  export function input(element: HTMLInputElement | HTMLSelectElement): DomWrapper<HTMLInputElement | HTMLSelectElement> {
     return new InputDomWrapper(element);
   }
 
-  export function array() {
+  export function array(): DomWrapper<Node> {
     return new ArrayWrapper();
   }
 
-  export function text(text = '') {
+  export function text(text = ''): DomWrapper<Text> {
     return new TextWrapper(document.createTextNode(text));
   }
 

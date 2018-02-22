@@ -86,7 +86,7 @@ describe('Checking scoped component', () => {
       XLib.define('input', { 'name': 'name', 'value-type': 'string' })
     );
 
-    component.queryById<XLib.List<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
+    component.queryById<XLib.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
     component.setData({ name: 'text_name', type: 'a' });
 
     var typeSelect = component.queryByName<XLib.ControlComponent<string>>('type').domNode as HTMLSelectElement;

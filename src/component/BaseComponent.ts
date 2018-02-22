@@ -1,4 +1,4 @@
-import { Channel, Listener } from '../event/Channel';
+import { Channel, Listener, Subscription } from '../event/Channel';
 import { BaseEvent, EventType } from '../event/Event';
 import { HasChannel } from '../event/types';
 import { Component, IsDataDriven } from './Components';
@@ -52,7 +52,7 @@ export abstract class BaseComponent<N extends Node> implements Component, HasCha
     return this.domWrapper.domElement;
   }
 
-  subscribeListener(eventType: EventType, listener: Listener) {
+  subscribeListener(eventType: EventType, listener: Listener): Subscription {
     return this.channel.subscribe(eventType, listener);
   }
 

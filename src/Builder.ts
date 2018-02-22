@@ -1,10 +1,10 @@
-import { ChildComponent, DomBasedComponent, BaseComponent } from './component/BaseComponent';
+import { BaseComponent, ChildComponent, DomBasedComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
   SelectComponent,
-  TextInputComponent,
+  TextInputComponent
 } from './component/HtmlComponents';
 import { ListContainer } from './component/ListContainer';
 import { TextComponent } from './component/TextComponent';
@@ -92,7 +92,7 @@ export namespace Builder {
   export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {
     switch (tag) {
       case NODES.DIV:
-        return (hasChildren ? createContainer : createHtmlComponent)(tag, properties)
+        return (hasChildren ? createContainer : createHtmlComponent)(tag, properties);
 
       case NODES.LABEL:
       case NODES.OPTION:
@@ -110,8 +110,8 @@ export namespace Builder {
     throw new Error(`'${tag}' not supported`);
   }
 
-  export function createList(properties: Properties) {
-    return new ListContainer(PropertiesUtil.getGenerator(properties), PropertiesUtil.getDataNodeProperties(properties));
+  export function createList<D>(properties: Properties) {
+    return new ListContainer<D>(PropertiesUtil.getGenerator(properties), PropertiesUtil.getDataNodeProperties(properties));
   }
 
   export function createText(properties: Properties) {

@@ -1,7 +1,5 @@
 import { Component, IsDataDriven } from './Components';
 
-type DataDrivenComponent = Component & IsDataDriven<any>;
-
 export interface DataNodeProperties {
   id?: string;
   name?: string;
@@ -13,7 +11,7 @@ export class DataNode {
   private childSeq = 0;
   private children: { [idx: number]: DataNode } = {};
 
-  constructor(private dataNodeProperties: DataNodeProperties = {}, private component?: DataDrivenComponent) {
+  constructor(private dataNodeProperties: DataNodeProperties = {}, private component?: Component & IsDataDriven<any>) {
   }
 
   get name() {

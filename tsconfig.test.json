@@ -1,16 +1,13 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "jsx": "preserve",
     "module": "commonjs",
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
+    "outDir": "./test",
     "sourceMap": true,
-    "outDir": "./dist",
     "types": [
       "node",
       "jasmine"
-    ],
+    ]
   },
   "include": [
     "src/**/*",

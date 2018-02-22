@@ -21,11 +21,11 @@ export namespace PropertiesUtil {
     }
   }
 
-  export function getGenerator<M>(properties: Properties) {
+  export function getGenerator<M>(properties: Properties): ComponentGenerator<M> {
     var generator = properties[SPECIFIC_PROPERTIES.GENERATOR];
 
     if (typeof generator === 'function') {
-      return generator as ComponentGenerator<M>;
+      return generator;
     }
   }
 
