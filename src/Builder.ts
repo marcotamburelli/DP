@@ -92,12 +92,26 @@ export namespace Builder {
   export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {
     switch (tag) {
       case NODES.DIV:
+      case NODES.UL:
+      case NODES.OL:
+      case NODES.LI:
+      case NODES.FORM:
         return (hasChildren ? createContainer : createHtmlComponent)(tag, properties);
 
       case NODES.LABEL:
       case NODES.OPTION:
       case NODES.SPAN:
       case NODES.BUTTON:
+      case NODES.BUTTON:
+      case NODES.A:
+      case NODES.P:
+      case NODES.H1:
+      case NODES.H2:
+      case NODES.H3:
+      case NODES.H4:
+      case NODES.H5:
+      case NODES.H6:
+      case NODES.BR:
         return createHtmlComponent(tag, properties);
 
       case NODES.INPUT:

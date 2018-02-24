@@ -5,8 +5,8 @@ import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
 
-export type ChildComponent = BaseComponent<any> | string;
-export type DomBasedComponent = BaseComponent<any>;
+export type ChildComponent = BaseComponent<Node> | string;
+export type DomBasedComponent = BaseComponent<Node>;
 
 export abstract class BaseComponent<N extends Node> implements Component, HasChannel {
   private channel = new Channel();
