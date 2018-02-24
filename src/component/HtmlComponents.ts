@@ -2,6 +2,14 @@ import { DataDrivenComponentImpl } from './BaseComponent';
 import { DataNodeProperties } from './DataNode';
 import { DomWrapper, DomWrappers } from './DomWrappers';
 
+function stringValue(x) {
+  if (x == null) {
+    return '';
+  } else {
+    return x.toString();
+  }
+}
+
 export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElement> {
   constructor(element: HTMLElement, properties: DataNodeProperties = {}, private transformer?: (value: string) => D) {
     super(DomWrappers.simple(element), properties);
@@ -9,7 +17,7 @@ export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElem
 
   setData(data: D) {
     if (this.dataNode.name) {
-      this.domWrapper.domElement.textContent = data.toString();
+      this.domWrapper.domElement.textContent = stringValue(data);
     }
   }
 
@@ -26,7 +34,7 @@ export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputE
   }
 
   setData(data: D) {
-    this.domWrapper.domElement.value = data.toString();
+    this.domWrapper.domElement.value = stringValue(data);
   }
 
   getData() {
@@ -40,7 +48,7 @@ export class CheckBoxInputComponent extends DataDrivenComponentImpl<boolean, HTM
   }
 
   setData(data: boolean) {
-    (this.domWrapper.domElement as HTMLInputElement).checked = data;
+    (this.domWrapper.domElement as HTMLInputElement).checked = !!data;
   }
 
   getData() {
@@ -63,7 +71,7 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
         values[t.toString()] = true;
       }
     } else {
-      values[data.toString()] = true;
+      values[stringValue(data)] = true;
     }
 
     for (let i = 0; i < options.length; i++) {

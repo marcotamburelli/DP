@@ -64,7 +64,7 @@ export abstract class BaseComponent<N extends Node> implements Component, HasCha
 export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
   protected dataNode: DataNode;
 
-  protected constructor(domWrapper: DomWrapper<N>, dataNodeProps: DataNodeProperties = { name: 'default' }) {
+  protected constructor(domWrapper: DomWrapper<N>, dataNodeProps: DataNodeProperties = {}) {
     super(domWrapper);
 
     this.dataNode = new DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);

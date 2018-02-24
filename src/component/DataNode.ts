@@ -67,11 +67,15 @@ export class DataNode {
       const childDataNode = this.children[idx] as DataNode;
       const { name, component } = childDataNode;
 
-      if (name && component) {
-        component.setData(data[name]);
-      } else {
-        childDataNode.setModelRecursive(data[name]);
+      if (!name) {
+        return childDataNode.setModelRecursive(data);
       }
+
+      if (!component) {
+        return childDataNode.setModelRecursive(data[name]);
+      }
+
+      component.setData(data[name]);
     });
   }
 

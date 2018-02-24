@@ -61,8 +61,8 @@ describe('Checking scoped component', () => {
 
     component.setData({ name: 'test', age: 123 });
 
-    var nameInput = component.queryByName<XLib.Container<HTMLInputElement>>('name').domNode;
-    var ageInput = component.queryByName<XLib.Container<HTMLInputElement>>('age').domNode;
+    var nameInput = component.queryByName<XLib.Container<string>>('name').domNode as HTMLSelectElement;
+    var ageInput = component.queryByName<XLib.Container<number>>('age').domNode as HTMLSelectElement;
 
     expect(nameInput.value).toBe('test');
     expect(ageInput.value).toBe('123');

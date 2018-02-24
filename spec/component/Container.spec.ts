@@ -36,6 +36,22 @@ describe('Scoped component', () => {
     expect(container.getData()).toEqual({ 'name_1': 'value_1' });
   });
 
+  it('Check empty data', () => {
+    const container = new Container(document.createElement('div'), { name: 'test' });
+    const subContainer = new Container(document.createElement('div'));
+
+    const control1 = propertiesGenerator('name_1', '1');
+    const control2 = propertiesGenerator('name_2', '2');
+
+    container.append(subContainer);
+    subContainer.append(control1);
+    subContainer.append(control2);
+
+    container.setData({});
+
+    expect(container.getData()).toEqual({ 'name_1': '', 'name_2': '' });
+  });
+
   it('Check object properties', () => {
     const element = document.createElement('div');
     const childElement = document.createElement('div');
