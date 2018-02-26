@@ -10,7 +10,7 @@ global['document'] = dom.window.document;
 describe('Checking single model', () => {
 
   it('Checking html', () => {
-    var div: XLib.ControlComponent<number> = XLib.define(
+    var div: XLib.ControlComponent<number, HTMLDivElement> = XLib.define(
       'div', { 'name': 'val', 'value-type': 'number' },
       '321'
     );
@@ -19,15 +19,15 @@ describe('Checking single model', () => {
 
     div.setData(123);
 
-    expect((div.domNode as HTMLDivElement).textContent).toBe('123');
+    expect(div.domNode.textContent).toBe('123');
   });
 
   it('Checking input', () => {
-    var input: XLib.ControlComponent<number> = XLib.define(
+    var input: XLib.ControlComponent<number, HTMLInputElement> = XLib.define(
       'input',
       { 'name': 'val', 'value-type': 'number' }
     );
-    var nativeInput = input.domNode as HTMLInputElement;
+    var nativeInput = input.domNode;
 
     input.setData(123);
 
@@ -53,7 +53,7 @@ describe('Checking scoped component', () => {
   }
 
   it('Check model', () => {
-    var component: XLib.Container<TestModel> = XLib.define(
+    var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
       'div', null,
       XLib.define('input', { 'name': 'name', 'value-type': 'string' }),
       XLib.define('input', { 'name': 'age', 'value-type': 'number' })
@@ -61,8 +61,8 @@ describe('Checking scoped component', () => {
 
     component.setData({ name: 'test', age: 123 });
 
-    var nameInput = component.queryByName<XLib.Container<string>>('name').domNode as HTMLSelectElement;
-    var ageInput = component.queryByName<XLib.Container<number>>('age').domNode as HTMLSelectElement;
+    var nameInput = component.queryByName<XLib.Container<string, HTMLInputElement>>('name').domNode;
+    var ageInput = component.queryByName<XLib.Container<number, HTMLInputElement>>('age').domNode;
 
     expect(nameInput.value).toBe('test');
     expect(ageInput.value).toBe('123');
@@ -78,7 +78,7 @@ describe('Checking scoped component', () => {
       return XLib.define('option', { value: model.id }, model.text);
     }
 
-    var component: XLib.Container<TypeModel> = XLib.define(
+    var component: XLib.Container<TypeModel, HTMLDivElement> = XLib.define(
       'div', null,
       XLib.define(
         'select', { 'name': 'type', 'value-type': 'string' },
@@ -89,8 +89,8 @@ describe('Checking scoped component', () => {
     component.queryById<XLib.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
     component.setData({ name: 'text_name', type: 'a' });
 
-    var typeSelect = component.queryByName<XLib.ControlComponent<string>>('type').domNode as HTMLSelectElement;
-    var nameInput = component.queryByName<XLib.ControlComponent<string>>('name').domNode as HTMLInputElement;
+    var typeSelect = component.queryByName<XLib.ControlComponent<string, HTMLSelectElement>>('type').domNode;
+    var nameInput = component.queryByName<XLib.ControlComponent<string, HTMLInputElement>>('name').domNode;
 
     expect(typeSelect.value).toBe('a');
     expect(nameInput.value).toBe('text_name');

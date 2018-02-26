@@ -8,10 +8,10 @@ import { UseCase } from './UseCase';
 import { Properties } from './util/types';
 
 export namespace XLib {
-  export type Container<M> = DomBasedComponent & IsDataDriven<M> & IsContainer;
+  export type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
   export type ListContainer<D> = ExtListContainer<D>;
   export type TextComponent = ExtTextComponent;
-  export type ControlComponent<M> = DomBasedComponent & IsDataDriven<M>;
+  export type ControlComponent<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
 
   export function List<D>(props: Properties) {
     return Builder.createList<D>(props) as ListContainer<D>;
