@@ -14,7 +14,7 @@ describe('Scoped component', () => {
   function propertiesGenerator(name: string, id: string) {
     const controlElement = document.createElement('div');
 
-    return new HtmlElementComponent(controlElement, { id, name }, (value) => value);
+    return new HtmlElementComponent(controlElement, { id, name }, {}, (value) => value);
   }
 
   it('Check simple properties', () => {

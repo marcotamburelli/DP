@@ -40,12 +40,10 @@ export namespace Builder {
   }
 
   function createHtmlComponent(tag: HTML, properties: Properties) {
-    var element = DomFactory.createElement(tag, properties);
-    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
-
     return new HtmlElementComponent<string | number>(
-      element,
-      dataNodeProperties,
+      DomFactory.createElement(tag, properties),
+      PropertiesUtil.getDataNodeProperties(properties),
+      PropertiesUtil.getObservationProperties(properties),
       PropertiesUtil.getTransformer(properties)
     );
   }
@@ -53,26 +51,29 @@ export namespace Builder {
   function createInputComponent(properties: Properties) {
     var element = DomFactory.createElement<HTMLInputElement>('input', properties);
     var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
+    var observationProperties = PropertiesUtil.getObservationProperties(properties);
 
     switch (properties[NATIVE_PROPERTIES.TYPE]) {
       case 'checkbox':
-        return new CheckBoxInputComponent(element, dataNodeProperties);
+        return new CheckBoxInputComponent(element, dataNodeProperties, observationProperties);
 
       default:
-        return new TextInputComponent<string | number>(element, dataNodeProperties, PropertiesUtil.getTransformer(properties));
+        return new TextInputComponent<string | number>(
+          element,
+          dataNodeProperties,
+          observationProperties,
+          PropertiesUtil.getTransformer(properties)
+        );
     }
   }
 
   function createSelectComponent(properties: Properties) {
-    var element = DomFactory.createElement<HTMLSelectElement>('select', properties);
-    var scopeProperties = PropertiesUtil.getDataNodeProperties(properties);
-
-    // TODO The select box requires a test, especially in case options are provided as array
-    // if (scopeProperties.namespace) {
-    //   return new Container(element, scopeProperties);
-    // } else {
-    return new SelectComponent<string | number>(element, scopeProperties, PropertiesUtil.getTransformer(properties));
-    // }
+    return new SelectComponent<string | number>(
+      DomFactory.createElement<HTMLSelectElement>('select', properties),
+      PropertiesUtil.getDataNodeProperties(properties),
+      PropertiesUtil.getObservationProperties(properties),
+      PropertiesUtil.getTransformer(properties)
+    );
   }
 
   export function appendChildDef(parent: DomBasedComponent, child: ChildDef) {

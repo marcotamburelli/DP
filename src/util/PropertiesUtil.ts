@@ -1,5 +1,6 @@
 import { DataNodeProperties } from '../component/DataNode';
 import { ComponentGenerator } from '../component/ListContainer';
+import { ObservationProperties } from '../event/ObservationNode';
 import { DATA_NODE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './const';
 import { Properties } from './types';
 
@@ -46,5 +47,20 @@ export namespace PropertiesUtil {
     delete nativeProps[STYLE_PROPERTIES.STYLE];
 
     return nativeProps;
+  }
+
+  export function getObservationProperties(properties: Properties) {
+    const observationProperties = {} as ObservationProperties;
+
+    Object.keys(properties).forEach(prop => {
+      const propValue = properties[prop];
+      const propKey = prop.toLowerCase();
+
+      if (propKey.startsWith('on') && typeof propValue === 'object') {
+        observationProperties[propKey.substr(2)] = { ...propValue };
+      }
+    });
+
+    return observationProperties;
   }
 }

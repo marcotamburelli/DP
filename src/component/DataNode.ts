@@ -6,7 +6,7 @@ export interface DataNodeProperties {
 }
 
 export class DataNode {
-  idx?: number;
+  private idx?: number;
 
   private childSeq = 0;
   private children: { [idx: number]: DataNode } = {};

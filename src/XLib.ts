@@ -3,8 +3,6 @@ import { BaseComponent, DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
 import { ListContainer as ExtListContainer } from './component/ListContainer';
 import { TextComponent as ExtTextComponent } from './component/TextComponent';
-import { HasChannel } from './event/types';
-import { UseCase } from './UseCase';
 import { Properties } from './util/types';
 
 export namespace XLib {
@@ -33,9 +31,5 @@ export namespace XLib {
     children.forEach(child => Builder.appendChildDef(component, child));
 
     return component as C;
-  }
-
-  export function useCaseFor(...actors: HasChannel[]) {
-    return new UseCase(actors);
   }
 }

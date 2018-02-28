@@ -1,4 +1,5 @@
 import { JSDOM } from 'jsdom';
+import * as Observable from 'zen-observable';
 
 import { XLib } from '../src/XLib';
 
@@ -101,4 +102,28 @@ describe('Checking scoped component', () => {
     expect(component.getData()).toEqual({ name: 'test test', type: 'b' });
   });
 
+  it('Check observer', (done) => {
+    var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
+      'div', null,
+      XLib.define('button', { id: 'button_1', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
+      XLib.define('button', { id: 'button_2', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
+    );
+
+    var observable = Observable.from(component.createObservable('EVENT') as any);
+    var count = 0;
+
+    var subscription = observable.subscribe(({ payload }) => {
+      count++;
+
+      expect(payload).toBe(count === 1 ? 'PAYLOAD_1' : 'PAYLOAD_2');
+
+      if (count > 1) {
+        subscription.unsubscribe();
+        done();
+      }
+    });
+
+    component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_1').domNode.click();
+    component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_2').domNode.click();
+  });
 });

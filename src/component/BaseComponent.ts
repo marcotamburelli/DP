@@ -1,6 +1,4 @@
-import { Channel, Listener, Subscription } from '../event/Channel';
-import { BaseEvent, EventType } from '../event/Event';
-import { HasChannel } from '../event/types';
+import { EventType, ObservationNode, ObservationProperties } from '../event/ObservationNode';
 import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
@@ -8,14 +6,17 @@ import { DomWrapper } from './DomWrappers';
 export type ChildComponent = BaseComponent<Node> | string;
 export type DomBasedComponent = BaseComponent<Node>;
 
-export abstract class BaseComponent<N extends Node> implements Component, HasChannel {
-  private channel = new Channel();
-
+export abstract class BaseComponent<N extends Node> implements Component {
   protected parentDomComponent: DomBasedComponent;
 
   protected abstract readonly dataNode: DataNode;
+  protected readonly observationNode: ObservationNode;
 
-  protected constructor(protected domWrapper: DomWrapper<N>) {
+  protected constructor(
+    protected domWrapper: DomWrapper<N>,
+    protected observationProperties: ObservationProperties = {}
+  ) {
+    this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties);
   }
 
   get parent() {
@@ -31,6 +32,7 @@ export abstract class BaseComponent<N extends Node> implements Component, HasCha
       child.parentDomComponent = this;
 
       this.dataNode.append(child.dataNode);
+      this.observationNode.append(child.observationNode);
       this.domWrapper.appendChild(child.domWrapper);
     } else {
       this.domWrapper.appendChild(child);
@@ -45,6 +47,8 @@ export abstract class BaseComponent<N extends Node> implements Component, HasCha
     delete child.parentDomComponent;
 
     this.dataNode.remove(child.dataNode);
+    this.observationNode.remove(child.observationNode);
+
     child.domWrapper.detach();
   }
 
@@ -52,20 +56,20 @@ export abstract class BaseComponent<N extends Node> implements Component, HasCha
     return this.domWrapper.domElement;
   }
 
-  subscribeListener(eventType: EventType, listener: Listener): Subscription {
-    return this.channel.subscribe(eventType, listener);
-  }
-
-  emitEvent<P>(event: BaseEvent<P>) {
-    this.channel.emit(event);
+  createObservable(observedEvent: EventType) {
+    return this.observationNode.createObservable(observedEvent);
   }
 }
 
 export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
   protected dataNode: DataNode;
 
-  protected constructor(domWrapper: DomWrapper<N>, dataNodeProps: DataNodeProperties = {}) {
-    super(domWrapper);
+  protected constructor(
+    domWrapper: DomWrapper<N>,
+    dataNodeProps: DataNodeProperties = {},
+    observationProperties: ObservationProperties = {}
+  ) {
+    super(domWrapper, observationProperties);
 
     this.dataNode = new DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);
   }

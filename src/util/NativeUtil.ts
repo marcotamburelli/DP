@@ -12,7 +12,7 @@ export namespace NativeUtil {
   }
 
   function stringToStyleObject(style: string) {
-    var regEx =  /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
+    var regEx = /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
     var obj: { [prop: string]: string } = {};
 
     for (let result = regEx.exec(style); result !== null; result = regEx.exec(style)) {
@@ -46,7 +46,7 @@ export namespace NativeUtil {
       const propValue = properties[prop];
       const propKey = prop.toLowerCase();
 
-      if (propKey.startsWith('on')) {
+      if (propKey.startsWith('on') && typeof propValue === 'function') {
         element.addEventListener(propKey.substr(2), propValue);
       } else {
         element[prop] = propValue;
