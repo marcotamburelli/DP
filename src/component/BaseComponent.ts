@@ -1,4 +1,4 @@
-import { EventType, ObservationNode, ObservationProperties } from '../event/ObservationNode';
+import { EventType, IsObservable, ObservationNode, ObservationProperties } from '../event/ObservationNode';
 import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
@@ -56,8 +56,8 @@ export abstract class BaseComponent<N extends Node> implements Component {
     return this.domWrapper.domElement;
   }
 
-  createObservable(observedEvent: EventType) {
-    return this.observationNode.createObservable(observedEvent);
+  createObservable<P>(observedEvent?: EventType): IsObservable<P> {
+    return this.observationNode.createObservable<P>(observedEvent);
   }
 }
 

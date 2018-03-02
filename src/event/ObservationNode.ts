@@ -6,7 +6,27 @@ export interface ObservationProperties {
   [domEvent: string]: {
     eventType: EventType;
 
-    emitter(): { payload: any; };
+    emitter(e: Event): any;
+  };
+}
+
+export interface Message<P> {
+  eventType: string;
+  payload: P;
+}
+
+export interface Subscriber<P> {
+  next(value: Message<P>);
+  error(err: Error);
+  complete(value?: Message<P>);
+}
+
+export interface IsObservable<P> {
+  [x: string]: ((subscriber: Subscriber<P>) => {
+    unsubscribe(): void;
+  }) | (() => any);
+  subscribe: (subscriber: Subscriber<P>) => {
+    unsubscribe(): void;
   };
 }
 
@@ -35,34 +55,30 @@ export class ObservationNode {
     }
   }
 
-  createObservable(observedType: EventType) {
+  createObservable<P>(observedType?: EventType): IsObservable<P> {
     return {
-      [Symbol_observable]: () => {
-        return {
-          subscribe: (observer) => {
-            const subscriptions = this.collectSubscriptions(observedType, observer);
+      subscribe: (subscriber: Subscriber<P>) => {
+        const subscriptions = this.collectSubscriptions(subscriber, observedType);
 
-            return {
-              unsubscribe() {
-                subscriptions.forEach(subscription => subscription());
-              }
-            };
-          },
-          [Symbol_observable]() { return this; }
+        return {
+          unsubscribe() {
+            subscriptions.forEach(subscription => subscription());
+          }
         };
-      }
+      },
+      [Symbol_observable]() { return this; }
     };
   }
 
-  private collectSubscriptions(observedType: EventType, observer): (() => void)[] {
+  private collectSubscriptions<P>(subscriber: Subscriber<P>, observedType?: EventType): (() => void)[] {
     var subscriptions: (() => void)[] = [];
 
     if (this.domNode) {
       Object.keys(this.observationProperties).map(domEvent => {
         const { emitter, eventType } = this.observationProperties[domEvent];
 
-        if (observedType === eventType) {
-          const handler = (e: Event) => observer.next({ e, payload: emitter() });
+        if (observedType == null || observedType === eventType) {
+          const handler = (e: Event) => subscriber.next({ eventType, payload: emitter(e) as P });
 
           this.domNode.addEventListener(domEvent, handler);
 
@@ -74,7 +90,7 @@ export class ObservationNode {
     return [].concat.apply(
       subscriptions,
       Object.keys(this.children).map(
-        idx => (this.children[idx] as ObservationNode).collectSubscriptions(observedType, observer)
+        idx => (this.children[idx] as ObservationNode).collectSubscriptions(subscriber, observedType)
       )
     );
   }

@@ -51,7 +51,6 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
   }
 
   getData() {
-    // return this.children.map(child => BaseComponent.extractDataNodeFrom(child as DomBasedComponent).getData());
     return this.children.map(child => (child as IsDataDriven<any>).getData());
   }
 

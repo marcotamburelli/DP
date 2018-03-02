@@ -109,7 +109,7 @@ describe('Checking scoped component', () => {
       XLib.define('button', { id: 'button_2', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
     );
 
-    var observable = Observable.from(component.createObservable('EVENT') as any);
+    var observable = Observable.from(component.createObservable<string>('EVENT'));
     var count = 0;
 
     var subscription = observable.subscribe(({ payload }) => {
