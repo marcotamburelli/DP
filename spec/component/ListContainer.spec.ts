@@ -62,6 +62,25 @@ describe('Checking Array', () => {
     expect(array.queryByIdx(1)).toBeUndefined();
   });
 
+  it('Query children by id', () => {
+    const div = document.createElement('div');
+
+    const root = new Container(div);
+    const array = new ListContainer<any>(flatGenerator, { name: 'values' });
+
+    const child1 = flatGenerator(null, 0);
+    const child2 = flatGenerator(null, 1);
+
+    root.append(array);
+
+    array.append(child1);
+    array.append(child2);
+
+    expect(root.queryById<HtmlElementComponent<string>>('0')).toBe(child1);
+    expect(root.queryById<HtmlElementComponent<string>>('1')).toBe(child2);
+  });
+
+
   it('Checking model', () => {
     const div = document.createElement('div');
 

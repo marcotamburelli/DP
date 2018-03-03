@@ -12,6 +12,10 @@ export abstract class BaseComponent<N extends Node> implements Component {
   protected abstract readonly dataNode: DataNode;
   protected readonly observationNode: ObservationNode;
 
+  protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
+    return component.dataNode;
+  }
+
   protected constructor(
     protected domWrapper: DomWrapper<N>,
     protected observationProperties: ObservationProperties = {}

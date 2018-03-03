@@ -7,7 +7,6 @@ export type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponen
 
 export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implements IsList {
   private children: (Component | IsDataDriven<any>)[];
-  private idx = 0;
 
   constructor(private generator: ComponentGenerator<M>, dataNodeProps?: DataNodeProperties) {
     super(DomWrappers.array(), dataNodeProps);
@@ -54,11 +53,31 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
     return this.children.map(child => (child as IsDataDriven<any>).getData());
   }
 
+  getChildCount() {
+    return this.children.length;
+  }
+
+  getFirstChild<C extends Component>() {
+    return this.children[0] as C;
+  }
+
+  getLastChild<C extends Component>() {
+    return this.children[this.children.length - 1] as C;
+  }
+
   queryByIdx<C extends Component>(idx: number) {
     return this.children[idx] as C;
   }
 
   queryById<C extends Component>(id: string) {
-    return this.dataNode.getById(id) as C;
+    for (const child of this.children) {
+      if (child instanceof BaseComponent) {
+        const component = ListContainer.getDataNode(child).getById(id);
+
+        if (component) {
+          return component as C;
+        }
+      }
+    }
   }
 }
