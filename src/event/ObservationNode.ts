@@ -55,9 +55,9 @@ export class ObservationNode {
   private idx?: number;
 
   private childSeq = 0;
-  private children: Map<number, ObservationNode> = new Map();
+  private children = new Map<number, ObservationNode>();
 
-  private activeSubscriptions: Set<SubscriptionImpl<any>> = new Set();
+  private activeSubscriptions = new Set<SubscriptionImpl<any>>();
 
   constructor(private domNode?: Node, private observationProperties: ObservationProperties = {}) { }
 

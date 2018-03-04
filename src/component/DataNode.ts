@@ -9,7 +9,7 @@ export class DataNode {
   private idx?: number;
 
   private childSeq = 0;
-  private children: { [idx: number]: DataNode } = {};
+  private children = new Map<number, DataNode>();
 
   constructor(private dataNodeProperties: DataNodeProperties = {}, private component?: Component & IsDataDriven<any>) {
   }
@@ -29,12 +29,13 @@ export class DataNode {
 
     dataNode.idx = ++this.childSeq;
 
-    this.children[dataNode.idx] = dataNode;
+    this.children.set(dataNode.idx, dataNode);
   }
 
   remove(dataNode: DataNode) {
     if (dataNode.idx != null) {
-      delete this.children[dataNode.idx];
+      this.children.delete(dataNode.idx);
+
       delete dataNode.idx;
     }
   }
@@ -44,8 +45,7 @@ export class DataNode {
   }
 
   private getDataRecursive(model) {
-    Object.keys(this.children).forEach(idx => {
-      const childDataNode = this.children[idx] as DataNode;
+    this.children.forEach((childDataNode, idx) => {
       const { name, component } = childDataNode;
 
       if (name && component) {
@@ -63,8 +63,7 @@ export class DataNode {
   }
 
   private setModelRecursive(data) {
-    Object.keys(this.children).forEach(idx => {
-      const childDataNode = this.children[idx] as DataNode;
+    this.children.forEach((childDataNode, idx) => {
       const { name, component } = childDataNode;
 
       if (!name) {
@@ -88,13 +87,11 @@ export class DataNode {
       return this.component.queryById(id);
     }
 
-    for (const idx in this.children) {
-      if (this.children.hasOwnProperty(idx)) {
-        const component = (this.children[idx] as DataNode).getById(id);
+    for (const dataNode of this.children.values()) {
+      const component = dataNode.getById(id);
 
-        if (component) {
-          return component;
-        }
+      if (component) {
+        return component;
       }
     }
   }
@@ -104,13 +101,11 @@ export class DataNode {
       return this.component;
     }
 
-    for (const idx in this.children) {
-      if (this.children.hasOwnProperty(idx)) {
-        const component = (this.children[idx] as DataNode).getByName(name);
+    for (const dataNode of this.children.values()) {
+      const component = dataNode.getByName(name);
 
-        if (component) {
-          return component;
-        }
+      if (component) {
+        return component;
       }
     }
   }
