@@ -21,53 +21,96 @@ export interface Subscriber<P> {
   complete(value?: Message<P>);
 }
 
+export interface Subscription {
+  unsubscribe(): void;
+}
+
 export interface IsObservable<P> {
   [x: string]: ((subscriber: Subscriber<P>) => {
     unsubscribe(): void;
   }) | (() => any);
-  subscribe: (subscriber: Subscriber<P>) => {
-    unsubscribe(): void;
-  };
+  subscribe(subscriber: Subscriber<P>): Subscription;
+}
+
+class SubscriptionImpl<P> implements Subscription {
+  private innerSubscriptions: (() => void)[] = [];
+
+  constructor(private activeSubscriptions: Set<Subscription>, private subscriber: Subscriber<P>, private observerType?: string) {
+    this.activeSubscriptions.add(this);
+  }
+
+  buildSubscription(func: (subscriber: Subscriber<P>, observerType?: string) => (() => void)[]) {
+    this.innerSubscriptions.forEach(subscription => subscription());
+    this.innerSubscriptions = func(this.subscriber, this.observerType);
+  }
+
+  unsubscribe(): void {
+    this.innerSubscriptions.forEach(subscription => subscription());
+    this.activeSubscriptions.delete(this);
+  }
 }
 
 export class ObservationNode {
+  private parent: ObservationNode;
   private idx?: number;
 
   private childSeq = 0;
-  private children: { [idx: number]: ObservationNode } = {};
+  private children: Map<number, ObservationNode> = new Map();
+
+  private activeSubscriptions: Set<SubscriptionImpl<any>> = new Set();
 
   constructor(private domNode?: Node, private observationProperties: ObservationProperties = {}) { }
 
-  append(dataNode: ObservationNode) {
-    if (dataNode.idx != null) {
+  append(child: ObservationNode) {
+    if (child.idx != null) {
       throw new Error('Observation node cannot be appended since it already has a parent.');
     }
 
-    dataNode.idx = ++this.childSeq;
+    child.idx = ++this.childSeq;
+    child.parent = this;
 
-    this.children[dataNode.idx] = dataNode;
+    this.children.set(child.idx, child);
+
+    this.rebuildDependentSubscriptions();
   }
 
-  remove(dataNode: ObservationNode) {
-    if (dataNode.idx != null) {
-      delete this.children[dataNode.idx];
-      delete dataNode.idx;
+  remove(child: ObservationNode) {
+    if (child.idx != null) {
+      this.children.delete(child.idx);
+
+      delete child.idx;
+      delete child.parent;
+
+      this.rebuildDependentSubscriptions();
     }
   }
 
   createObservable<P>(observedType?: EventType): IsObservable<P> {
     return {
-      subscribe: (subscriber: Subscriber<P>) => {
-        const subscriptions = this.collectSubscriptions(subscriber, observedType);
-
-        return {
-          unsubscribe() {
-            subscriptions.forEach(subscription => subscription());
-          }
-        };
-      },
+      subscribe: (subscriber: Subscriber<P>) => this.rebuildSubscription<P>(
+        new SubscriptionImpl(this.activeSubscriptions, subscriber, observedType)
+      ),
       [Symbol_observable]() { return this; }
     };
+  }
+
+  private rebuildSubscription<P>(subscription: SubscriptionImpl<P>) {
+    subscription.buildSubscription((subscriber, observedType) => this.collectSubscriptions(subscriber, observedType));
+
+    return subscription;
+  }
+
+  private rebuildSubscriptions() {
+    this.activeSubscriptions.forEach(subscription => this.rebuildSubscription(subscription));
+  }
+
+  private rebuildDependentSubscriptions() {
+    var observationNode: ObservationNode = this;
+
+    while (observationNode) {
+      observationNode.rebuildSubscriptions();
+      observationNode = observationNode.parent;
+    }
   }
 
   private collectSubscriptions<P>(subscriber: Subscriber<P>, observedType?: EventType): (() => void)[] {
@@ -87,11 +130,11 @@ export class ObservationNode {
       });
     }
 
-    return [].concat.apply(
-      subscriptions,
-      Object.keys(this.children).map(
-        idx => (this.children[idx] as ObservationNode).collectSubscriptions(subscriber, observedType)
-      )
-    );
+    const buffer: (() => void)[][] = [];
+
+    this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType)));
+
+    const array = [].concat.apply(subscriptions, buffer);
+    return array;
   }
 }

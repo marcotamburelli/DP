@@ -126,4 +126,33 @@ describe('Checking scoped component', () => {
     component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_1').domNode.click();
     component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_2').domNode.click();
   });
+
+  it('Check observer when modifying structure', (done) => {
+    var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
+      'div', null,
+      XLib.define('button', { id: 'button_1', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
+    );
+
+    var observable = Observable.from(component.createObservable<string>('EVENT'));
+
+    var subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toBe('PAYLOAD_2');
+
+      subscription.unsubscribe();
+      done();
+    });
+
+    const child1 = component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_1');
+    var child2 = XLib.define<XLib.ControlComponent<any, HTMLButtonElement>>(
+      'button',
+      { id: 'button_2', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } }
+    );
+
+    component.remove(child1);
+    component.append(child2);
+
+    child1.domNode.click();
+    child2.domNode.click();
+  });
+
 });
