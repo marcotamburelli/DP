@@ -70,14 +70,6 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
   }
 
   queryById<C extends Component>(id: string) {
-    for (const child of this.children) {
-      if (child instanceof BaseComponent) {
-        const component = ListContainer.getDataNode(child).getById(id);
-
-        if (component) {
-          return component as C;
-        }
-      }
-    }
+    return this.dataNode.getById(id) as C;
   }
 }

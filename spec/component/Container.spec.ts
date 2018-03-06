@@ -73,4 +73,19 @@ describe('Scoped component', () => {
     expect(container.getData()).toEqual({});
   });
 
+  it('Check query by id of missing element', () => {
+    const element = document.createElement('div');
+    const childElement = document.createElement('div');
+
+    const container = new Container(element);
+    const childContainer = new Container(childElement, { name: 'obj' });
+
+    container.append(childContainer);
+
+    childContainer.append(propertiesGenerator('name_1', '1'));
+    childContainer.append(propertiesGenerator('name_2', '2'));
+
+    expect(container.queryById('')).toBeUndefined();
+  });
+
 });

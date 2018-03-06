@@ -33,10 +33,11 @@ namespace DomFactory {
 
 export namespace Builder {
   function createContainer(tag: HTML, properties: Properties) {
-    var element = DomFactory.createElement(tag, properties);
-    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
-
-    return new Container(element, dataNodeProperties);
+    return new Container(
+      DomFactory.createElement(tag, properties),
+      PropertiesUtil.getDataNodeProperties(properties),
+      PropertiesUtil.getObservationProperties(properties)
+    );
   }
 
   function createHtmlComponent(tag: HTML, properties: Properties) {

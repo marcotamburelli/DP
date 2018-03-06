@@ -83,10 +83,6 @@ export class DataNode {
       return this.component;
     }
 
-    if (this.component && this.component.queryById) {
-      return this.component.queryById(id);
-    }
-
     for (const dataNode of this.children.values()) {
       const component = dataNode.getById(id);
 

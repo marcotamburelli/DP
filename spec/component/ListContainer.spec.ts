@@ -80,7 +80,6 @@ describe('Checking Array', () => {
     expect(root.queryById<HtmlElementComponent<string>>('1')).toBe(child2);
   });
 
-
   it('Checking model', () => {
     const div = document.createElement('div');
 
