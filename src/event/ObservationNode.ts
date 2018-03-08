@@ -1,36 +1,6 @@
 import Symbol_observable from 'symbol-observable';
 
-export type EventType = string;
-
-export interface ObservationProperties {
-  [domEvent: string]: {
-    eventType: EventType;
-
-    emitter(e: Event): any;
-  };
-}
-
-export interface Message<P> {
-  eventType: string;
-  payload: P;
-}
-
-export interface Subscriber<P> {
-  next(value: Message<P>);
-  error(err: Error);
-  complete(value?: Message<P>);
-}
-
-export interface Subscription {
-  unsubscribe(): void;
-}
-
-export interface IsObservable<P> {
-  [x: string]: ((subscriber: Subscriber<P>) => {
-    unsubscribe(): void;
-  }) | (() => any);
-  subscribe(subscriber: Subscriber<P>): Subscription;
-}
+import { EventType, IsObservable, ObservationProperties, Subscriber, Subscription } from './types';
 
 class SubscriptionImpl<P> implements Subscription {
   private innerSubscriptions: (() => void)[] = [];

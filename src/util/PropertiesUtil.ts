@@ -1,6 +1,6 @@
 import { DataNodeProperties } from '../component/DataNode';
 import { ComponentGenerator } from '../component/ListContainer';
-import { ObservationProperties } from '../event/ObservationNode';
+import { ObservationProperties } from '../event/types';
 import { DATA_NODE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './const';
 import { Properties } from './types';
 

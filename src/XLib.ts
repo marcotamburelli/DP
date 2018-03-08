@@ -3,6 +3,8 @@ import { BaseComponent, DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
 import { ListContainer as ExtListContainer } from './component/ListContainer';
 import { TextComponent as ExtTextComponent } from './component/TextComponent';
+import { Listener } from './event/listener';
+import { GenericObservable, Message } from './event/types';
 import { Properties } from './util/types';
 
 export namespace XLib {
@@ -31,5 +33,9 @@ export namespace XLib {
     children.forEach(child => Builder.appendChildDef(component, child));
 
     return component as C;
+  }
+
+  export function listen<P>(stream: GenericObservable<Message<P>>) {
+    return Listener.create(stream);
   }
 }

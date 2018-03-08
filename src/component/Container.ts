@@ -1,4 +1,4 @@
-import { ObservationProperties } from '../event/ObservationNode';
+import { ObservationProperties } from '../event/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { Component, IsContainer } from './Components';
 import { DataNodeProperties } from './DataNode';

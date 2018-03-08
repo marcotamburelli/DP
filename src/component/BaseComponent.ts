@@ -1,4 +1,5 @@
-import { EventType, IsObservable, ObservationNode, ObservationProperties } from '../event/ObservationNode';
+import { ObservationNode } from '../event/ObservationNode';
+import { EventType, IsObservable, ObservationProperties } from '../event/types';
 import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
