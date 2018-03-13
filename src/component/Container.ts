@@ -22,7 +22,7 @@ export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, 
   }
 
   queryByName<C extends Component>(name: string) {
-    return this.dataNode.getByName(name) as C;
+    return this.dataNode.getByName(name) as C[];
   }
 
   queryById<C extends Component>(id: string) {

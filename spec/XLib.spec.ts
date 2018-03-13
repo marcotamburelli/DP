@@ -53,6 +53,10 @@ describe('Checking scoped component', () => {
     name: string;
   }
 
+  interface RadioModel {
+    age: number;
+  }
+
   it('Check model', () => {
     var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
       'div', null,
@@ -62,8 +66,8 @@ describe('Checking scoped component', () => {
 
     component.setData({ name: 'test', age: 123 });
 
-    var nameInput = component.queryByName<XLib.Container<string, HTMLInputElement>>('name').domNode;
-    var ageInput = component.queryByName<XLib.Container<number, HTMLInputElement>>('age').domNode;
+    var nameInput = component.queryByName<XLib.Container<string, HTMLInputElement>>('name')[0].domNode;
+    var ageInput = component.queryByName<XLib.Container<number, HTMLInputElement>>('age')[0].domNode;
 
     expect(nameInput.value).toBe('test');
     expect(ageInput.value).toBe('123');
@@ -72,6 +76,26 @@ describe('Checking scoped component', () => {
     ageInput.value = '456';
 
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
+  });
+
+  it('Check radio group', () => {
+    var component: XLib.Container<RadioModel, HTMLDivElement> = XLib.define(
+      'div', null,
+      XLib.define('input', { 'name': 'age', 'value': 10, 'type': 'RADIO', 'value-type': 'number', 'id': '10' }),
+      XLib.define('input', { 'name': 'age', 'value': 20, 'type': 'RADIO', 'value-type': 'number', 'id': '20' })
+    );
+
+    component.setData({ age: 20 });
+
+    var radio10 = component.queryById<XLib.Container<string, HTMLInputElement>>('10').domNode;
+    var radio20 = component.queryById<XLib.Container<number, HTMLInputElement>>('20').domNode;
+
+    expect(radio10.checked).toBe(false);
+    expect(radio20.checked).toBe(true);
+
+    radio10.checked = true;
+
+    expect(component.getData()).toEqual({ age: 10 });
   });
 
   it('Check select with array', () => {
@@ -90,8 +114,8 @@ describe('Checking scoped component', () => {
     component.queryById<XLib.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
     component.setData({ name: 'text_name', type: 'a' });
 
-    var typeSelect = component.queryByName<XLib.ControlComponent<string, HTMLSelectElement>>('type').domNode;
-    var nameInput = component.queryByName<XLib.ControlComponent<string, HTMLInputElement>>('name').domNode;
+    var typeSelect = component.queryByName<XLib.ControlComponent<string, HTMLSelectElement>>('type')[0].domNode;
+    var nameInput = component.queryByName<XLib.ControlComponent<string, HTMLInputElement>>('name')[0].domNode;
 
     expect(typeSelect.value).toBe('a');
     expect(nameInput.value).toBe('text_name');

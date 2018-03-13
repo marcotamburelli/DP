@@ -45,11 +45,13 @@ export class DataNode {
   }
 
   private getDataRecursive(model) {
-    this.children.forEach((childDataNode, idx) => {
+    this.children.forEach((childDataNode) => {
       const { name, component } = childDataNode;
 
       if (name && component) {
-        model[name] = component.getData();
+        if (model[name] == null) {
+          model[name] = component.getData();
+        }
       } else {
         childDataNode.getDataRecursive(model);
       }
@@ -59,19 +61,19 @@ export class DataNode {
   }
 
   setData<D>(data: D) {
-    this.setModelRecursive(data);
+    this.setDataRecursive(data);
   }
 
-  private setModelRecursive(data) {
-    this.children.forEach((childDataNode, idx) => {
+  private setDataRecursive(data) {
+    this.children.forEach((childDataNode) => {
       const { name, component } = childDataNode;
 
       if (!name) {
-        return childDataNode.setModelRecursive(data);
+        return childDataNode.setDataRecursive(data);
       }
 
       if (!component) {
-        return childDataNode.setModelRecursive(data[name]);
+        return childDataNode.setDataRecursive(data[name]);
       }
 
       component.setData(data[name]);
@@ -94,15 +96,19 @@ export class DataNode {
 
   getByName(name: string) {
     if (this.name === name) {
-      return this.component;
+      return [this.component];
     }
+
+    var components = [];
 
     for (const dataNode of this.children.values()) {
-      const component = dataNode.getByName(name);
+      const componentsByName = dataNode.getByName(name);
 
-      if (component) {
-        return component;
+      if (componentsByName) {
+        components = components.concat(componentsByName);
       }
     }
+
+    return components;
   }
 }

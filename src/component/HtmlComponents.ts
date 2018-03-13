@@ -132,3 +132,32 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
     }
   }
 }
+
+export class RadioInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement>  {
+  constructor(
+    element: HTMLInputElement,
+    properties: DataNodeProperties = {},
+    observationProperties?: ObservationProperties,
+    private transformer?: (value: string) => D
+  ) {
+    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
+  }
+
+  setData(data: D) {
+    if (this.dataNode.name) {
+      const radioInput = this.domWrapper.domElement;
+
+      radioInput.checked = (radioInput.value === stringValue(data));
+    }
+  }
+
+  getData() {
+    if (this.dataNode.name && this.transformer) {
+      const radioInput = this.domWrapper.domElement;
+
+      if (radioInput.checked) {
+        return this.transformer(radioInput.value);
+      }
+    }
+  }
+}

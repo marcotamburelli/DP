@@ -3,6 +3,7 @@ import { Container } from './component/Container';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
+  RadioInputComponent,
   SelectComponent,
   TextInputComponent
 } from './component/HtmlComponents';
@@ -50,13 +51,21 @@ export namespace Builder {
   }
 
   function createInputComponent(properties: Properties) {
-    var element = DomFactory.createElement<HTMLInputElement>('input', properties);
-    var dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
-    var observationProperties = PropertiesUtil.getObservationProperties(properties);
+    const element = DomFactory.createElement<HTMLInputElement>('input', properties);
+    const dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
+    const observationProperties = PropertiesUtil.getObservationProperties(properties);
 
-    switch (properties[NATIVE_PROPERTIES.TYPE]) {
+    switch ((properties[NATIVE_PROPERTIES.TYPE] || '').toLowerCase()) {
       case 'checkbox':
         return new CheckBoxInputComponent(element, dataNodeProperties, observationProperties);
+
+      case 'radio':
+        return new RadioInputComponent<string | number>(
+          element,
+          dataNodeProperties,
+          observationProperties,
+          PropertiesUtil.getTransformer(properties)
+        );
 
       default:
         return new TextInputComponent<string | number>(
@@ -77,6 +86,16 @@ export namespace Builder {
     );
   }
 
+  function normalizeProperties(properties: Properties) {
+    const normalizedProperties: Properties = {};
+
+    Object.keys(properties).forEach(key => {
+      normalizedProperties[key.toLowerCase()] = properties[key];
+    });
+
+    return normalizedProperties;
+  }
+
   export function appendChildDef(parent: DomBasedComponent, child: ChildDef) {
     if (Array.isArray(child)) {
       child.forEach(c => {
@@ -92,13 +111,15 @@ export namespace Builder {
   }
 
   export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {
+    const normalizedProperties: Properties = normalizeProperties(properties);
+
     switch (tag) {
       case NODES.DIV:
       case NODES.UL:
       case NODES.OL:
       case NODES.LI:
       case NODES.FORM:
-        return (hasChildren ? createContainer : createHtmlComponent)(tag, properties);
+        return (hasChildren ? createContainer : createHtmlComponent)(tag, normalizedProperties);
 
       case NODES.LABEL:
       case NODES.OPTION:
@@ -114,13 +135,13 @@ export namespace Builder {
       case NODES.H5:
       case NODES.H6:
       case NODES.BR:
-        return createHtmlComponent(tag, properties);
+        return createHtmlComponent(tag, normalizedProperties);
 
       case NODES.INPUT:
-        return createInputComponent(properties);
+        return createInputComponent(normalizedProperties);
 
       case NODES.SELECT:
-        return createSelectComponent(properties);
+        return createSelectComponent(normalizedProperties);
     }
 
     throw new Error(`'${tag}' not supported`);

@@ -10,7 +10,7 @@ export interface Component {
 }
 
 export interface IsContainer {
-  queryByName<C extends Component>(name: string): C;
+  queryByName<C extends Component>(name: string): C[];
 
   queryById<C extends Component>(id: string): C;
 }

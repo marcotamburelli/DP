@@ -1,9 +1,8 @@
 import { JSDOM } from 'jsdom';
 
 import { Container } from '../../src/component/Container';
-import { HtmlElementComponent } from '../../src/component/HtmlComponents';
+import { HtmlElementComponent, RadioInputComponent } from '../../src/component/HtmlComponents';
 
-// import { ScopeProperties } from '../../src/component/BaseComponent';
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
 // tslint:disable-next-line:no-string-literal
@@ -17,7 +16,16 @@ describe('Scoped component', () => {
     return new HtmlElementComponent(controlElement, { id, name }, {}, (value) => value);
   }
 
-  it('Check simple properties', () => {
+  function radioElement(name: string, value: string) {
+    const radioInput = document.createElement('input');
+    radioInput.type = 'radio';
+    radioInput.value = value;
+    radioInput.name = name;
+
+    return new RadioInputComponent(radioInput, { name }, {}, (value) => value);
+  }
+
+  it('Check radio button', () => {
     const element = document.createElement('div');
     const container = new Container(element, { name: 'test' });
 
@@ -34,6 +42,26 @@ describe('Scoped component', () => {
     container.remove(control2);
 
     expect(container.getData()).toEqual({ 'name_1': 'value_1' });
+  });
+
+  it('Check simple properties', () => {
+    const element = document.createElement('div');
+    const container = new Container(element, { name: 'test' });
+
+    const control1 = radioElement('name', 'val_1');
+    const control2 = radioElement('name', 'val_2');
+
+    container.append(control1);
+    container.append(control2);
+
+    container.setData({ name: 'val_1' });
+
+    expect(control1.domNode.checked).toBe(true);
+    expect(control2.domNode.checked).toBe(false);
+
+    control2.domNode.checked = true;
+
+    expect(container.getData()).toEqual({ name: 'val_2' });
   });
 
   it('Check empty data', () => {

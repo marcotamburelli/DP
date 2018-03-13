@@ -54,10 +54,9 @@ export namespace PropertiesUtil {
 
     Object.keys(properties).forEach(prop => {
       const propValue = properties[prop];
-      const propKey = prop.toLowerCase();
 
-      if (propKey.startsWith('on') && typeof propValue === 'object') {
-        observationProperties[propKey.substr(2)] = { ...propValue };
+      if (prop.startsWith('on') && typeof propValue === 'object') {
+        observationProperties[prop.substr(2)] = { ...propValue };
       }
     });
 

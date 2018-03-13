@@ -1,3 +1,4 @@
+import { NATIVE_PROPERTIES } from './const';
 import { Properties } from './types';
 
 export namespace NativeUtil {
@@ -42,12 +43,20 @@ export namespace NativeUtil {
   }
 
   export function applyProperties(element: HTMLElement, properties: Properties) {
-    Object.keys(properties).forEach(prop => {
-      const propValue = properties[prop];
-      const propKey = prop.toLowerCase();
+    /* The 'type' is better to set before others */
+    if (properties[NATIVE_PROPERTIES.TYPE]) {
+      element[NATIVE_PROPERTIES.TYPE] = properties[NATIVE_PROPERTIES.TYPE];
+    }
 
-      if (propKey.startsWith('on') && typeof propValue === 'function') {
-        element.addEventListener(propKey.substr(2), propValue);
+    Object.keys(properties).forEach(prop => {
+      if (prop === NATIVE_PROPERTIES.TYPE) {
+        return;
+      }
+
+      const propValue = properties[prop];
+
+      if (prop.startsWith('on') && typeof propValue === 'function') {
+        element.addEventListener(prop.substr(2), propValue);
       } else {
         element[prop] = propValue;
       }
