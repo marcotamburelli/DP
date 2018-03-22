@@ -1,4 +1,4 @@
-import { BaseComponent, ChildComponent, DomBasedComponent } from './component/BaseComponent';
+import { DomBasedComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
 import {
   CheckBoxInputComponent,
@@ -14,7 +14,6 @@ import { NativeUtil } from './util/NativeUtil';
 import { PropertiesUtil } from './util/PropertiesUtil';
 import { HTML, Properties } from './util/types';
 
-export type ChildDef = (ChildComponent | DomBasedComponent[]);
 export type Definition = HTML | ((props: Properties) => DomBasedComponent) | DomBasedComponent;
 
 namespace DomFactory {
@@ -94,20 +93,6 @@ export namespace Builder {
     });
 
     return normalizedProperties;
-  }
-
-  export function appendChildDef(parent: DomBasedComponent, child: ChildDef) {
-    if (Array.isArray(child)) {
-      child.forEach(c => {
-        if (!(c instanceof BaseComponent)) {
-          throw new Error('Invalid element to append');
-        }
-
-        parent.append(c);
-      });
-    } else {
-      parent.append(child);
-    }
   }
 
   export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {

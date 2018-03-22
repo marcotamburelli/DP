@@ -1,12 +1,11 @@
+import { EventType, IsObservable } from '../event/types';
 
 export interface Component {
-  readonly parent: Component;
+  append(child);
 
-  queryByName?<C extends Component>(name: string): C;
+  remove(child: Component);
 
-  queryByIdx?<C extends Component>(idx: number): C;
-
-  queryById?<C extends Component>(id: string): C;
+  createObservable<P>(observedEvent?: EventType): IsObservable<P>;
 }
 
 export interface IsContainer {
@@ -15,10 +14,8 @@ export interface IsContainer {
   queryById<C extends Component>(id: string): C;
 }
 
-export interface IsList {
+export interface IsList extends IsContainer {
   queryByIdx<C extends Component>(idx: number): C;
-
-  queryById<C extends Component>(id: string): C;
 }
 
 export interface IsDataDriven<D> {

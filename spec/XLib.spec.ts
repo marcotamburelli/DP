@@ -23,6 +23,19 @@ describe('Checking single model', () => {
     expect(div.domNode.textContent).toBe('123');
   });
 
+  it('Checking html', () => {
+    var div: XLib.ControlComponent<number, HTMLDivElement> = XLib.define(
+      'div', { 'name': 'val', 'value-type': 'number' },
+      321
+    );
+
+    expect(div.getData()).toBe(321);
+
+    div.setData(123);
+
+    expect(div.domNode.textContent).toBe('123');
+  });
+
   it('Checking input', () => {
     var input: XLib.ControlComponent<number, HTMLInputElement> = XLib.define(
       'input',

@@ -4,11 +4,10 @@ import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './DomWrappers';
 
-export type ChildComponent = BaseComponent<Node> | string;
 export type DomBasedComponent = BaseComponent<Node>;
 
 export abstract class BaseComponent<N extends Node> implements Component {
-  protected parentDomComponent: DomBasedComponent;
+  protected parent: DomBasedComponent;
 
   protected abstract readonly dataNode: DataNode;
   protected readonly observationNode: ObservationNode;
@@ -24,32 +23,32 @@ export abstract class BaseComponent<N extends Node> implements Component {
     this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties);
   }
 
-  get parent() {
-    return this.parentDomComponent;
-  }
-
-  append(child: ChildComponent) {
+  append(child: any) {
     if (child instanceof BaseComponent) {
-      if (child.parentDomComponent) {
+      if (child.parent) {
         throw new Error('Element already appended');
       }
 
-      child.parentDomComponent = this;
+      child.parent = this;
 
       this.dataNode.append(child.dataNode);
       this.observationNode.append(child.observationNode);
       this.domWrapper.appendChild(child.domWrapper);
     } else {
-      this.domWrapper.appendChild(child);
+      this.domWrapper.appendChild(`${child}`);
     }
   }
 
-  remove(child: DomBasedComponent) {
+  remove(child: Component) {
+    if (!(child instanceof BaseComponent)) {
+      return;
+    }
+
     if (child.parent !== this) {
       throw new Error('Impossible to detach a not child component');
     }
 
-    delete child.parentDomComponent;
+    delete child.parent;
 
     this.dataNode.remove(child.dataNode);
     this.observationNode.remove(child.observationNode);

@@ -1,4 +1,4 @@
-import { BaseComponent, ChildComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
+import { BaseComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
 import { Component, IsDataDriven, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './DomWrappers';
@@ -14,7 +14,7 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
     this.children = [];
   }
 
-  append(child: ChildComponent) {
+  append(child: any) {
     super.append(child);
 
     if (child instanceof BaseComponent) {
@@ -67,6 +67,10 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
 
   queryByIdx<C extends Component>(idx: number) {
     return this.children[idx] as C;
+  }
+
+  queryByName<C extends Component>(name: string): C[] {
+    return this.dataNode.getByName(name);
   }
 
   queryById<C extends Component>(id: string) {

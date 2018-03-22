@@ -1,4 +1,4 @@
-import { Builder, ChildDef, Definition } from './Builder';
+import { Builder, Definition } from './Builder';
 import { BaseComponent, DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
 import { ListContainer as ExtListContainer } from './component/ListContainer';
@@ -21,16 +21,16 @@ export namespace XLib {
     return Builder.createText(props) as TextComponent;
   }
 
-  export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: ChildDef[]) {
+  export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]) {
     if (typeof definition === 'function') {
       var component = definition(properties || {});
     } else if (definition instanceof BaseComponent) {
       component = definition;
     } else {
-      component = Builder.createComponent(definition, properties || {}, children.some(child => typeof child !== 'string'));
+      component = Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent));
     }
 
-    children.forEach(child => Builder.appendChildDef(component, child));
+    children.forEach(child => component.append(child));
 
     return component as C;
   }
