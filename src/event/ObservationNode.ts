@@ -29,7 +29,7 @@ export class ObservationNode {
 
   private activeSubscriptions = new Set<SubscriptionImpl<any>>();
 
-  constructor(private domNode?: Node, private observationProperties: ObservationProperties = {}) { }
+  constructor(private domNode?: Node, private observationProperties: ObservationProperties = {}, private defaultEmitter?: () => any) { }
 
   append(child: ObservationNode) {
     if (child.idx != null) {
@@ -83,7 +83,11 @@ export class ObservationNode {
     }
   }
 
-  private collectSubscriptions<P>(subscriber: Subscriber<P>, observedType?: EventType): (() => void)[] {
+  private collectSubscriptions<P>(
+    subscriber: Subscriber<P>,
+    observedType: EventType,
+    defaultEmitter = this.defaultEmitter
+  ): (() => void)[] {
     var subscriptions: (() => void)[] = [];
 
     if (this.domNode) {
@@ -91,7 +95,10 @@ export class ObservationNode {
         const { emitter, eventType } = this.observationProperties[domEvent];
 
         if (observedType == null || observedType === eventType) {
-          const handler = (e: Event) => subscriber.next({ eventType, payload: emitter(e) as P });
+          const handler = (e: Event) => subscriber.next({
+            eventType,
+            payload: (emitter || defaultEmitter || (() => null))(e) as P
+          });
 
           this.domNode.addEventListener(domEvent, handler);
 
@@ -102,7 +109,7 @@ export class ObservationNode {
 
     const buffer: (() => void)[][] = [];
 
-    this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType)));
+    this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType, defaultEmitter)));
 
     const array = [].concat.apply(subscriptions, buffer);
     return array;

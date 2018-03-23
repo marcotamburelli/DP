@@ -10,17 +10,13 @@ export abstract class BaseComponent<N extends Node> implements Component {
   protected parent: DomBasedComponent;
 
   protected abstract readonly dataNode: DataNode;
-  protected readonly observationNode: ObservationNode;
+  protected abstract readonly observationNode: ObservationNode;
 
   protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
     return component.dataNode;
   }
 
-  protected constructor(
-    protected domWrapper: DomWrapper<N>,
-    protected observationProperties: ObservationProperties = {}
-  ) {
-    this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties);
+  protected constructor(protected domWrapper: DomWrapper<N>) {
   }
 
   append(child: any) {
@@ -66,16 +62,18 @@ export abstract class BaseComponent<N extends Node> implements Component {
 }
 
 export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
-  protected dataNode: DataNode;
+  protected readonly dataNode: DataNode;
+  protected readonly observationNode: ObservationNode;
 
   protected constructor(
     domWrapper: DomWrapper<N>,
     dataNodeProps: DataNodeProperties = {},
     observationProperties: ObservationProperties = {}
   ) {
-    super(domWrapper, observationProperties);
+    super(domWrapper);
 
     this.dataNode = new DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);
+    this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties, () => this.getData());
   }
 
   abstract getData(): D;

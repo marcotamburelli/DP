@@ -142,8 +142,8 @@ describe('Checking scoped component', () => {
   it('Check observer', (done) => {
     var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
       'div', null,
-      XLib.define('button', { id: 'button_1', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
-      XLib.define('button', { id: 'button_2', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
+      XLib.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
+      XLib.define('button', { id: 'button_2', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
     );
 
     var observable = Observable.from(component.createObservable<string>('EVENT'));
@@ -167,7 +167,7 @@ describe('Checking scoped component', () => {
   it('Check observer when modifying structure', (done) => {
     var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
       'div', null,
-      XLib.define('button', { id: 'button_1', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
+      XLib.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
     );
 
     var observable = Observable.from(component.createObservable<string>('EVENT'));
@@ -182,7 +182,7 @@ describe('Checking scoped component', () => {
     const child1 = component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button_1');
     var child2 = XLib.define<XLib.ControlComponent<any, HTMLButtonElement>>(
       'button',
-      { id: 'button_2', 'onclick': { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } }
+      { id: 'button_2', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } }
     );
 
     component.remove(child1);
@@ -190,6 +190,29 @@ describe('Checking scoped component', () => {
 
     child1.domNode.click();
     child2.domNode.click();
+  });
+
+  it('Check model payload', (done) => {
+    var component: XLib.Container<TestModel, HTMLDivElement> = XLib.define(
+      'div', null,
+      XLib.define('input', { 'name': 'name', 'value-type': 'string' }),
+      XLib.define('input', { 'name': 'age', 'value-type': 'number' }),
+      XLib.define<XLib.ControlComponent<any, HTMLButtonElement>>(
+        'button',
+        { id: 'button', onclick: { eventType: 'EVENT' } }
+      )
+    );
+
+    component.setData({ name: 'test', age: 123 });
+
+    var observable = Observable.from(component.createObservable<string>('EVENT'));
+
+    var subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123 });
+      done();
+    });
+
+    component.queryById<XLib.ControlComponent<any, HTMLButtonElement>>('button').domNode.click();
   });
 
 });
