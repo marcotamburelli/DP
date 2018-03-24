@@ -2,14 +2,13 @@ var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
-var babel = require('babelify');
 var tsify = require('tsify');
 var uglify = require('gulp-uglify');
 
 function createBundle() {
   return browserify('./src/dp.ts', { standalone: "dp" })
     .plugin(tsify, { target: 'es6' })
-    .transform(babel, { presets: ["es2015"], extensions: ['.ts'] })
+    .transform('babelify', { presets: ["env"], extensions: ['.ts'] })
     .bundle();
 }
 
