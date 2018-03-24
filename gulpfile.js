@@ -7,7 +7,7 @@ var tsify = require('tsify');
 var uglify = require('gulp-uglify');
 
 function createBundle() {
-  return browserify('./src/XLib.ts', { standalone: "XLib" })
+  return browserify('./src/dp.ts', { standalone: "dp" })
     .plugin(tsify, { target: 'es6' })
     .transform(babel, { presets: ["es2015"], extensions: ['.ts'] })
     .bundle();
@@ -15,14 +15,14 @@ function createBundle() {
 
 gulp.task('build', function () {
   return createBundle()
-    .pipe(source('xlib.js'))
+    .pipe(source('dp.js'))
     .pipe(buffer())
     .pipe(gulp.dest('./bundle'));
 });
 
 gulp.task('min', function () {
   return createBundle()
-    .pipe(source('xlib.min.js'))
+    .pipe(source('dp.min.js'))
     .pipe(buffer())
     .pipe(uglify())
     .pipe(gulp.dest('./bundle'));

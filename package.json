@@ -1,10 +1,10 @@
 {
-  "name": "hello",
+  "name": "dp",
   "version": "0.0.0",
   "author": "Marco Tamburelli",
   "description": "",
-  "main": "dist/XLib.js",
-  "typings": "dist/XLib.d.ts",
+  "main": "dist/dp.js",
+  "typings": "dist/dp.d.ts",
   "scripts": {
     "bundle": "gulp bundle",
     "build": "tsc --project tsconfig.dist.json",
