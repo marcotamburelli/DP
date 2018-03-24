@@ -10,8 +10,7 @@
     "build": "tsc --project tsconfig.dist.json",
     "build:test": "tsc --project tsconfig.test.json",
     "test:debug": "npm run build:test && node --inspect --debug-brk node_modules/jasmine/bin/jasmine.js \"./test/spec/**/*.spec.js\"",
-    "test": "npm run build:test && jasmine \"./test/spec/**/*.spec.js\"",
-    "prepublish": "npm run build && npm run bundle"
+    "test": "npm run build:test && jasmine \"./test/spec/**/*.spec.js\""
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.6",
