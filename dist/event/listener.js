@@ -9,7 +9,7 @@ class Listener {
             next: ({ eventType, payload }) => {
                 const processingFunc = this.consumer.get(eventType);
                 if (processingFunc) {
-                    this.childListeners.forEach(listener => listener && listener.dispose());
+                    this.childListeners.forEach(childListener => childListener && childListener.dispose());
                     const listener = processingFunc(payload);
                     (listener instanceof Listener) && this.childListeners.set(processingFunc, listener);
                 }

@@ -29,34 +29,8 @@ class DataNode {
     getData() {
         return this.getDataRecursive({});
     }
-    getDataRecursive(model) {
-        this.children.forEach((childDataNode) => {
-            const { name, component } = childDataNode;
-            if (name && component) {
-                if (model[name] == null) {
-                    model[name] = component.getData();
-                }
-            }
-            else {
-                childDataNode.getDataRecursive(model);
-            }
-        });
-        return model;
-    }
     setData(data) {
         this.setDataRecursive(data);
-    }
-    setDataRecursive(data) {
-        this.children.forEach((childDataNode) => {
-            const { name, component } = childDataNode;
-            if (!name) {
-                return childDataNode.setDataRecursive(data);
-            }
-            if (!component) {
-                return childDataNode.setDataRecursive(data[name]);
-            }
-            component.setData(data[name]);
-        });
     }
     getById(id) {
         if (this.id === id) {
@@ -81,6 +55,32 @@ class DataNode {
             }
         }
         return components;
+    }
+    getDataRecursive(model) {
+        this.children.forEach((childDataNode) => {
+            const { name, component } = childDataNode;
+            if (name && component) {
+                if (model[name] == null) {
+                    model[name] = component.getData();
+                }
+            }
+            else {
+                childDataNode.getDataRecursive(model);
+            }
+        });
+        return model;
+    }
+    setDataRecursive(data) {
+        this.children.forEach((childDataNode) => {
+            const { name, component } = childDataNode;
+            if (!name) {
+                return childDataNode.setDataRecursive(data);
+            }
+            if (!component) {
+                return childDataNode.setDataRecursive(data[name]);
+            }
+            component.setData(data[name]);
+        });
     }
 }
 exports.DataNode = DataNode;

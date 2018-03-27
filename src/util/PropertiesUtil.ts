@@ -5,15 +5,15 @@ import { DATA_NODE_PROPERTIES, SPECIFIC_PROPERTIES, STYLE_PROPERTIES } from './c
 import { Properties } from './types';
 
 export namespace PropertiesUtil {
-  export function getDataNodeProperties(properties: Properties) {
+  export function getDataNodeProperties(properties: Properties): DataNodeProperties {
     return {
       id: properties[DATA_NODE_PROPERTIES.ID],
       name: properties[DATA_NODE_PROPERTIES.NAME]
-    } as DataNodeProperties;
+    };
   }
 
   export function getTransformer(properties: Properties) {
-    var type = properties[SPECIFIC_PROPERTIES.VALUE_TYPE];
+    const type = properties[SPECIFIC_PROPERTIES.VALUE_TYPE];
 
     switch (type) {
       case 'number': return (value: string) => parseInt(value);
@@ -23,7 +23,7 @@ export namespace PropertiesUtil {
   }
 
   export function getGenerator<M>(properties: Properties): ComponentGenerator<M> {
-    var generator = properties[SPECIFIC_PROPERTIES.GENERATOR];
+    const generator = properties[SPECIFIC_PROPERTIES.GENERATOR];
 
     if (typeof generator === 'function') {
       return generator;
@@ -38,7 +38,7 @@ export namespace PropertiesUtil {
   }
 
   export function getNativeProperties(properties: Properties) {
-    var nativeProps = { ...properties } as Properties;
+    const nativeProps: Properties = { ...properties };
 
     delete nativeProps[DATA_NODE_PROPERTIES.ID];
     delete nativeProps[SPECIFIC_PROPERTIES.VALUE_TYPE];
@@ -50,7 +50,7 @@ export namespace PropertiesUtil {
   }
 
   export function getObservationProperties(properties: Properties) {
-    const observationProperties = {} as ObservationProperties;
+    const observationProperties: ObservationProperties = {};
 
     Object.keys(properties).forEach(prop => {
       const propValue = properties[prop];

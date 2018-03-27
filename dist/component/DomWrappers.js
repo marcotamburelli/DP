@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-;
 var DomWrappers;
 (function (DomWrappers) {
     function simple(element) {
@@ -15,8 +14,8 @@ var DomWrappers;
         return new ArrayWrapper();
     }
     DomWrappers.array = array;
-    function text(text = '') {
-        return new TextWrapper(document.createTextNode(text));
+    function text(str = '') {
+        return new TextWrapper(document.createTextNode(str));
     }
     DomWrappers.text = text;
     class SimpleDomWrapper {
@@ -36,7 +35,7 @@ var DomWrappers;
         provideParent(parent) {
         }
         detach() {
-            var domParent = this.domElement.parentNode;
+            const domParent = this.domElement.parentNode;
             domParent && domParent.removeChild(this.domElement);
         }
         registerDomId(namespace, id) {
@@ -106,7 +105,7 @@ var DomWrappers;
         provideParent(parent) {
         }
         detach() {
-            var domParent = this.domElement.parentNode;
+            const domParent = this.domElement.parentNode;
             domParent && domParent.removeChild(this.domElement);
         }
         registerDomId(namespace, id) {

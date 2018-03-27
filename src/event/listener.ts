@@ -3,13 +3,13 @@ import { GenericObservable, Message, Subscription } from './types';
 export type ProcessingFunction<P> = (payload: P) => (Listener<P> | void);
 
 export class Listener<P> {
-  private subscription: Subscription;
-  private childListeners = new Map<ProcessingFunction<any>, Listener<any>>();
-  private consumer = new Map<string, ProcessingFunction<P>>();
-
   static create<P>(stream: GenericObservable<Message<P>>) {
     return new Listener<P>(stream);
   }
+
+  private subscription: Subscription;
+  private childListeners = new Map<ProcessingFunction<any>, Listener<any>>();
+  private consumer = new Map<string, ProcessingFunction<P>>();
 
   private constructor(private stream: GenericObservable<Message<P>>) {
     this.subscription = stream.subscribe({
@@ -17,7 +17,7 @@ export class Listener<P> {
         const processingFunc = this.consumer.get(eventType);
 
         if (processingFunc) {
-          this.childListeners.forEach(listener => listener && listener.dispose());
+          this.childListeners.forEach(childListener => childListener && childListener.dispose());
 
           const listener = processingFunc(payload);
 

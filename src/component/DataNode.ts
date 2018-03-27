@@ -41,43 +41,11 @@ export class DataNode {
   }
 
   getData<D>() {
-    return this.getDataRecursive({} as D);
-  }
-
-  private getDataRecursive(model) {
-    this.children.forEach((childDataNode) => {
-      const { name, component } = childDataNode;
-
-      if (name && component) {
-        if (model[name] == null) {
-          model[name] = component.getData();
-        }
-      } else {
-        childDataNode.getDataRecursive(model);
-      }
-    });
-
-    return model;
+    return this.getDataRecursive({});
   }
 
   setData<D>(data: D) {
     this.setDataRecursive(data);
-  }
-
-  private setDataRecursive(data) {
-    this.children.forEach((childDataNode) => {
-      const { name, component } = childDataNode;
-
-      if (!name) {
-        return childDataNode.setDataRecursive(data);
-      }
-
-      if (!component) {
-        return childDataNode.setDataRecursive(data[name]);
-      }
-
-      component.setData(data[name]);
-    });
   }
 
   getById(id: string): Component {
@@ -110,5 +78,37 @@ export class DataNode {
     }
 
     return components;
+  }
+
+  private getDataRecursive(model) {
+    this.children.forEach((childDataNode) => {
+      const { name, component } = childDataNode;
+
+      if (name && component) {
+        if (model[name] == null) {
+          model[name] = component.getData();
+        }
+      } else {
+        childDataNode.getDataRecursive(model);
+      }
+    });
+
+    return model;
+  }
+
+  private setDataRecursive(data) {
+    this.children.forEach((childDataNode) => {
+      const { name, component } = childDataNode;
+
+      if (!name) {
+        return childDataNode.setDataRecursive(data);
+      }
+
+      if (!component) {
+        return childDataNode.setDataRecursive(data[name]);
+      }
+
+      component.setData(data[name]);
+    });
   }
 }

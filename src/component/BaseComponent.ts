@@ -7,14 +7,14 @@ import { DomWrapper } from './DomWrappers';
 export type DomBasedComponent = BaseComponent<Node>;
 
 export abstract class BaseComponent<N extends Node> implements Component {
+  protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
+    return component.dataNode;
+  }
+
   protected parent: DomBasedComponent;
 
   protected abstract readonly dataNode: DataNode;
   protected abstract readonly observationNode: ObservationNode;
-
-  protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
-    return component.dataNode;
-  }
 
   protected constructor(protected domWrapper: DomWrapper<N>) {
   }

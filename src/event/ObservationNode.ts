@@ -88,7 +88,7 @@ export class ObservationNode {
     observedType: EventType,
     defaultEmitter = this.defaultEmitter
   ): (() => void)[] {
-    var subscriptions: (() => void)[] = [];
+    const subscriptions: (() => void)[] = [];
 
     if (this.domNode) {
       Object.keys(this.observationProperties).map(domEvent => {

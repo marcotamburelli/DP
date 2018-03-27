@@ -10,5 +10,5 @@ export declare namespace DomWrappers {
     function simple<E extends Element>(element: E): DomWrapper<E>;
     function input(element: HTMLInputElement | HTMLSelectElement): DomWrapper<HTMLInputElement | HTMLSelectElement>;
     function array(): DomWrapper<Node>;
-    function text(text?: string): DomWrapper<Text>;
+    function text(str?: string): DomWrapper<Text>;
 }

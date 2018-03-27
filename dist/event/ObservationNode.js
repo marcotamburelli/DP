@@ -65,7 +65,7 @@ class ObservationNode {
         }
     }
     collectSubscriptions(subscriber, observedType, defaultEmitter = this.defaultEmitter) {
-        var subscriptions = [];
+        const subscriptions = [];
         if (this.domNode) {
             Object.keys(this.observationProperties).map(domEvent => {
                 const { emitter, eventType } = this.observationProperties[domEvent];

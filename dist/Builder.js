@@ -10,9 +10,9 @@ const PropertiesUtil_1 = require("./util/PropertiesUtil");
 var DomFactory;
 (function (DomFactory) {
     function createElement(tag, properties) {
-        var element = document.createElement(tag);
-        var styleProps = PropertiesUtil_1.PropertiesUtil.getStyleProperties(properties);
-        var nativeProps = PropertiesUtil_1.PropertiesUtil.getNativeProperties(properties);
+        const element = document.createElement(tag);
+        const styleProps = PropertiesUtil_1.PropertiesUtil.getStyleProperties(properties);
+        const nativeProps = PropertiesUtil_1.PropertiesUtil.getNativeProperties(properties);
         styleProps.class && NativeUtil_1.NativeUtil.applyClass(element, styleProps.class);
         styleProps.style && NativeUtil_1.NativeUtil.applyStyle(element, styleProps.style);
         NativeUtil_1.NativeUtil.applyProperties(element, nativeProps);
@@ -63,7 +63,6 @@ var Builder;
             case const_1.NODES.LABEL:
             case const_1.NODES.OPTION:
             case const_1.NODES.SPAN:
-            case const_1.NODES.BUTTON:
             case const_1.NODES.BUTTON:
             case const_1.NODES.A:
             case const_1.NODES.P:

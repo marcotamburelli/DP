@@ -1,4 +1,4 @@
-export interface Properties { [prop: string]: any; };
+export interface Properties { [prop: string]: any; }
 
 export type HTML =
   'div' |

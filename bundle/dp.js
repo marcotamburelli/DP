@@ -122,7 +122,6 @@ var Builder;
             case const_1.NODES.OPTION:
             case const_1.NODES.SPAN:
             case const_1.NODES.BUTTON:
-            case const_1.NODES.BUTTON:
             case const_1.NODES.A:
             case const_1.NODES.P:
             case const_1.NODES.H1:
@@ -347,42 +346,9 @@ var DataNode = function () {
             return this.getDataRecursive({});
         }
     }, {
-        key: "getDataRecursive",
-        value: function getDataRecursive(model) {
-            this.children.forEach(function (childDataNode) {
-                var name = childDataNode.name,
-                    component = childDataNode.component;
-
-                if (name && component) {
-                    if (model[name] == null) {
-                        model[name] = component.getData();
-                    }
-                } else {
-                    childDataNode.getDataRecursive(model);
-                }
-            });
-            return model;
-        }
-    }, {
         key: "setData",
         value: function setData(data) {
             this.setDataRecursive(data);
-        }
-    }, {
-        key: "setDataRecursive",
-        value: function setDataRecursive(data) {
-            this.children.forEach(function (childDataNode) {
-                var name = childDataNode.name,
-                    component = childDataNode.component;
-
-                if (!name) {
-                    return childDataNode.setDataRecursive(data);
-                }
-                if (!component) {
-                    return childDataNode.setDataRecursive(data[name]);
-                }
-                component.setData(data[name]);
-            });
         }
     }, {
         key: "getById",
@@ -456,6 +422,39 @@ var DataNode = function () {
             return components;
         }
     }, {
+        key: "getDataRecursive",
+        value: function getDataRecursive(model) {
+            this.children.forEach(function (childDataNode) {
+                var name = childDataNode.name,
+                    component = childDataNode.component;
+
+                if (name && component) {
+                    if (model[name] == null) {
+                        model[name] = component.getData();
+                    }
+                } else {
+                    childDataNode.getDataRecursive(model);
+                }
+            });
+            return model;
+        }
+    }, {
+        key: "setDataRecursive",
+        value: function setDataRecursive(data) {
+            this.children.forEach(function (childDataNode) {
+                var name = childDataNode.name,
+                    component = childDataNode.component;
+
+                if (!name) {
+                    return childDataNode.setDataRecursive(data);
+                }
+                if (!component) {
+                    return childDataNode.setDataRecursive(data[name]);
+                }
+                component.setData(data[name]);
+            });
+        }
+    }, {
         key: "name",
         get: function get() {
             return this.dataNodeProperties.name;
@@ -484,7 +483,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 Object.defineProperty(exports, "__esModule", { value: true });
-;
 var DomWrappers;
 (function (DomWrappers) {
     function simple(element) {
@@ -500,9 +498,9 @@ var DomWrappers;
     }
     DomWrappers.array = array;
     function text() {
-        var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+        var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
-        return new TextWrapper(document.createTextNode(text));
+        return new TextWrapper(document.createTextNode(str));
     }
     DomWrappers.text = text;
 
@@ -1299,8 +1297,8 @@ var Listener = function () {
 
                 var processingFunc = _this.consumer.get(eventType);
                 if (processingFunc) {
-                    _this.childListeners.forEach(function (listener) {
-                        return listener && listener.dispose();
+                    _this.childListeners.forEach(function (childListener) {
+                        return childListener && childListener.dispose();
                     });
                     var listener = processingFunc(payload);
                     listener instanceof Listener && _this.childListeners.set(processingFunc, listener);

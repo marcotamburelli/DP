@@ -10,7 +10,7 @@ global['document'] = dom.window.document;
 describe('Checking native utils', () => {
 
   it('Checking apply style', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
 
     NativeUtil.applyStyle(element, 'background-color: red; padding-top: 12px');
 
@@ -19,7 +19,7 @@ describe('Checking native utils', () => {
   });
 
   it('Checking apply class', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
 
     NativeUtil.applyClass(element, 'class1 class2');
 
@@ -28,7 +28,7 @@ describe('Checking native utils', () => {
   });
 
   it('Checking apply events', (done) => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
 
     NativeUtil.applyProperties(element, { onclick: () => done() });
 

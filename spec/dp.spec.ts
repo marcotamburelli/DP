@@ -11,7 +11,7 @@ global['document'] = dom.window.document;
 describe('Checking single model', () => {
 
   it('Checking html', () => {
-    var div: dp.Component<number, HTMLDivElement> = dp.define(
+    const div: dp.Component<number, HTMLDivElement> = dp.define(
       'div', { 'name': 'val', 'value-type': 'number' },
       '321'
     );
@@ -24,7 +24,7 @@ describe('Checking single model', () => {
   });
 
   it('Checking html', () => {
-    var div: dp.Component<number, HTMLDivElement> = dp.define(
+    const div: dp.Component<number, HTMLDivElement> = dp.define(
       'div', { 'name': 'val', 'value-type': 'number' },
       321
     );
@@ -37,11 +37,11 @@ describe('Checking single model', () => {
   });
 
   it('Checking input', () => {
-    var input: dp.Component<number, HTMLInputElement> = dp.define(
+    const input: dp.Component<number, HTMLInputElement> = dp.define(
       'input',
       { 'name': 'val', 'value-type': 'number' }
     );
-    var nativeInput = input.domNode;
+    const nativeInput = input.domNode;
 
     input.setData(123);
 
@@ -71,7 +71,7 @@ describe('Checking scoped component', () => {
   }
 
   it('Check model', () => {
-    var component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { 'name': 'name', 'value-type': 'string' }),
       dp.define('input', { 'name': 'age', 'value-type': 'number' })
@@ -79,8 +79,8 @@ describe('Checking scoped component', () => {
 
     component.setData({ name: 'test', age: 123 });
 
-    var nameInput = component.queryByName<dp.Container<string, HTMLInputElement>>('name')[0].domNode;
-    var ageInput = component.queryByName<dp.Container<number, HTMLInputElement>>('age')[0].domNode;
+    const nameInput = component.queryByName<dp.Container<string, HTMLInputElement>>('name')[0].domNode;
+    const ageInput = component.queryByName<dp.Container<number, HTMLInputElement>>('age')[0].domNode;
 
     expect(nameInput.value).toBe('test');
     expect(ageInput.value).toBe('123');
@@ -92,7 +92,7 @@ describe('Checking scoped component', () => {
   });
 
   it('Check radio group', () => {
-    var component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { 'name': 'age', 'value': 10, 'type': 'RADIO', 'value-type': 'number', 'id': '10' }),
       dp.define('input', { 'name': 'age', 'value': 20, 'type': 'RADIO', 'value-type': 'number', 'id': '20' })
@@ -100,8 +100,8 @@ describe('Checking scoped component', () => {
 
     component.setData({ age: 20 });
 
-    var radio10 = component.queryById<dp.Container<string, HTMLInputElement>>('10').domNode;
-    var radio20 = component.queryById<dp.Container<number, HTMLInputElement>>('20').domNode;
+    const radio10 = component.queryById<dp.Container<string, HTMLInputElement>>('10').domNode;
+    const radio20 = component.queryById<dp.Container<number, HTMLInputElement>>('20').domNode;
 
     expect(radio10.checked).toBe(false);
     expect(radio20.checked).toBe(true);
@@ -116,7 +116,7 @@ describe('Checking scoped component', () => {
       return dp.define('option', { value: model.id }, model.text);
     }
 
-    var component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define(
         'select', { 'name': 'type', 'value-type': 'string' },
@@ -127,8 +127,8 @@ describe('Checking scoped component', () => {
     component.queryById<dp.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
     component.setData({ name: 'text_name', type: 'a' });
 
-    var typeSelect = component.queryByName<dp.Component<string, HTMLSelectElement>>('type')[0].domNode;
-    var nameInput = component.queryByName<dp.Component<string, HTMLInputElement>>('name')[0].domNode;
+    const typeSelect = component.queryByName<dp.Component<string, HTMLSelectElement>>('type')[0].domNode;
+    const nameInput = component.queryByName<dp.Component<string, HTMLInputElement>>('name')[0].domNode;
 
     expect(typeSelect.value).toBe('a');
     expect(nameInput.value).toBe('text_name');
@@ -140,16 +140,16 @@ describe('Checking scoped component', () => {
   });
 
   it('Check observer', (done) => {
-    var component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
       dp.define('button', { id: 'button_2', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
     );
 
-    var observable = Observable.from(component.createObservable<string>('EVENT'));
+    const observable = Observable.from(component.createObservable<string>('EVENT'));
     var count = 0;
 
-    var subscription = observable.subscribe(({ payload }) => {
+    const subscription = observable.subscribe(({ payload }) => {
       count++;
 
       expect(payload).toBe(count === 1 ? 'PAYLOAD_1' : 'PAYLOAD_2');
@@ -165,14 +165,14 @@ describe('Checking scoped component', () => {
   });
 
   it('Check observer when modifying structure', (done) => {
-    var component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
     );
 
-    var observable = Observable.from(component.createObservable<string>('EVENT'));
+    const observable = Observable.from(component.createObservable<string>('EVENT'));
 
-    var subscription = observable.subscribe(({ payload }) => {
+    const subscription = observable.subscribe(({ payload }) => {
       expect(payload).toBe('PAYLOAD_2');
 
       subscription.unsubscribe();
@@ -180,7 +180,7 @@ describe('Checking scoped component', () => {
     });
 
     const child1 = component.queryById<dp.Component<any, HTMLButtonElement>>('button_1');
-    var child2 = dp.define<dp.Component<any, HTMLButtonElement>>(
+    const child2 = dp.define<dp.Component<any, HTMLButtonElement>>(
       'button',
       { id: 'button_2', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } }
     );
@@ -193,7 +193,7 @@ describe('Checking scoped component', () => {
   });
 
   it('Check model payload', (done) => {
-    var component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { 'name': 'name', 'value-type': 'string' }),
       dp.define('input', { 'name': 'age', 'value-type': 'number' }),
@@ -205,9 +205,9 @@ describe('Checking scoped component', () => {
 
     component.setData({ name: 'test', age: 123 });
 
-    var observable = Observable.from(component.createObservable<string>('EVENT'));
+    const observable = Observable.from(component.createObservable<string>('EVENT'));
 
-    var subscription = observable.subscribe(({ payload }) => {
+    const subscription = observable.subscribe(({ payload }) => {
       expect(payload).toEqual({ name: 'test', age: 123 });
       done();
     });

@@ -70,7 +70,7 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
             return;
         }
         const { options } = this.domWrapper.domElement;
-        var values = {};
+        const values = {};
         if (Array.isArray(data)) {
             for (const t of data) {
                 values[t.toString()] = true;
@@ -88,7 +88,7 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
         if (!this.dataNode.name || !this.transformer) {
             return;
         }
-        var data = [];
+        const data = [];
         const { options } = this.domWrapper.domElement;
         for (let i = 0; i < options.length; i++) {
             const opt = options.item(i);

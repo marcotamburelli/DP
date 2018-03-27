@@ -13,8 +13,8 @@ export namespace NativeUtil {
   }
 
   function stringToStyleObject(style: string) {
-    var regEx = /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
-    var obj: { [prop: string]: string } = {};
+    const regEx = /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
+    const obj: { [prop: string]: string } = {};
 
     for (let result = regEx.exec(style); result !== null; result = regEx.exec(style)) {
       const key = toCamelCase(result[1]);
@@ -37,7 +37,7 @@ export namespace NativeUtil {
       styleObj = { ...style };
     }
 
-    var elementStyle = element.style;
+    const elementStyle = element.style;
 
     Object.keys(styleObj).forEach(key => elementStyle[key] = styleObj[key]);
   }

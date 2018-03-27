@@ -14,8 +14,8 @@ var NativeUtil;
         });
     }
     function stringToStyleObject(style) {
-        var regEx = /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
-        var obj = {};
+        const regEx = /(\w+(-\w+)*)\s*:\s*(\w*(\s|\w)*\w)/g;
+        const obj = {};
         for (let result = regEx.exec(style); result !== null; result = regEx.exec(style)) {
             const key = toCamelCase(result[1]);
             const value = result[3];
@@ -34,7 +34,7 @@ var NativeUtil;
         else {
             styleObj = Object.assign({}, style);
         }
-        var elementStyle = element.style;
+        const elementStyle = element.style;
         Object.keys(styleObj).forEach(key => elementStyle[key] = styleObj[key]);
     }
     NativeUtil.applyStyle = applyStyle;

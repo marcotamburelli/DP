@@ -91,8 +91,7 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
     }
 
     const { options } = this.domWrapper.domElement;
-
-    var values = {} as { [index: string]: boolean };
+    const values: { [index: string]: boolean } = {};
 
     if (Array.isArray(data)) {
       for (const t of data) {
@@ -114,7 +113,7 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
       return;
     }
 
-    var data = [] as D[];
+    const data = [] as D[];
     const { options } = this.domWrapper.domElement;
 
     for (let i = 0; i < options.length; i++) {

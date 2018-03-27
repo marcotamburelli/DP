@@ -10,7 +10,7 @@ export interface DomWrapper<N extends Node> {
   registerDomId(namespace: string, id: string);
 
   registerDomName(namespace: string, name: string);
-};
+}
 
 export namespace DomWrappers {
   export function simple<E extends Element>(element: E): DomWrapper<E> {
@@ -25,8 +25,8 @@ export namespace DomWrappers {
     return new ArrayWrapper();
   }
 
-  export function text(text = ''): DomWrapper<Text> {
-    return new TextWrapper(document.createTextNode(text));
+  export function text(str = ''): DomWrapper<Text> {
+    return new TextWrapper(document.createTextNode(str));
   }
 
   class SimpleDomWrapper<E extends Element> implements DomWrapper<E> {
@@ -48,7 +48,7 @@ export namespace DomWrappers {
     }
 
     detach() {
-      var domParent = this.domElement.parentNode;
+      const domParent = this.domElement.parentNode;
 
       domParent && domParent.removeChild(this.domElement);
     }
@@ -140,7 +140,7 @@ export namespace DomWrappers {
     }
 
     detach() {
-      var domParent = this.domElement.parentNode;
+      const domParent = this.domElement.parentNode;
 
       domParent && domParent.removeChild(this.domElement);
     }

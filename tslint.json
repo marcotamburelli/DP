@@ -13,9 +13,9 @@
     ],
     "member-ordering": [
       true,
-      "private-before-public",
-      "static-before-instance",
-      "variables-before-functions"
+      {
+        "order": "statics-first"
+      }
     ],
     "no-unused-variable": false,
     "variable-name": [
@@ -26,6 +26,7 @@
       "allow-pascal-case"
     ],
     "linebreak-style": [
+      true,
       "LF"
     ],
     "no-any": false,
@@ -72,6 +73,11 @@
       true,
       "array"
     ],
-    "space-before-function-paren": "true"
+    "space-before-function-paren": false,
+    "no-this-assignment": false,
+    "no-implicit-dependencies": [
+      true,
+      "dev"
+    ]
   }
 }

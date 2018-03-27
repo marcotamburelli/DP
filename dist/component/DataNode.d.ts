@@ -15,9 +15,9 @@ export declare class DataNode {
     append(dataNode: DataNode): void;
     remove(dataNode: DataNode): void;
     getData<D>(): any;
-    private getDataRecursive(model);
     setData<D>(data: D): void;
-    private setDataRecursive(data);
     getById(id: string): Component;
     getByName(name: string): any[];
+    private getDataRecursive(model);
+    private setDataRecursive(data);
 }

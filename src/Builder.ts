@@ -18,10 +18,10 @@ export type Definition = HTML | ((props: Properties) => DomBasedComponent) | Dom
 
 namespace DomFactory {
   export function createElement<E extends HTMLElement>(tag: HTML, properties: Properties) {
-    var element = document.createElement(tag);
+    const element = document.createElement(tag);
 
-    var styleProps = PropertiesUtil.getStyleProperties(properties);
-    var nativeProps = PropertiesUtil.getNativeProperties(properties);
+    const styleProps = PropertiesUtil.getStyleProperties(properties);
+    const nativeProps = PropertiesUtil.getNativeProperties(properties);
 
     styleProps.class && NativeUtil.applyClass(element, styleProps.class);
     styleProps.style && NativeUtil.applyStyle(element, styleProps.style);
@@ -109,7 +109,6 @@ export namespace Builder {
       case NODES.LABEL:
       case NODES.OPTION:
       case NODES.SPAN:
-      case NODES.BUTTON:
       case NODES.BUTTON:
       case NODES.A:
       case NODES.P:

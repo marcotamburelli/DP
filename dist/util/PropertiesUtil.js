@@ -11,7 +11,7 @@ var PropertiesUtil;
     }
     PropertiesUtil.getDataNodeProperties = getDataNodeProperties;
     function getTransformer(properties) {
-        var type = properties[const_1.SPECIFIC_PROPERTIES.VALUE_TYPE];
+        const type = properties[const_1.SPECIFIC_PROPERTIES.VALUE_TYPE];
         switch (type) {
             case 'number': return (value) => parseInt(value);
             case 'number.float': return (value) => parseFloat(value);
@@ -20,7 +20,7 @@ var PropertiesUtil;
     }
     PropertiesUtil.getTransformer = getTransformer;
     function getGenerator(properties) {
-        var generator = properties[const_1.SPECIFIC_PROPERTIES.GENERATOR];
+        const generator = properties[const_1.SPECIFIC_PROPERTIES.GENERATOR];
         if (typeof generator === 'function') {
             return generator;
         }
@@ -34,7 +34,7 @@ var PropertiesUtil;
     }
     PropertiesUtil.getStyleProperties = getStyleProperties;
     function getNativeProperties(properties) {
-        var nativeProps = Object.assign({}, properties);
+        const nativeProps = Object.assign({}, properties);
         delete nativeProps[const_1.DATA_NODE_PROPERTIES.ID];
         delete nativeProps[const_1.SPECIFIC_PROPERTIES.VALUE_TYPE];
         delete nativeProps[const_1.SPECIFIC_PROPERTIES.GENERATOR];

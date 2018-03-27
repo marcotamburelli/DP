@@ -22,7 +22,7 @@ describe('Scoped component', () => {
     radioInput.value = value;
     radioInput.name = name;
 
-    return new RadioInputComponent(radioInput, { name }, {}, (value) => value);
+    return new RadioInputComponent(radioInput, { name }, {}, (v) => v);
   }
 
   it('Check radio button', () => {
@@ -35,13 +35,13 @@ describe('Scoped component', () => {
     container.append(control1);
     container.append(control2);
 
-    container.setData({ 'name_1': 'value_1', 'name_2': 'value_2' });
+    container.setData({ name_1: 'value_1', name_2: 'value_2' });
 
-    expect(container.getData()).toEqual({ 'name_1': 'value_1', 'name_2': 'value_2' });
+    expect(container.getData()).toEqual({ name_1: 'value_1', name_2: 'value_2' });
 
     container.remove(control2);
 
-    expect(container.getData()).toEqual({ 'name_1': 'value_1' });
+    expect(container.getData()).toEqual({ name_1: 'value_1' });
   });
 
   it('Check simple properties', () => {
@@ -77,7 +77,7 @@ describe('Scoped component', () => {
 
     container.setData({});
 
-    expect(container.getData()).toEqual({ 'name_1': '', 'name_2': '' });
+    expect(container.getData()).toEqual({ name_1: '', name_2: '' });
   });
 
   it('Check object properties', () => {
@@ -92,9 +92,9 @@ describe('Scoped component', () => {
     childContainer.append(propertiesGenerator('name_1', '1'));
     childContainer.append(propertiesGenerator('name_2', '2'));
 
-    container.setData({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
+    container.setData({ obj: { name_1: 'value_1', name_2: 'value_2' } });
 
-    expect(container.getData()).toEqual({ obj: { 'name_1': 'value_1', 'name_2': 'value_2' } });
+    expect(container.getData()).toEqual({ obj: { name_1: 'value_1', name_2: 'value_2' } });
 
     container.remove(childContainer);
 
