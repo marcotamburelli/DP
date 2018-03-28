@@ -122,6 +122,7 @@ export namespace Builder {
         return createHtmlComponent(tag, normalizedProperties);
 
       case NODES.INPUT:
+      case NODES.TEXTAREA:
         return createInputComponent(normalizedProperties);
 
       case NODES.SELECT:

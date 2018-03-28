@@ -16,6 +16,7 @@ export declare const NODES: {
     IMG: string;
     A: string;
     INPUT: string;
+    TEXTAREA: string;
     BUTTON: string;
     SELECT: string;
     OPTION: string;

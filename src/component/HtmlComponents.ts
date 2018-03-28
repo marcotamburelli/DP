@@ -34,14 +34,14 @@ export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElem
   }
 }
 
-export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement>  {
+export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement | HTMLTextAreaElement>  {
   constructor(
-    element: HTMLInputElement,
+    element: HTMLInputElement | HTMLTextAreaElement,
     properties: DataNodeProperties = {},
     observationProperties?: ObservationProperties,
     private transformer?: (value: string) => D
   ) {
-    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
+    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement | HTMLTextAreaElement>, properties, observationProperties);
   }
 
   setData(data: D) {

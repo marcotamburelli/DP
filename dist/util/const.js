@@ -18,6 +18,7 @@ exports.NODES = {
     IMG: 'img',
     A: 'a',
     INPUT: 'input',
+    TEXTAREA: 'textarea',
     BUTTON: 'button',
     SELECT: 'select',
     OPTION: 'option',

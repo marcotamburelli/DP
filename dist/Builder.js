@@ -75,6 +75,7 @@ var Builder;
             case const_1.NODES.BR:
                 return createHtmlComponent(tag, normalizedProperties);
             case const_1.NODES.INPUT:
+            case const_1.NODES.TEXTAREA:
                 return createInputComponent(normalizedProperties);
             case const_1.NODES.SELECT:
                 return createSelectComponent(normalizedProperties);

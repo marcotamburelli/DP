@@ -17,7 +17,9 @@ export namespace DomWrappers {
     return new SimpleDomWrapper(element);
   }
 
-  export function input(element: HTMLInputElement | HTMLSelectElement): DomWrapper<HTMLInputElement | HTMLSelectElement> {
+  export function input(
+    element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  ): DomWrapper<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
     return new InputDomWrapper(element);
   }
 
@@ -61,8 +63,8 @@ export namespace DomWrappers {
     }
   }
 
-  class InputDomWrapper extends SimpleDomWrapper<HTMLInputElement | HTMLSelectElement> {
-    constructor(domElement: HTMLInputElement | HTMLSelectElement) {
+  class InputDomWrapper extends SimpleDomWrapper<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
+    constructor(domElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
       super(domElement);
     }
 

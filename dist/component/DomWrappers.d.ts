@@ -8,7 +8,7 @@ export interface DomWrapper<N extends Node> {
 }
 export declare namespace DomWrappers {
     function simple<E extends Element>(element: E): DomWrapper<E>;
-    function input(element: HTMLInputElement | HTMLSelectElement): DomWrapper<HTMLInputElement | HTMLSelectElement>;
+    function input(element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): DomWrapper<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
     function array(): DomWrapper<Node>;
     function text(str?: string): DomWrapper<Text>;
 }
