@@ -1074,6 +1074,12 @@ var BaseComponent_1 = require("./component/BaseComponent");
 var listener_1 = require("./event/listener");
 var dp;
 (function (dp) {
+    function compose(component, children) {
+        children.forEach(function (child) {
+            return component.append(child);
+        });
+        return component;
+    }
     function List(props) {
         return Builder_1.Builder.createList(props);
     }
@@ -1088,18 +1094,14 @@ var dp;
         }
 
         if (typeof definition === 'function') {
-            var component = definition(properties || {});
-        } else if (definition instanceof BaseComponent_1.BaseComponent) {
-            component = definition;
-        } else {
-            component = Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
-                return child instanceof BaseComponent_1.BaseComponent;
-            }));
+            return compose(definition(properties || {}), children);
         }
-        children.forEach(function (child) {
-            return component.append(child);
-        });
-        return component;
+        if (definition instanceof BaseComponent_1.BaseComponent) {
+            return compose(definition, children);
+        }
+        return compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
+            return child instanceof BaseComponent_1.BaseComponent;
+        })), children);
     }
     dp.define = define;
     function listen(stream) {

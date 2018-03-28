@@ -5,6 +5,10 @@ const BaseComponent_1 = require("./component/BaseComponent");
 const listener_1 = require("./event/listener");
 var dp;
 (function (dp) {
+    function compose(component, children) {
+        children.forEach(child => component.append(child));
+        return component;
+    }
     function List(props) {
         return Builder_1.Builder.createList(props);
     }
@@ -15,16 +19,12 @@ var dp;
     dp.Text = Text;
     function define(definition, properties, ...children) {
         if (typeof definition === 'function') {
-            var component = definition(properties || {});
+            return compose(definition(properties || {}), children);
         }
-        else if (definition instanceof BaseComponent_1.BaseComponent) {
-            component = definition;
+        if (definition instanceof BaseComponent_1.BaseComponent) {
+            return compose(definition, children);
         }
-        else {
-            component = Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.BaseComponent));
-        }
-        children.forEach(child => component.append(child));
-        return component;
+        return compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.BaseComponent)), children);
     }
     dp.define = define;
     function listen(stream) {

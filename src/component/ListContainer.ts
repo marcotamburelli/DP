@@ -5,10 +5,10 @@ import { DomWrappers } from './DomWrappers';
 
 export type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponent & IsDataDriven<D>);
 
-export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implements IsList {
+export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
   private children: (Component | IsDataDriven<any>)[];
 
-  constructor(private generator: ComponentGenerator<M>, dataNodeProps?: DataNodeProperties) {
+  constructor(private generator: ComponentGenerator<D>, dataNodeProps?: DataNodeProperties) {
     super(DomWrappers.array(), dataNodeProps);
 
     this.children = [];
@@ -32,7 +32,7 @@ export class ListContainer<M> extends DataDrivenComponentImpl<M[], any> implemen
     }
   }
 
-  setData(data: M[]) {
+  setData(data: D[]) {
     if (!this.generator) {
       return;
     }

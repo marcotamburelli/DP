@@ -6,10 +6,10 @@ import { DomWrapper } from './DomWrappers';
 export declare type DomBasedComponent = BaseComponent<Node>;
 export declare abstract class BaseComponent<N extends Node> implements Component {
     protected domWrapper: DomWrapper<N>;
+    protected static getDataNode<N extends Node>(component: BaseComponent<N>): DataNode;
     protected parent: DomBasedComponent;
     protected readonly abstract dataNode: DataNode;
     protected readonly abstract observationNode: ObservationNode;
-    protected static getDataNode<N extends Node>(component: BaseComponent<N>): DataNode;
     protected constructor(domWrapper: DomWrapper<N>);
     append(child: any): void;
     remove(child: Component): void;

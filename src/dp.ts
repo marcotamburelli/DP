@@ -8,6 +8,12 @@ import { GenericObservable, Message } from './event/types';
 import { Properties } from './util/types';
 
 export namespace dp {
+  function compose<C extends DomBasedComponent>(component: DomBasedComponent, children: any[]) {
+    children.forEach(child => component.append(child));
+
+    return component as C;
+  }
+
   export type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
   export type ListContainer<D> = ExtListContainer<D>;
   export type TextComponent = ExtTextComponent;
@@ -21,18 +27,19 @@ export namespace dp {
     return Builder.createText(props) as TextComponent;
   }
 
-  export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]) {
+  export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C {
     if (typeof definition === 'function') {
-      var component = definition(properties || {});
-    } else if (definition instanceof BaseComponent) {
-      component = definition;
-    } else {
-      component = Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent));
+      return compose(definition(properties || {}), children) ;
     }
 
-    children.forEach(child => component.append(child));
+    if (definition instanceof BaseComponent) {
+      return compose(definition, children) ;
+    }
 
-    return component as C;
+    return compose(
+      Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent)),
+      children
+    ) ;
   }
 
   export function listen<P>(stream: GenericObservable<Message<P>>) {
