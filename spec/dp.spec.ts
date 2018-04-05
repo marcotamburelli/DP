@@ -94,6 +94,29 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
+  it('checks model of group container', () => {
+    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(dp.Group, null,
+        dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+        dp.define('input', { name: 'age', bind: intBinder })
+      )
+    );
+
+    component.setData({ name: 'test', age: 123 });
+
+    const nameInput = component.queryByName<dp.Container<string, HTMLInputElement>>('name')[0].domNode;
+    const ageInput = component.queryByName<dp.Container<number, HTMLInputElement>>('age')[0].domNode;
+
+    expect(nameInput.value).toBe('test');
+    expect(ageInput.value).toBe('123');
+
+    nameInput.value = 'test test';
+    ageInput.value = '456';
+
+    expect(component.getData()).toEqual({ name: 'test test', age: 456 });
+  });
+
   it('checks radio group', () => {
     const component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
       'div', null,

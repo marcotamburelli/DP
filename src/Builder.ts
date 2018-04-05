@@ -1,5 +1,6 @@
 import { DomBasedComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
+import { GroupContainer } from './component/GroupContainer';
 import {
   CheckBoxInputComponent,
   HtmlElementComponent,
@@ -128,9 +129,13 @@ export namespace Builder {
     return new ListContainer<D>(propReader.generator, propReader.dataNodeProperties);
   }
 
-  export function createText<D>(properties: Properties) {
-    const propReader = PropertiesReader.create(properties);
+  export function createGroup<D>(properties: Properties) {
+    return new GroupContainer<D>(PropertiesReader.create(properties).bindProperties);
+  }
 
-    return new TextComponent<D>(propReader.dataNodeProperties, propReader.bindProperties);
+  export function createText<D>(properties: Properties) {
+    const { dataNodeProperties, bindProperties } = PropertiesReader.create(properties);
+
+    return new TextComponent<D>(dataNodeProperties, bindProperties);
   }
 }

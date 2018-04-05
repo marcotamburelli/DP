@@ -9,7 +9,7 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
   private children: (Component | IsDataDriven<any>)[];
 
   constructor(private generator: ComponentGenerator<D>, dataNodeProps?: DataNodeProperties) {
-    super(DomWrappers.array(), dataNodeProps);
+    super(DomWrappers.group(), dataNodeProps);
 
     this.children = [];
   }

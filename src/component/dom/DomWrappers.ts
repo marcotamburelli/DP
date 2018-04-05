@@ -19,8 +19,8 @@ export namespace DomWrappers {
     return new InputDomWrapper(element);
   }
 
-  export function array(): DomWrapper<Node> {
-    return new ArrayWrapper();
+  export function group(): DomWrapper<Node> {
+    return new GroupWrapper();
   }
 
   export function text(str = ''): DomWrapper<Text> {
@@ -65,29 +65,24 @@ export namespace DomWrappers {
   const START_PLACEHOLDER = 'START';
   const END_PLACEHOLDER = 'END';
 
-  class ArrayWrapper implements DomWrapper<Node> {
+  class GroupWrapper implements DomWrapper<Node> {
     private domParent: Node;
 
     private startPlaceholder = document.createComment(START_PLACEHOLDER);
     private endPlaceholder = document.createComment(END_PLACEHOLDER);
 
+    private pendingChildNodes: (string | DomWrapper<any>)[] = [];
+
     appendChild<F extends Node>(child: string | DomWrapper<F>) {
       if (!this.domParent) {
-        throw new Error('Array requires to be attached to a parent element, in order to add children');
-      }
-
-      if (typeof child === 'string') {
-        this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+        this.pendingChildNodes.push(child);
       } else {
-        const childDom = child.domElement;
-
-        childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
-        child.provideParent(this);
+        this._append(child);
       }
     }
 
     provideParent<P extends Node>(parent: DomWrapper<P>) {
-      if (parent instanceof ArrayWrapper) {
+      if (parent instanceof GroupWrapper) {
         this.domParent = parent.domParent;
 
         this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
@@ -98,6 +93,8 @@ export namespace DomWrappers {
         this.domParent.appendChild(this.startPlaceholder);
         this.domParent.appendChild(this.endPlaceholder);
       }
+
+      this.pendingChildNodes.forEach(child => this._append(child));
     }
 
     detach() {
@@ -111,6 +108,17 @@ export namespace DomWrappers {
 
       this.domParent.removeChild(this.startPlaceholder);
       this.domParent.removeChild(this.endPlaceholder);
+    }
+
+    private _append(child: string | DomWrapper<any>) {
+      if (typeof child === 'string') {
+        this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+      } else {
+        const childDom = child.domElement;
+
+        childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
+        child.provideParent(this);
+      }
     }
   }
 

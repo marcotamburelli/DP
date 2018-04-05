@@ -26,7 +26,7 @@ function createRadio(name: string, value: string) {
 
 describe('Query inside the container', () => {
 
-  it('checks query by id of missing element', () => {
+  it('checks query by id of missing and existing element', () => {
     const element = document.createElement('div');
     const childElement = document.createElement('div');
 
@@ -39,6 +39,7 @@ describe('Query inside the container', () => {
     childContainer.append(createSimpleHtml('name_2', '2'));
 
     expect(container.queryById('')).toBeUndefined();
+    expect(container.queryById('1')).toBeDefined();
   });
 
 });

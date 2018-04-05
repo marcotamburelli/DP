@@ -4,7 +4,7 @@ const BaseComponent_1 = require("./BaseComponent");
 const DomWrappers_1 = require("./dom/DomWrappers");
 class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(generator, dataNodeProps) {
-        super(DomWrappers_1.DomWrappers.array(), dataNodeProps);
+        super(DomWrappers_1.DomWrappers.group(), dataNodeProps);
         this.generator = generator;
         this.children = [];
     }

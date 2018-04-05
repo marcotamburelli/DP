@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Container_1 = require("./component/Container");
+const GroupContainer_1 = require("./component/GroupContainer");
 const HtmlComponents_1 = require("./component/HtmlComponents");
 const ListContainer_1 = require("./component/ListContainer");
 const TextComponent_1 = require("./component/TextComponent");
@@ -76,9 +77,13 @@ var Builder;
         return new ListContainer_1.ListContainer(propReader.generator, propReader.dataNodeProperties);
     }
     Builder.createList = createList;
+    function createGroup(properties) {
+        return new GroupContainer_1.GroupContainer(PropertiesReader_1.PropertiesReader.create(properties).bindProperties);
+    }
+    Builder.createGroup = createGroup;
     function createText(properties) {
-        const propReader = PropertiesReader_1.PropertiesReader.create(properties);
-        return new TextComponent_1.TextComponent(propReader.dataNodeProperties, propReader.bindProperties);
+        const { dataNodeProperties, bindProperties } = PropertiesReader_1.PropertiesReader.create(properties);
+        return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties);
     }
     Builder.createText = createText;
 })(Builder = exports.Builder || (exports.Builder = {}));

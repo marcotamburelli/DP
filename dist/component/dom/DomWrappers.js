@@ -10,10 +10,10 @@ var DomWrappers;
         return new InputDomWrapper(element);
     }
     DomWrappers.input = input;
-    function array() {
-        return new ArrayWrapper();
+    function group() {
+        return new GroupWrapper();
     }
-    DomWrappers.array = array;
+    DomWrappers.group = group;
     function text(str = '') {
         return new TextWrapper(document.createTextNode(str));
     }
@@ -49,26 +49,22 @@ var DomWrappers;
     }
     const START_PLACEHOLDER = 'START';
     const END_PLACEHOLDER = 'END';
-    class ArrayWrapper {
+    class GroupWrapper {
         constructor() {
             this.startPlaceholder = document.createComment(START_PLACEHOLDER);
             this.endPlaceholder = document.createComment(END_PLACEHOLDER);
+            this.pendingChildNodes = [];
         }
         appendChild(child) {
             if (!this.domParent) {
-                throw new Error('Array requires to be attached to a parent element, in order to add children');
-            }
-            if (typeof child === 'string') {
-                this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+                this.pendingChildNodes.push(child);
             }
             else {
-                const childDom = child.domElement;
-                childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
-                child.provideParent(this);
+                this._append(child);
             }
         }
         provideParent(parent) {
-            if (parent instanceof ArrayWrapper) {
+            if (parent instanceof GroupWrapper) {
                 this.domParent = parent.domParent;
                 this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
                 this.domParent.insertBefore(this.endPlaceholder, parent.endPlaceholder);
@@ -78,6 +74,7 @@ var DomWrappers;
                 this.domParent.appendChild(this.startPlaceholder);
                 this.domParent.appendChild(this.endPlaceholder);
             }
+            this.pendingChildNodes.forEach(child => this._append(child));
         }
         detach() {
             for (let child = this.startPlaceholder.nextSibling; child !== this.endPlaceholder; child = this.startPlaceholder.nextSibling) {
@@ -85,6 +82,16 @@ var DomWrappers;
             }
             this.domParent.removeChild(this.startPlaceholder);
             this.domParent.removeChild(this.endPlaceholder);
+        }
+        _append(child) {
+            if (typeof child === 'string') {
+                this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+            }
+            else {
+                const childDom = child.domElement;
+                childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
+                child.provideParent(this);
+            }
         }
     }
     class TextWrapper {

@@ -13,6 +13,10 @@ var dp;
         return Builder_1.Builder.createList(props);
     }
     dp.List = List;
+    function Group(props) {
+        return Builder_1.Builder.createGroup(props);
+    }
+    dp.Group = Group;
     function Text(props) {
         return Builder_1.Builder.createText(props);
     }
