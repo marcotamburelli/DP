@@ -2,7 +2,7 @@ import { ObservationNode } from '../event/ObservationNode';
 import { EventType, IsObservable, ObservationProperties } from '../event/types';
 import { Component, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
-import { DomWrapper } from './DomWrappers';
+import { DomWrapper } from './dom/DomWrappers';
 export declare type DomBasedComponent = BaseComponent<Node>;
 export declare abstract class BaseComponent<N extends Node> implements Component {
     protected domWrapper: DomWrapper<N>;

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const BaseComponent_1 = require("./BaseComponent");
-const DomWrappers_1 = require("./DomWrappers");
+const DomWrappers_1 = require("./dom/DomWrappers");
 class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(generator, dataNodeProps) {
         super(DomWrappers_1.DomWrappers.array(), dataNodeProps);

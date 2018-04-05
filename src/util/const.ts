@@ -41,3 +41,7 @@ export const STYLE_PROPERTIES = {
 export const NATIVE_PROPERTIES = {
   TYPE: 'type'
 };
+
+export const BIND_PROPERTIES = {
+  BIND: 'bind'
+};

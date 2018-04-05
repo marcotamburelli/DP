@@ -16,30 +16,30 @@ export namespace dp {
 
   export type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
   export type ListContainer<D> = ExtListContainer<D>;
-  export type TextComponent = ExtTextComponent;
+  export type TextComponent<D> = ExtTextComponent<D>;
   export type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
 
   export function List<D>(props: Properties) {
     return Builder.createList<D>(props) as ListContainer<D>;
   }
 
-  export function Text(props: Properties) {
-    return Builder.createText(props) as TextComponent;
+  export function Text<D>(props: Properties): TextComponent<D> {
+    return Builder.createText(props);
   }
 
   export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C {
     if (typeof definition === 'function') {
-      return compose(definition(properties || {}), children) ;
+      return compose(definition(properties || {}), children);
     }
 
     if (definition instanceof BaseComponent) {
-      return compose(definition, children) ;
+      return compose(definition, children);
     }
 
     return compose(
       Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent)),
       children
-    ) ;
+    );
   }
 
   export function listen<P>(stream: GenericObservable<Message<P>>) {

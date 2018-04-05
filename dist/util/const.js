@@ -39,3 +39,6 @@ exports.STYLE_PROPERTIES = {
 exports.NATIVE_PROPERTIES = {
     TYPE: 'type'
 };
+exports.BIND_PROPERTIES = {
+    BIND: 'bind'
+};

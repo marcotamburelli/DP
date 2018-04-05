@@ -1,7 +1,7 @@
 import { BaseComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
 import { Component, IsDataDriven, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
-import { DomWrappers } from './DomWrappers';
+import { DomWrappers } from './dom/DomWrappers';
 
 export type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponent & IsDataDriven<D>);
 

@@ -11,92 +11,82 @@ import { ListContainer } from './component/ListContainer';
 import { TextComponent } from './component/TextComponent';
 import { NATIVE_PROPERTIES, NODES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
-import { PropertiesUtil } from './util/PropertiesUtil';
+import { PropertiesReader } from './util/PropertiesReader';
 import { HTML, Properties } from './util/types';
 
 export type Definition = HTML | ((props: Properties) => DomBasedComponent) | DomBasedComponent;
 
 namespace DomFactory {
-  export function createElement<E extends HTMLElement>(tag: HTML, properties: Properties) {
+  export function createElement<E extends HTMLElement>(tag: HTML, nativeProperties: Properties) {
     const element = document.createElement(tag);
 
-    const styleProps = PropertiesUtil.getStyleProperties(properties);
-    const nativeProps = PropertiesUtil.getNativeProperties(properties);
-
-    styleProps.class && NativeUtil.applyClass(element, styleProps.class);
-    styleProps.style && NativeUtil.applyStyle(element, styleProps.style);
-    NativeUtil.applyProperties(element, nativeProps);
+    NativeUtil.applyProperties(element, nativeProperties);
 
     return element as E;
   }
 }
 
 export namespace Builder {
-  function createContainer(tag: HTML, properties: Properties) {
+  function createContainer(tag: HTML, propReader: PropertiesReader) {
     return new Container(
-      DomFactory.createElement(tag, properties),
-      PropertiesUtil.getDataNodeProperties(properties),
-      PropertiesUtil.getObservationProperties(properties)
+      DomFactory.createElement(tag, propReader.nativeProperties),
+      propReader.dataNodeProperties,
+      propReader.bindProperties,
+      propReader.observationProperties
     );
   }
 
-  function createHtmlComponent(tag: HTML, properties: Properties) {
+  function createHtmlComponent(tag: HTML, propReader: PropertiesReader) {
     return new HtmlElementComponent<string | number>(
-      DomFactory.createElement(tag, properties),
-      PropertiesUtil.getDataNodeProperties(properties),
-      PropertiesUtil.getObservationProperties(properties),
-      PropertiesUtil.getTransformer(properties)
+      DomFactory.createElement(tag, propReader.nativeProperties),
+      propReader.dataNodeProperties,
+      propReader.bindProperties,
+      propReader.observationProperties
     );
   }
 
-  function createInputComponent(properties: Properties) {
-    const element = DomFactory.createElement<HTMLInputElement>('input', properties);
-    const dataNodeProperties = PropertiesUtil.getDataNodeProperties(properties);
-    const observationProperties = PropertiesUtil.getObservationProperties(properties);
+  function createInputComponent(propReader: PropertiesReader) {
+    const { dataNodeProperties, bindProperties, nativeProperties, observationProperties } = propReader;
+    const element = DomFactory.createElement<HTMLInputElement>('input', nativeProperties);
 
-    switch ((properties[NATIVE_PROPERTIES.TYPE] || '').toLowerCase()) {
+    switch (nativeProperties[NATIVE_PROPERTIES.TYPE] || '') {
       case 'checkbox':
-        return new CheckBoxInputComponent(element, dataNodeProperties, observationProperties);
+        return new CheckBoxInputComponent(
+          element,
+          dataNodeProperties,
+          bindProperties,
+          observationProperties
+        );
 
       case 'radio':
         return new RadioInputComponent<string | number>(
           element,
           dataNodeProperties,
-          observationProperties,
-          PropertiesUtil.getTransformer(properties)
+          bindProperties,
+          observationProperties
         );
 
       default:
         return new TextInputComponent<string | number>(
           element,
           dataNodeProperties,
-          observationProperties,
-          PropertiesUtil.getTransformer(properties)
+          bindProperties,
+          observationProperties
         );
     }
   }
 
-  function createSelectComponent(properties: Properties) {
+  function createSelectComponent(propReader: PropertiesReader) {
     return new SelectComponent<string | number>(
-      DomFactory.createElement<HTMLSelectElement>('select', properties),
-      PropertiesUtil.getDataNodeProperties(properties),
-      PropertiesUtil.getObservationProperties(properties),
-      PropertiesUtil.getTransformer(properties)
+      DomFactory.createElement<HTMLSelectElement>('select', propReader.nativeProperties),
+      propReader.dataNodeProperties,
+      propReader.bindProperties,
+      propReader.observationProperties
     );
   }
 
-  function normalizeProperties(properties: Properties) {
-    const normalizedProperties: Properties = {};
-
-    Object.keys(properties).forEach(key => {
-      normalizedProperties[key.toLowerCase()] = properties[key];
-    });
-
-    return normalizedProperties;
-  }
-
   export function createComponent(tag: HTML, properties: Properties, hasChildren: boolean) {
-    const normalizedProperties: Properties = normalizeProperties(properties);
+    const propReader = PropertiesReader.create(properties);
 
     switch (tag) {
       case NODES.DIV:
@@ -104,7 +94,7 @@ export namespace Builder {
       case NODES.OL:
       case NODES.LI:
       case NODES.FORM:
-        return (hasChildren ? createContainer : createHtmlComponent)(tag, normalizedProperties);
+        return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
 
       case NODES.LABEL:
       case NODES.OPTION:
@@ -119,24 +109,28 @@ export namespace Builder {
       case NODES.H5:
       case NODES.H6:
       case NODES.BR:
-        return createHtmlComponent(tag, normalizedProperties);
+        return createHtmlComponent(tag, propReader);
 
       case NODES.INPUT:
       case NODES.TEXTAREA:
-        return createInputComponent(normalizedProperties);
+        return createInputComponent(propReader);
 
       case NODES.SELECT:
-        return createSelectComponent(normalizedProperties);
+        return createSelectComponent(propReader);
     }
 
     throw new Error(`'${tag}' not supported`);
   }
 
   export function createList<D>(properties: Properties) {
-    return new ListContainer<D>(PropertiesUtil.getGenerator(properties), PropertiesUtil.getDataNodeProperties(properties));
+    const propReader = PropertiesReader.create(properties);
+
+    return new ListContainer<D>(propReader.generator, propReader.dataNodeProperties);
   }
 
-  export function createText(properties: Properties) {
-    return new TextComponent(PropertiesUtil.getDataNodeProperties(properties));
+  export function createText<D>(properties: Properties) {
+    const propReader = PropertiesReader.create(properties);
+
+    return new TextComponent<D>(propReader.dataNodeProperties, propReader.bindProperties);
   }
 }

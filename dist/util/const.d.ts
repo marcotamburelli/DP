@@ -37,3 +37,6 @@ export declare const STYLE_PROPERTIES: {
 export declare const NATIVE_PROPERTIES: {
     TYPE: string;
 };
+export declare const BIND_PROPERTIES: {
+    BIND: string;
+};

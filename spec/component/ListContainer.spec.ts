@@ -14,7 +14,7 @@ describe('Checking Array', () => {
   function flatGenerator(model: { val: string }, idx: number) {
     const div = document.createElement('div');
 
-    return new HtmlElementComponent(div, { id: `${idx}`, name: 'val' }, {}, (value) => value);
+    return new HtmlElementComponent<string>(div, { id: `${idx}`, name: 'val' }, {});
   }
 
   function propertiesGenerator(model: { val: string }, idx: number) {
@@ -22,7 +22,7 @@ describe('Checking Array', () => {
     const controlElement = document.createElement('div');
 
     const container = new Container(element);
-    const child = new HtmlElementComponent(controlElement, { id: `${idx}`, name: 'val' }, {}, (value) => value);
+    const child = new HtmlElementComponent(controlElement, { id: `${idx}`, name: 'val' }, {});
 
     container.append(child);
 
@@ -35,7 +35,7 @@ describe('Checking Array', () => {
     div.id = `id-${idx}`;
     div.textContent = `div-${idx}`;
 
-    return new HtmlElementComponent(div, {}, {}, (value) => value);
+    return new HtmlElementComponent(div, {}, {});
   }
 
   it('Append HTML children', () => {

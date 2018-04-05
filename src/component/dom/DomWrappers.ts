@@ -6,10 +6,6 @@ export interface DomWrapper<N extends Node> {
   provideParent<P extends Node>(parent: DomWrapper<P>);
 
   detach();
-
-  registerDomId(namespace: string, id: string);
-
-  registerDomName(namespace: string, name: string);
 }
 
 export namespace DomWrappers {
@@ -53,13 +49,6 @@ export namespace DomWrappers {
       const domParent = this.domElement.parentNode;
 
       domParent && domParent.removeChild(this.domElement);
-    }
-
-    registerDomId(namespace: string, id: string) {
-      this.domElement.id = `${namespace}.${id}`;
-    }
-
-    registerDomName(namespace: string, name: string) {
     }
   }
 
@@ -123,12 +112,6 @@ export namespace DomWrappers {
       this.domParent.removeChild(this.startPlaceholder);
       this.domParent.removeChild(this.endPlaceholder);
     }
-
-    registerDomId(namespace: string, id: string) {
-    }
-
-    registerDomName(namespace: string, name: string) {
-    }
   }
 
   class TextWrapper implements DomWrapper<Text> {
@@ -145,12 +128,6 @@ export namespace DomWrappers {
       const domParent = this.domElement.parentNode;
 
       domParent && domParent.removeChild(this.domElement);
-    }
-
-    registerDomId(namespace: string, id: string) {
-    }
-
-    registerDomName(namespace: string, name: string) {
     }
   }
 }

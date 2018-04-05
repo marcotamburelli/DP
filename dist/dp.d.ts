@@ -9,10 +9,10 @@ import { Properties } from './util/types';
 export declare namespace dp {
     type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
     type ListContainer<D> = ExtListContainer<D>;
-    type TextComponent = ExtTextComponent;
+    type TextComponent<D> = ExtTextComponent<D>;
     type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
     function List<D>(props: Properties): ExtListContainer<D>;
-    function Text(props: Properties): ExtTextComponent;
+    function Text<D>(props: Properties): TextComponent<D>;
     function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C;
     function listen<P>(stream: GenericObservable<Message<P>>): Listener<P>;
 }

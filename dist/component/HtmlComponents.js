@@ -1,83 +1,113 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const BaseComponent_1 = require("./BaseComponent");
-const DomWrappers_1 = require("./DomWrappers");
-function stringValue(x) {
-    if (x == null) {
-        return '';
-    }
-    else {
-        return x.toString();
-    }
-}
+const DomBinder_1 = require("./dom/DomBinder");
+const DomWrappers_1 = require("./dom/DomWrappers");
 class HtmlElementComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, observationProperties, transformer) {
+    constructor(element, properties = {}, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.simple(element), properties, observationProperties);
-        this.transformer = transformer;
+        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
-        if (this.dataNode.name) {
-            this.domWrapper.domElement.textContent = stringValue(data);
+        if (!this.dataNode.name) {
+            return;
+        }
+        if (this.domBinder.isDefault()) {
+            const set = this.domBinder.getDefaultBinder().set;
+            set && this.setDefaultValue(set(data));
+        }
+        else {
+            this.domBinder.setTo(data, this.domNode);
         }
     }
     getData() {
-        if (this.dataNode.name && this.transformer) {
-            return this.transformer(this.domWrapper.domElement.textContent);
+        if (!this.dataNode.name) {
+            return;
         }
+        if (this.domBinder.isDefault()) {
+            const get = this.domBinder.getDefaultBinder().get;
+            return get && get(this.getDefaultValue());
+        }
+        else {
+            return this.domBinder.getFrom(this.domNode);
+        }
+    }
+    setDefaultValue(value) {
+        this.domWrapper.domElement.textContent = value;
+    }
+    getDefaultValue() {
+        return this.domWrapper.domElement.textContent;
     }
 }
 exports.HtmlElementComponent = HtmlElementComponent;
 class TextInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, observationProperties, transformer) {
+    constructor(element, properties = {}, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.transformer = transformer;
+        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
-        if (this.dataNode.name) {
-            this.domWrapper.domElement.value = stringValue(data);
+        if (!this.dataNode.name) {
+            return;
+        }
+        const set = this.domBinder.getDefaultBinder().set;
+        if (set) {
+            this.domWrapper.domElement.value = set(data);
         }
     }
     getData() {
-        if (this.dataNode.name && this.transformer) {
-            return this.transformer(this.domWrapper.domElement.value);
+        if (!this.dataNode.name) {
+            return;
         }
+        const get = this.domBinder.getDefaultBinder().get;
+        return get && get(this.domWrapper.domElement.value);
     }
 }
 exports.TextInputComponent = TextInputComponent;
 class CheckBoxInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, observationProperties) {
+    constructor(element, properties = {}, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
+        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
-        if (this.dataNode.name) {
-            this.domWrapper.domElement.checked = !!data;
+        if (!this.dataNode.name) {
+            return;
+        }
+        const set = this.domBinder.getDefaultBinder().set;
+        if (set) {
+            this.domWrapper.domElement.checked = set(data);
         }
     }
     getData() {
-        if (this.dataNode.name) {
-            return this.domWrapper.domElement.checked;
+        if (!this.dataNode.name) {
+            return;
         }
+        const get = this.domBinder.getDefaultBinder().get;
+        return get && get(this.domWrapper.domElement.checked);
     }
 }
 exports.CheckBoxInputComponent = CheckBoxInputComponent;
 class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, observationProperties, transformer) {
+    constructor(element, properties = {}, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.transformer = transformer;
+        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data = []) {
         if (!this.dataNode.name) {
+            return;
+        }
+        const set = this.domBinder.getDefaultBinder().set;
+        if (set == null) {
             return;
         }
         const { options } = this.domWrapper.domElement;
         const values = {};
         if (Array.isArray(data)) {
             for (const t of data) {
-                values[t.toString()] = true;
+                values[set(t)] = true;
             }
         }
         else {
-            values[stringValue(data)] = true;
+            values[set(data)] = true;
         }
         for (let i = 0; i < options.length; i++) {
             const opt = options.item(i);
@@ -85,7 +115,11 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
     }
     getData() {
-        if (!this.dataNode.name || !this.transformer) {
+        if (!this.dataNode.name) {
+            return;
+        }
+        const get = this.domBinder.getDefaultBinder().get;
+        if (get == null) {
             return;
         }
         const data = [];
@@ -93,7 +127,7 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
         for (let i = 0; i < options.length; i++) {
             const opt = options.item(i);
             if (opt.selected) {
-                data.push(this.transformer(opt.value));
+                data.push(get(opt.value));
             }
         }
         if (this.domWrapper.domElement.multiple) {
@@ -106,22 +140,32 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
 }
 exports.SelectComponent = SelectComponent;
 class RadioInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, observationProperties, transformer) {
+    constructor(element, properties = {}, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.transformer = transformer;
+        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
-        if (this.dataNode.name) {
-            const radioInput = this.domWrapper.domElement;
-            radioInput.checked = (radioInput.value === stringValue(data));
+        if (!this.dataNode.name) {
+            return;
         }
+        const set = this.domBinder.getDefaultBinder().set;
+        if (set == null) {
+            return;
+        }
+        const radioInput = this.domWrapper.domElement;
+        radioInput.checked = (radioInput.value === set(data));
     }
     getData() {
-        if (this.dataNode.name && this.transformer) {
-            const radioInput = this.domWrapper.domElement;
-            if (radioInput.checked) {
-                return this.transformer(radioInput.value);
-            }
+        if (!this.dataNode.name) {
+            return;
+        }
+        const get = this.domBinder.getDefaultBinder().get;
+        if (get == null) {
+            return;
+        }
+        const radioInput = this.domWrapper.domElement;
+        if (radioInput.checked) {
+            return get(radioInput.value);
         }
     }
 }

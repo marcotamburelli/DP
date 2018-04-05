@@ -1,8 +1,11 @@
 import { Properties } from './types';
 export declare namespace NativeUtil {
-    function applyClass(element: HTMLElement, classProp: string): void;
-    function applyStyle(element: HTMLElement, style: {
-        [prop: string]: string;
-    } | string): void;
-    function applyProperties(element: HTMLElement, properties: Properties): void;
+    function applyProperty(node: Node, {name, value}: {
+        name: string;
+        value: any;
+    }): void;
+    function extractProperty(node: Node, name: string): string | {
+        [prop: string]: any;
+    };
+    function applyProperties(node: Node, properties: Properties): void;
 }

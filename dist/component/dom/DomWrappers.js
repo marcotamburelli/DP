@@ -38,11 +38,6 @@ var DomWrappers;
             const domParent = this.domElement.parentNode;
             domParent && domParent.removeChild(this.domElement);
         }
-        registerDomId(namespace, id) {
-            this.domElement.id = `${namespace}.${id}`;
-        }
-        registerDomName(namespace, name) {
-        }
     }
     class InputDomWrapper extends SimpleDomWrapper {
         constructor(domElement) {
@@ -91,10 +86,6 @@ var DomWrappers;
             this.domParent.removeChild(this.startPlaceholder);
             this.domParent.removeChild(this.endPlaceholder);
         }
-        registerDomId(namespace, id) {
-        }
-        registerDomName(namespace, name) {
-        }
     }
     class TextWrapper {
         constructor(domElement) {
@@ -107,10 +98,6 @@ var DomWrappers;
         detach() {
             const domParent = this.domElement.parentNode;
             domParent && domParent.removeChild(this.domElement);
-        }
-        registerDomId(namespace, id) {
-        }
-        registerDomName(namespace, name) {
         }
     }
 })(DomWrappers = exports.DomWrappers || (exports.DomWrappers = {}));

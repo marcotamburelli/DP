@@ -1,4 +1,4 @@
-import { NATIVE_PROPERTIES } from './const';
+import { NATIVE_PROPERTIES, STYLE_PROPERTIES } from './const';
 import { Properties } from './types';
 
 export namespace NativeUtil {
@@ -26,11 +26,19 @@ export namespace NativeUtil {
     return obj;
   }
 
-  export function applyClass(element: HTMLElement, classProp: string) {
-    classProp.split(' ').forEach(_class => element.classList.add(_class));
+  function applyClass(element: HTMLElement, cssClass: string[] | string | { [cssClass: string]: boolean }) {
+    if (typeof cssClass === 'string') {
+      var classes = cssClass.split(' ');
+    } else if (Array.isArray(cssClass)) {
+      classes = cssClass;
+    } else {
+      classes = Object.keys(cssClass).filter(className => cssClass[className]);
+    }
+
+    classes.forEach(className => element.classList.add(className));
   }
 
-  export function applyStyle(element: HTMLElement, style: { [prop: string]: string } | string) {
+  function applyStyle(element: HTMLElement, style: { [prop: string]: any } | string) {
     if (typeof style === 'string') {
       var styleObj = stringToStyleObject(style);
     } else {
@@ -42,24 +50,72 @@ export namespace NativeUtil {
     Object.keys(styleObj).forEach(key => elementStyle[key] = styleObj[key]);
   }
 
-  export function applyProperties(element: HTMLElement, properties: Properties) {
-    /* The 'type' is better to set before others */
-    if (properties[NATIVE_PROPERTIES.TYPE]) {
-      element[NATIVE_PROPERTIES.TYPE] = properties[NATIVE_PROPERTIES.TYPE];
+  export function applyProperty(node: Node, { name, value }: { name: string, value: any }) {
+    if (name === STYLE_PROPERTIES.CLASS) {
+      return applyClass(node as HTMLElement, value);
     }
 
-    Object.keys(properties).forEach(prop => {
-      if (prop === NATIVE_PROPERTIES.TYPE) {
+    if (name === STYLE_PROPERTIES.STYLE) {
+      return applyStyle(node as HTMLElement, value);
+    }
+
+    if (name.startsWith('on') && typeof value === 'function') {
+      return node.addEventListener(name.substr(2), value);
+    }
+
+    const attr = document.createAttribute(name);
+
+    attr.value = value;
+    node.attributes.setNamedItem(attr);
+  }
+
+  export function extractProperty(node: Node, name: string) {
+    if (name === STYLE_PROPERTIES.CLASS) {
+      const { classList } = node as HTMLElement;
+      const cssClass: string[] = [];
+
+      for (const className of classList) {
+        cssClass.push(className);
+      }
+
+      return cssClass;
+    }
+
+    if (name === STYLE_PROPERTIES.STYLE) {
+      const { style } = node as HTMLElement;
+      const styleValue: { [prop: string]: any } = {};
+      const propCount = style.length;
+
+      for (let i = 0; i < propCount; i++) {
+        const prop = style[i];
+
+        styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
+      }
+
+      return styleValue;
+    }
+
+    const attr = node.attributes.getNamedItem(name);
+
+    if (attr != null) {
+      return attr.value;
+    }
+  }
+
+  export function applyProperties(node: Node, properties: Properties) {
+    /* The 'type' is better to set before others */
+    if (properties[NATIVE_PROPERTIES.TYPE]) {
+      applyProperty(node, { name: NATIVE_PROPERTIES.TYPE, value: properties[NATIVE_PROPERTIES.TYPE] });
+    }
+
+    Object.keys(properties).forEach(name => {
+      if (name === NATIVE_PROPERTIES.TYPE) {
         return;
       }
 
-      const propValue = properties[prop];
+      const value = properties[name];
 
-      if (prop.startsWith('on') && typeof propValue === 'function') {
-        element.addEventListener(prop.substr(2), propValue);
-      } else {
-        element[prop] = propValue;
-      }
+      applyProperty(node, { name, value });
     });
   }
 }

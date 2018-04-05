@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import * as Observable from 'zen-observable';
 
+import { DomBinder } from '../src/component/dom/DomBinder';
 import { dp } from '../src/dp';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
@@ -8,11 +9,13 @@ const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 // tslint:disable-next-line:no-string-literal
 global['document'] = dom.window.document;
 
-describe('Checking single model', () => {
+const intBinder = { set: (n) => `${n}`, get: (v) => parseInt(v) };
 
-  it('Checking html', () => {
+describe('Definition of simple HTML components with bound data', () => {
+
+  it('checks html', () => {
     const div: dp.Component<number, HTMLDivElement> = dp.define(
-      'div', { 'name': 'val', 'value-type': 'number' },
+      'div', { name: 'val', bind: intBinder },
       '321'
     );
 
@@ -23,9 +26,9 @@ describe('Checking single model', () => {
     expect(div.domNode.textContent).toBe('123');
   });
 
-  it('Checking html', () => {
+  it('checks html', () => {
     const div: dp.Component<number, HTMLDivElement> = dp.define(
-      'div', { 'name': 'val', 'value-type': 'number' },
+      'div', { name: 'val', bind: intBinder },
       321
     );
 
@@ -36,10 +39,10 @@ describe('Checking single model', () => {
     expect(div.domNode.textContent).toBe('123');
   });
 
-  it('Checking input', () => {
+  it('checks input', () => {
     const input: dp.Component<number, HTMLInputElement> = dp.define(
       'input',
-      { 'name': 'val', 'value-type': 'number' }
+      { name: 'val', bind: intBinder }
     );
     const nativeInput = input.domNode;
 
@@ -54,12 +57,12 @@ describe('Checking single model', () => {
 
 });
 
-describe('Checking scoped component', () => {
+interface TestModel {
+  name: string;
+  age: number;
+}
 
-  interface TestModel {
-    name: string;
-    age: number;
-  }
+describe('Definition of containers', () => {
 
   interface TypeModel {
     type: string;
@@ -70,11 +73,11 @@ describe('Checking scoped component', () => {
     age: number;
   }
 
-  it('Check model', () => {
+  it('checks model', () => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
-      dp.define('input', { 'name': 'name', 'value-type': 'string' }),
-      dp.define('input', { 'name': 'age', 'value-type': 'number' })
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+      dp.define('input', { name: 'age', bind: intBinder })
     );
 
     component.setData({ name: 'test', age: 123 });
@@ -91,11 +94,11 @@ describe('Checking scoped component', () => {
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
-  it('Check radio group', () => {
+  it('checks radio group', () => {
     const component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
       'div', null,
-      dp.define('input', { 'name': 'age', 'value': 10, 'type': 'RADIO', 'value-type': 'number', 'id': '10' }),
-      dp.define('input', { 'name': 'age', 'value': 20, 'type': 'RADIO', 'value-type': 'number', 'id': '20' })
+      dp.define('input', { name: 'age', value: 10, type: 'RADIO', bind: intBinder, id: '10' }),
+      dp.define('input', { name: 'age', value: 20, type: 'RADIO', bind: intBinder, id: '20' })
     );
 
     component.setData({ age: 20 });
@@ -111,7 +114,7 @@ describe('Checking scoped component', () => {
     expect(component.getData()).toEqual({ age: 10 });
   });
 
-  it('Check select with array', () => {
+  it('checks select with array', () => {
     function generator(model: { id: string, text: string }) {
       return dp.define('option', { value: model.id }, model.text);
     }
@@ -119,9 +122,9 @@ describe('Checking scoped component', () => {
     const component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define(
-        'select', { 'name': 'type', 'value-type': 'string' },
+        'select', { name: 'type', bind: DomBinder.IDENTITY_BINDER },
         dp.List({ generator, id: 'list' })),
-      dp.define('input', { 'name': 'name', 'value-type': 'string' })
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER })
     );
 
     component.queryById<dp.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
@@ -139,7 +142,11 @@ describe('Checking scoped component', () => {
     expect(component.getData()).toEqual({ name: 'test test', type: 'b' });
   });
 
-  it('Check observer', (done) => {
+});
+
+describe('Observer', () => {
+
+  it('checks observer', (done) => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
@@ -164,7 +171,7 @@ describe('Checking scoped component', () => {
     component.queryById<dp.Component<any, HTMLButtonElement>>('button_2').domNode.click();
   });
 
-  it('Check observer when modifying structure', (done) => {
+  it('checks observer when modifying structure', (done) => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
@@ -192,11 +199,11 @@ describe('Checking scoped component', () => {
     child2.domNode.click();
   });
 
-  it('Check model payload', (done) => {
+  it('checks model payload', (done) => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
-      dp.define('input', { 'name': 'name', 'value-type': 'string' }),
-      dp.define('input', { 'name': 'age', 'value-type': 'number' }),
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+      dp.define('input', { name: 'age', bind: intBinder }),
       dp.define<dp.Component<any, HTMLButtonElement>>(
         'button',
         { id: 'button', onclick: { eventType: 'EVENT' } }

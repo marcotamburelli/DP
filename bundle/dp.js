@@ -64,60 +64,52 @@ var ListContainer_1 = require("./component/ListContainer");
 var TextComponent_1 = require("./component/TextComponent");
 var const_1 = require("./util/const");
 var NativeUtil_1 = require("./util/NativeUtil");
-var PropertiesUtil_1 = require("./util/PropertiesUtil");
+var PropertiesReader_1 = require("./util/PropertiesReader");
 var DomFactory;
 (function (DomFactory) {
-    function createElement(tag, properties) {
+    function createElement(tag, nativeProperties) {
         var element = document.createElement(tag);
-        var styleProps = PropertiesUtil_1.PropertiesUtil.getStyleProperties(properties);
-        var nativeProps = PropertiesUtil_1.PropertiesUtil.getNativeProperties(properties);
-        styleProps.class && NativeUtil_1.NativeUtil.applyClass(element, styleProps.class);
-        styleProps.style && NativeUtil_1.NativeUtil.applyStyle(element, styleProps.style);
-        NativeUtil_1.NativeUtil.applyProperties(element, nativeProps);
+        NativeUtil_1.NativeUtil.applyProperties(element, nativeProperties);
         return element;
     }
     DomFactory.createElement = createElement;
 })(DomFactory || (DomFactory = {}));
 var Builder;
 (function (Builder) {
-    function createContainer(tag, properties) {
-        return new Container_1.Container(DomFactory.createElement(tag, properties), PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties), PropertiesUtil_1.PropertiesUtil.getObservationProperties(properties));
+    function createContainer(tag, propReader) {
+        return new Container_1.Container(DomFactory.createElement(tag, propReader.nativeProperties), propReader.dataNodeProperties, propReader.bindProperties, propReader.observationProperties);
     }
-    function createHtmlComponent(tag, properties) {
-        return new HtmlComponents_1.HtmlElementComponent(DomFactory.createElement(tag, properties), PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties), PropertiesUtil_1.PropertiesUtil.getObservationProperties(properties), PropertiesUtil_1.PropertiesUtil.getTransformer(properties));
+    function createHtmlComponent(tag, propReader) {
+        return new HtmlComponents_1.HtmlElementComponent(DomFactory.createElement(tag, propReader.nativeProperties), propReader.dataNodeProperties, propReader.bindProperties, propReader.observationProperties);
     }
-    function createInputComponent(properties) {
-        var element = DomFactory.createElement('input', properties);
-        var dataNodeProperties = PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties);
-        var observationProperties = PropertiesUtil_1.PropertiesUtil.getObservationProperties(properties);
-        switch ((properties[const_1.NATIVE_PROPERTIES.TYPE] || '').toLowerCase()) {
+    function createInputComponent(propReader) {
+        var dataNodeProperties = propReader.dataNodeProperties,
+            bindProperties = propReader.bindProperties,
+            nativeProperties = propReader.nativeProperties,
+            observationProperties = propReader.observationProperties;
+
+        var element = DomFactory.createElement('input', nativeProperties);
+        switch (nativeProperties[const_1.NATIVE_PROPERTIES.TYPE] || '') {
             case 'checkbox':
-                return new HtmlComponents_1.CheckBoxInputComponent(element, dataNodeProperties, observationProperties);
+                return new HtmlComponents_1.CheckBoxInputComponent(element, dataNodeProperties, bindProperties, observationProperties);
             case 'radio':
-                return new HtmlComponents_1.RadioInputComponent(element, dataNodeProperties, observationProperties, PropertiesUtil_1.PropertiesUtil.getTransformer(properties));
+                return new HtmlComponents_1.RadioInputComponent(element, dataNodeProperties, bindProperties, observationProperties);
             default:
-                return new HtmlComponents_1.TextInputComponent(element, dataNodeProperties, observationProperties, PropertiesUtil_1.PropertiesUtil.getTransformer(properties));
+                return new HtmlComponents_1.TextInputComponent(element, dataNodeProperties, bindProperties, observationProperties);
         }
     }
-    function createSelectComponent(properties) {
-        return new HtmlComponents_1.SelectComponent(DomFactory.createElement('select', properties), PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties), PropertiesUtil_1.PropertiesUtil.getObservationProperties(properties), PropertiesUtil_1.PropertiesUtil.getTransformer(properties));
-    }
-    function normalizeProperties(properties) {
-        var normalizedProperties = {};
-        Object.keys(properties).forEach(function (key) {
-            normalizedProperties[key.toLowerCase()] = properties[key];
-        });
-        return normalizedProperties;
+    function createSelectComponent(propReader) {
+        return new HtmlComponents_1.SelectComponent(DomFactory.createElement('select', propReader.nativeProperties), propReader.dataNodeProperties, propReader.bindProperties, propReader.observationProperties);
     }
     function createComponent(tag, properties, hasChildren) {
-        var normalizedProperties = normalizeProperties(properties);
+        var propReader = PropertiesReader_1.PropertiesReader.create(properties);
         switch (tag) {
             case const_1.NODES.DIV:
             case const_1.NODES.UL:
             case const_1.NODES.OL:
             case const_1.NODES.LI:
             case const_1.NODES.FORM:
-                return (hasChildren ? createContainer : createHtmlComponent)(tag, normalizedProperties);
+                return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
             case const_1.NODES.LABEL:
             case const_1.NODES.OPTION:
             case const_1.NODES.SPAN:
@@ -131,27 +123,29 @@ var Builder;
             case const_1.NODES.H5:
             case const_1.NODES.H6:
             case const_1.NODES.BR:
-                return createHtmlComponent(tag, normalizedProperties);
+                return createHtmlComponent(tag, propReader);
             case const_1.NODES.INPUT:
             case const_1.NODES.TEXTAREA:
-                return createInputComponent(normalizedProperties);
+                return createInputComponent(propReader);
             case const_1.NODES.SELECT:
-                return createSelectComponent(normalizedProperties);
+                return createSelectComponent(propReader);
         }
         throw new Error("'" + tag + "' not supported");
     }
     Builder.createComponent = createComponent;
     function createList(properties) {
-        return new ListContainer_1.ListContainer(PropertiesUtil_1.PropertiesUtil.getGenerator(properties), PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties));
+        var propReader = PropertiesReader_1.PropertiesReader.create(properties);
+        return new ListContainer_1.ListContainer(propReader.generator, propReader.dataNodeProperties);
     }
     Builder.createList = createList;
     function createText(properties) {
-        return new TextComponent_1.TextComponent(PropertiesUtil_1.PropertiesUtil.getDataNodeProperties(properties));
+        var propReader = PropertiesReader_1.PropertiesReader.create(properties);
+        return new TextComponent_1.TextComponent(propReader.dataNodeProperties, propReader.bindProperties);
     }
     Builder.createText = createText;
 })(Builder = exports.Builder || (exports.Builder = {}));
 
-},{"./component/Container":5,"./component/HtmlComponents":8,"./component/ListContainer":9,"./component/TextComponent":10,"./util/NativeUtil":14,"./util/PropertiesUtil":15,"./util/const":16}],4:[function(require,module,exports){
+},{"./component/Container":5,"./component/HtmlComponents":7,"./component/ListContainer":8,"./component/TextComponent":9,"./util/NativeUtil":15,"./util/PropertiesReader":16,"./util/const":17}],4:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -247,7 +241,7 @@ var DataDrivenComponentImpl = function (_BaseComponent) {
 
 exports.DataDrivenComponentImpl = DataDrivenComponentImpl;
 
-},{"../event/ObservationNode":12,"./DataNode":6}],5:[function(require,module,exports){
+},{"../event/ObservationNode":13,"./DataNode":6}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -260,7 +254,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var BaseComponent_1 = require("./BaseComponent");
-var DomWrappers_1 = require("./DomWrappers");
+var DomBinder_1 = require("./dom/DomBinder");
+var DomWrappers_1 = require("./dom/DomWrappers");
 /**
  * Basic element.
  * @template E The type of DOM node.
@@ -269,21 +264,25 @@ var DomWrappers_1 = require("./DomWrappers");
 var Container = function (_BaseComponent_1$Data) {
     _inherits(Container, _BaseComponent_1$Data);
 
-    function Container(element, dataNodeProps, observationProperties) {
+    function Container(element, dataNodeProps, bindProperties, observationProperties) {
         _classCallCheck(this, Container);
 
-        return _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, DomWrappers_1.DomWrappers.simple(element), dataNodeProps, observationProperties));
+        var _this = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, DomWrappers_1.DomWrappers.simple(element), dataNodeProps, observationProperties));
+
+        _this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+        return _this;
     }
 
     _createClass(Container, [{
         key: "setData",
         value: function setData(data) {
+            this.domBinder.setTo(data, this.domNode);
             this.dataNode.setData(data);
         }
     }, {
         key: "getData",
         value: function getData() {
-            return this.dataNode.getData();
+            return Object.assign({}, this.domBinder.getFrom(this.domNode), this.dataNode.getData());
         }
     }, {
         key: "queryByName",
@@ -302,7 +301,7 @@ var Container = function (_BaseComponent_1$Data) {
 
 exports.Container = Container;
 
-},{"./BaseComponent":4,"./DomWrappers":7}],6:[function(require,module,exports){
+},{"./BaseComponent":4,"./dom/DomBinder":10,"./dom/DomWrappers":11}],6:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -477,187 +476,6 @@ exports.DataNode = DataNode;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var DomWrappers;
-(function (DomWrappers) {
-    function simple(element) {
-        return new SimpleDomWrapper(element);
-    }
-    DomWrappers.simple = simple;
-    function input(element) {
-        return new InputDomWrapper(element);
-    }
-    DomWrappers.input = input;
-    function array() {
-        return new ArrayWrapper();
-    }
-    DomWrappers.array = array;
-    function text() {
-        var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-
-        return new TextWrapper(document.createTextNode(str));
-    }
-    DomWrappers.text = text;
-
-    var SimpleDomWrapper = function () {
-        function SimpleDomWrapper(domElement) {
-            _classCallCheck(this, SimpleDomWrapper);
-
-            this.domElement = domElement;
-        }
-
-        _createClass(SimpleDomWrapper, [{
-            key: "appendChild",
-            value: function appendChild(child) {
-                if (typeof child === 'string') {
-                    this.domElement.appendChild(document.createTextNode(child));
-                } else {
-                    var childDom = child.domElement;
-                    childDom && this.domElement.appendChild(childDom);
-                    child.provideParent(this);
-                }
-            }
-        }, {
-            key: "provideParent",
-            value: function provideParent(parent) {}
-        }, {
-            key: "detach",
-            value: function detach() {
-                var domParent = this.domElement.parentNode;
-                domParent && domParent.removeChild(this.domElement);
-            }
-        }, {
-            key: "registerDomId",
-            value: function registerDomId(namespace, id) {
-                this.domElement.id = namespace + "." + id;
-            }
-        }, {
-            key: "registerDomName",
-            value: function registerDomName(namespace, name) {}
-        }]);
-
-        return SimpleDomWrapper;
-    }();
-
-    var InputDomWrapper = function (_SimpleDomWrapper) {
-        _inherits(InputDomWrapper, _SimpleDomWrapper);
-
-        function InputDomWrapper(domElement) {
-            _classCallCheck(this, InputDomWrapper);
-
-            return _possibleConstructorReturn(this, (InputDomWrapper.__proto__ || Object.getPrototypeOf(InputDomWrapper)).call(this, domElement));
-        }
-
-        _createClass(InputDomWrapper, [{
-            key: "registerDomName",
-            value: function registerDomName(namespace, name) {
-                this.domElement.name = namespace + "." + name;
-            }
-        }]);
-
-        return InputDomWrapper;
-    }(SimpleDomWrapper);
-
-    var START_PLACEHOLDER = 'START';
-    var END_PLACEHOLDER = 'END';
-
-    var ArrayWrapper = function () {
-        function ArrayWrapper() {
-            _classCallCheck(this, ArrayWrapper);
-
-            this.startPlaceholder = document.createComment(START_PLACEHOLDER);
-            this.endPlaceholder = document.createComment(END_PLACEHOLDER);
-        }
-
-        _createClass(ArrayWrapper, [{
-            key: "appendChild",
-            value: function appendChild(child) {
-                if (!this.domParent) {
-                    throw new Error('Array requires to be attached to a parent element, in order to add children');
-                }
-                if (typeof child === 'string') {
-                    this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
-                } else {
-                    var childDom = child.domElement;
-                    childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
-                    child.provideParent(this);
-                }
-            }
-        }, {
-            key: "provideParent",
-            value: function provideParent(parent) {
-                if (parent instanceof ArrayWrapper) {
-                    this.domParent = parent.domParent;
-                    this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
-                    this.domParent.insertBefore(this.endPlaceholder, parent.endPlaceholder);
-                } else {
-                    this.domParent = parent.domElement;
-                    this.domParent.appendChild(this.startPlaceholder);
-                    this.domParent.appendChild(this.endPlaceholder);
-                }
-            }
-        }, {
-            key: "detach",
-            value: function detach() {
-                for (var child = this.startPlaceholder.nextSibling; child !== this.endPlaceholder; child = this.startPlaceholder.nextSibling) {
-                    this.domParent.removeChild(child);
-                }
-                this.domParent.removeChild(this.startPlaceholder);
-                this.domParent.removeChild(this.endPlaceholder);
-            }
-        }, {
-            key: "registerDomId",
-            value: function registerDomId(namespace, id) {}
-        }, {
-            key: "registerDomName",
-            value: function registerDomName(namespace, name) {}
-        }]);
-
-        return ArrayWrapper;
-    }();
-
-    var TextWrapper = function () {
-        function TextWrapper(domElement) {
-            _classCallCheck(this, TextWrapper);
-
-            this.domElement = domElement;
-        }
-
-        _createClass(TextWrapper, [{
-            key: "appendChild",
-            value: function appendChild(child) {}
-        }, {
-            key: "provideParent",
-            value: function provideParent(parent) {}
-        }, {
-            key: "detach",
-            value: function detach() {
-                var domParent = this.domElement.parentNode;
-                domParent && domParent.removeChild(this.domElement);
-            }
-        }, {
-            key: "registerDomId",
-            value: function registerDomId(namespace, id) {}
-        }, {
-            key: "registerDomName",
-            value: function registerDomName(namespace, name) {}
-        }]);
-
-        return TextWrapper;
-    }();
-})(DomWrappers = exports.DomWrappers || (exports.DomWrappers = {}));
-
-},{}],8:[function(require,module,exports){
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -666,44 +484,60 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var BaseComponent_1 = require("./BaseComponent");
-var DomWrappers_1 = require("./DomWrappers");
-function stringValue(x) {
-    if (x == null) {
-        return '';
-    } else {
-        return x.toString();
-    }
-}
+var DomBinder_1 = require("./dom/DomBinder");
+var DomWrappers_1 = require("./dom/DomWrappers");
 
 var HtmlElementComponent = function (_BaseComponent_1$Data) {
     _inherits(HtmlElementComponent, _BaseComponent_1$Data);
 
     function HtmlElementComponent(element) {
         var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var observationProperties = arguments[2];
-        var transformer = arguments[3];
+        var bindProperties = arguments[2];
+        var observationProperties = arguments[3];
 
         _classCallCheck(this, HtmlElementComponent);
 
         var _this = _possibleConstructorReturn(this, (HtmlElementComponent.__proto__ || Object.getPrototypeOf(HtmlElementComponent)).call(this, DomWrappers_1.DomWrappers.simple(element), properties, observationProperties));
 
-        _this.transformer = transformer;
+        _this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this;
     }
 
     _createClass(HtmlElementComponent, [{
         key: "setData",
         value: function setData(data) {
-            if (this.dataNode.name) {
-                this.domWrapper.domElement.textContent = stringValue(data);
+            if (!this.dataNode.name) {
+                return;
+            }
+            if (this.domBinder.isDefault()) {
+                var set = this.domBinder.getDefaultBinder().set;
+                set && this.setDefaultValue(set(data));
+            } else {
+                this.domBinder.setTo(data, this.domNode);
             }
         }
     }, {
         key: "getData",
         value: function getData() {
-            if (this.dataNode.name && this.transformer) {
-                return this.transformer(this.domWrapper.domElement.textContent);
+            if (!this.dataNode.name) {
+                return;
             }
+            if (this.domBinder.isDefault()) {
+                var get = this.domBinder.getDefaultBinder().get;
+                return get && get(this.getDefaultValue());
+            } else {
+                return this.domBinder.getFrom(this.domNode);
+            }
+        }
+    }, {
+        key: "setDefaultValue",
+        value: function setDefaultValue(value) {
+            this.domWrapper.domElement.textContent = value;
+        }
+    }, {
+        key: "getDefaultValue",
+        value: function getDefaultValue() {
+            return this.domWrapper.domElement.textContent;
         }
     }]);
 
@@ -717,30 +551,36 @@ var TextInputComponent = function (_BaseComponent_1$Data2) {
 
     function TextInputComponent(element) {
         var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var observationProperties = arguments[2];
-        var transformer = arguments[3];
+        var bindProperties = arguments[2];
+        var observationProperties = arguments[3];
 
         _classCallCheck(this, TextInputComponent);
 
         var _this2 = _possibleConstructorReturn(this, (TextInputComponent.__proto__ || Object.getPrototypeOf(TextInputComponent)).call(this, DomWrappers_1.DomWrappers.input(element), properties, observationProperties));
 
-        _this2.transformer = transformer;
+        _this2.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this2;
     }
 
     _createClass(TextInputComponent, [{
         key: "setData",
         value: function setData(data) {
-            if (this.dataNode.name) {
-                this.domWrapper.domElement.value = stringValue(data);
+            if (!this.dataNode.name) {
+                return;
+            }
+            var set = this.domBinder.getDefaultBinder().set;
+            if (set) {
+                this.domWrapper.domElement.value = set(data);
             }
         }
     }, {
         key: "getData",
         value: function getData() {
-            if (this.dataNode.name && this.transformer) {
-                return this.transformer(this.domWrapper.domElement.value);
+            if (!this.dataNode.name) {
+                return;
             }
+            var get = this.domBinder.getDefaultBinder().get;
+            return get && get(this.domWrapper.domElement.value);
         }
     }]);
 
@@ -754,26 +594,36 @@ var CheckBoxInputComponent = function (_BaseComponent_1$Data3) {
 
     function CheckBoxInputComponent(element) {
         var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var observationProperties = arguments[2];
+        var bindProperties = arguments[2];
+        var observationProperties = arguments[3];
 
         _classCallCheck(this, CheckBoxInputComponent);
 
-        return _possibleConstructorReturn(this, (CheckBoxInputComponent.__proto__ || Object.getPrototypeOf(CheckBoxInputComponent)).call(this, DomWrappers_1.DomWrappers.input(element), properties, observationProperties));
+        var _this3 = _possibleConstructorReturn(this, (CheckBoxInputComponent.__proto__ || Object.getPrototypeOf(CheckBoxInputComponent)).call(this, DomWrappers_1.DomWrappers.input(element), properties, observationProperties));
+
+        _this3.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+        return _this3;
     }
 
     _createClass(CheckBoxInputComponent, [{
         key: "setData",
         value: function setData(data) {
-            if (this.dataNode.name) {
-                this.domWrapper.domElement.checked = !!data;
+            if (!this.dataNode.name) {
+                return;
+            }
+            var set = this.domBinder.getDefaultBinder().set;
+            if (set) {
+                this.domWrapper.domElement.checked = set(data);
             }
         }
     }, {
         key: "getData",
         value: function getData() {
-            if (this.dataNode.name) {
-                return this.domWrapper.domElement.checked;
+            if (!this.dataNode.name) {
+                return;
             }
+            var get = this.domBinder.getDefaultBinder().get;
+            return get && get(this.domWrapper.domElement.checked);
         }
     }]);
 
@@ -787,14 +637,14 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
 
     function SelectComponent(element) {
         var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var observationProperties = arguments[2];
-        var transformer = arguments[3];
+        var bindProperties = arguments[2];
+        var observationProperties = arguments[3];
 
         _classCallCheck(this, SelectComponent);
 
         var _this4 = _possibleConstructorReturn(this, (SelectComponent.__proto__ || Object.getPrototypeOf(SelectComponent)).call(this, DomWrappers_1.DomWrappers.input(element), properties, observationProperties));
 
-        _this4.transformer = transformer;
+        _this4.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this4;
     }
 
@@ -804,6 +654,10 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
             var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
             if (!this.dataNode.name) {
+                return;
+            }
+            var set = this.domBinder.getDefaultBinder().set;
+            if (set == null) {
                 return;
             }
             var options = this.domWrapper.domElement.options;
@@ -818,7 +672,7 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
                     for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                         var t = _step.value;
 
-                        values[t.toString()] = true;
+                        values[set(t)] = true;
                     }
                 } catch (err) {
                     _didIteratorError = true;
@@ -835,7 +689,7 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
                     }
                 }
             } else {
-                values[stringValue(data)] = true;
+                values[set(data)] = true;
             }
             for (var i = 0; i < options.length; i++) {
                 var opt = options.item(i);
@@ -845,7 +699,11 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
     }, {
         key: "getData",
         value: function getData() {
-            if (!this.dataNode.name || !this.transformer) {
+            if (!this.dataNode.name) {
+                return;
+            }
+            var get = this.domBinder.getDefaultBinder().get;
+            if (get == null) {
                 return;
             }
             var data = [];
@@ -854,7 +712,7 @@ var SelectComponent = function (_BaseComponent_1$Data4) {
             for (var i = 0; i < options.length; i++) {
                 var opt = options.item(i);
                 if (opt.selected) {
-                    data.push(this.transformer(opt.value));
+                    data.push(get(opt.value));
                 }
             }
             if (this.domWrapper.domElement.multiple) {
@@ -875,33 +733,43 @@ var RadioInputComponent = function (_BaseComponent_1$Data5) {
 
     function RadioInputComponent(element) {
         var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var observationProperties = arguments[2];
-        var transformer = arguments[3];
+        var bindProperties = arguments[2];
+        var observationProperties = arguments[3];
 
         _classCallCheck(this, RadioInputComponent);
 
         var _this5 = _possibleConstructorReturn(this, (RadioInputComponent.__proto__ || Object.getPrototypeOf(RadioInputComponent)).call(this, DomWrappers_1.DomWrappers.input(element), properties, observationProperties));
 
-        _this5.transformer = transformer;
+        _this5.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this5;
     }
 
     _createClass(RadioInputComponent, [{
         key: "setData",
         value: function setData(data) {
-            if (this.dataNode.name) {
-                var radioInput = this.domWrapper.domElement;
-                radioInput.checked = radioInput.value === stringValue(data);
+            if (!this.dataNode.name) {
+                return;
             }
+            var set = this.domBinder.getDefaultBinder().set;
+            if (set == null) {
+                return;
+            }
+            var radioInput = this.domWrapper.domElement;
+            radioInput.checked = radioInput.value === set(data);
         }
     }, {
         key: "getData",
         value: function getData() {
-            if (this.dataNode.name && this.transformer) {
-                var radioInput = this.domWrapper.domElement;
-                if (radioInput.checked) {
-                    return this.transformer(radioInput.value);
-                }
+            if (!this.dataNode.name) {
+                return;
+            }
+            var get = this.domBinder.getDefaultBinder().get;
+            if (get == null) {
+                return;
+            }
+            var radioInput = this.domWrapper.domElement;
+            if (radioInput.checked) {
+                return get(radioInput.value);
             }
         }
     }]);
@@ -911,7 +779,7 @@ var RadioInputComponent = function (_BaseComponent_1$Data5) {
 
 exports.RadioInputComponent = RadioInputComponent;
 
-},{"./BaseComponent":4,"./DomWrappers":7}],9:[function(require,module,exports){
+},{"./BaseComponent":4,"./dom/DomBinder":10,"./dom/DomWrappers":11}],8:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -926,7 +794,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var BaseComponent_1 = require("./BaseComponent");
-var DomWrappers_1 = require("./DomWrappers");
+var DomWrappers_1 = require("./dom/DomWrappers");
 
 var ListContainer = function (_BaseComponent_1$Data) {
     _inherits(ListContainer, _BaseComponent_1$Data);
@@ -1020,7 +888,7 @@ var ListContainer = function (_BaseComponent_1$Data) {
 
 exports.ListContainer = ListContainer;
 
-},{"./BaseComponent":4,"./DomWrappers":7}],10:[function(require,module,exports){
+},{"./BaseComponent":4,"./dom/DomWrappers":11}],9:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1033,30 +901,40 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var BaseComponent_1 = require("./BaseComponent");
-var DomWrappers_1 = require("./DomWrappers");
+var DomBinder_1 = require("./dom/DomBinder");
+var DomWrappers_1 = require("./dom/DomWrappers");
 
 var TextComponent = function (_BaseComponent_1$Data) {
     _inherits(TextComponent, _BaseComponent_1$Data);
 
-    function TextComponent(dataNodeProps) {
+    function TextComponent(dataNodeProps, bindProperties) {
         _classCallCheck(this, TextComponent);
 
-        return _possibleConstructorReturn(this, (TextComponent.__proto__ || Object.getPrototypeOf(TextComponent)).call(this, DomWrappers_1.DomWrappers.text(), dataNodeProps));
+        var _this = _possibleConstructorReturn(this, (TextComponent.__proto__ || Object.getPrototypeOf(TextComponent)).call(this, DomWrappers_1.DomWrappers.text(), dataNodeProps));
+
+        _this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+        return _this;
     }
 
     _createClass(TextComponent, [{
         key: "setData",
         value: function setData(data) {
-            if (this.dataNode.name) {
-                this.domWrapper.domElement.data = data;
+            if (!this.dataNode.name) {
+                return;
+            }
+            var set = this.domBinder.getDefaultBinder().set;
+            if (set) {
+                this.domWrapper.domElement.data = set(data);
             }
         }
     }, {
         key: "getData",
         value: function getData() {
-            if (this.dataNode.name) {
-                return this.domWrapper.domElement.data;
+            if (!this.dataNode.name) {
+                return;
             }
+            var get = this.domBinder.getDefaultBinder().get;
+            return get && get(this.domWrapper.domElement.data);
         }
     }]);
 
@@ -1065,7 +943,249 @@ var TextComponent = function (_BaseComponent_1$Data) {
 
 exports.TextComponent = TextComponent;
 
-},{"./BaseComponent":4,"./DomWrappers":7}],11:[function(require,module,exports){
+},{"./BaseComponent":4,"./dom/DomBinder":10,"./dom/DomWrappers":11}],10:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var NativeUtil_1 = require("../../util/NativeUtil");
+exports.DEFAULT_BIND = '____DEFAULT';
+
+var DomBinder = function () {
+    function DomBinder(properties) {
+        _classCallCheck(this, DomBinder);
+
+        this.properties = properties;
+        this.names = Object.keys(properties).filter(function (name) {
+            return name !== exports.DEFAULT_BIND;
+        });
+    }
+
+    _createClass(DomBinder, [{
+        key: "isDefault",
+        value: function isDefault() {
+            return this.names.length === 0 && this.getDefaultBinder() != null;
+        }
+    }, {
+        key: "getDefaultBinder",
+        value: function getDefaultBinder() {
+            return this.properties[exports.DEFAULT_BIND];
+        }
+    }, {
+        key: "setTo",
+        value: function setTo(data, node) {
+            var _this = this;
+
+            this.names.filter(function (name) {
+                return _this.properties[name].set != null;
+            }).forEach(function (name) {
+                NativeUtil_1.NativeUtil.applyProperty(node, { name: name, value: _this.properties[name].set(data[name]) });
+            });
+        }
+    }, {
+        key: "getFrom",
+        value: function getFrom(node) {
+            var _this2 = this;
+
+            return this.names.filter(function (name) {
+                return _this2.properties[name].get != null;
+            }).reduce(function (data, name) {
+                return Object.assign({}, data, _defineProperty({}, name, _this2.properties[name].get(NativeUtil_1.NativeUtil.extractProperty(node, name))));
+            }, {});
+        }
+    }], [{
+        key: "create",
+        value: function create() {
+            var properties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+            if (properties[exports.DEFAULT_BIND]) {
+                return new DomBinder(Object.assign({}, properties));
+            } else {
+                return new DomBinder(Object.assign({}, properties, _defineProperty({}, exports.DEFAULT_BIND, DomBinder.IDENTITY_BINDER)));
+            }
+        }
+    }]);
+
+    return DomBinder;
+}();
+
+DomBinder.IDENTITY_BINDER = {
+    get: function get(v) {
+        return v;
+    },
+    set: function set(v) {
+        return v;
+    }
+};
+exports.DomBinder = DomBinder;
+
+},{"../../util/NativeUtil":15}],11:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var DomWrappers;
+(function (DomWrappers) {
+    function simple(element) {
+        return new SimpleDomWrapper(element);
+    }
+    DomWrappers.simple = simple;
+    function input(element) {
+        return new InputDomWrapper(element);
+    }
+    DomWrappers.input = input;
+    function array() {
+        return new ArrayWrapper();
+    }
+    DomWrappers.array = array;
+    function text() {
+        var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+        return new TextWrapper(document.createTextNode(str));
+    }
+    DomWrappers.text = text;
+
+    var SimpleDomWrapper = function () {
+        function SimpleDomWrapper(domElement) {
+            _classCallCheck(this, SimpleDomWrapper);
+
+            this.domElement = domElement;
+        }
+
+        _createClass(SimpleDomWrapper, [{
+            key: "appendChild",
+            value: function appendChild(child) {
+                if (typeof child === 'string') {
+                    this.domElement.appendChild(document.createTextNode(child));
+                } else {
+                    var childDom = child.domElement;
+                    childDom && this.domElement.appendChild(childDom);
+                    child.provideParent(this);
+                }
+            }
+        }, {
+            key: "provideParent",
+            value: function provideParent(parent) {}
+        }, {
+            key: "detach",
+            value: function detach() {
+                var domParent = this.domElement.parentNode;
+                domParent && domParent.removeChild(this.domElement);
+            }
+        }]);
+
+        return SimpleDomWrapper;
+    }();
+
+    var InputDomWrapper = function (_SimpleDomWrapper) {
+        _inherits(InputDomWrapper, _SimpleDomWrapper);
+
+        function InputDomWrapper(domElement) {
+            _classCallCheck(this, InputDomWrapper);
+
+            return _possibleConstructorReturn(this, (InputDomWrapper.__proto__ || Object.getPrototypeOf(InputDomWrapper)).call(this, domElement));
+        }
+
+        _createClass(InputDomWrapper, [{
+            key: "registerDomName",
+            value: function registerDomName(namespace, name) {
+                this.domElement.name = namespace + "." + name;
+            }
+        }]);
+
+        return InputDomWrapper;
+    }(SimpleDomWrapper);
+
+    var START_PLACEHOLDER = 'START';
+    var END_PLACEHOLDER = 'END';
+
+    var ArrayWrapper = function () {
+        function ArrayWrapper() {
+            _classCallCheck(this, ArrayWrapper);
+
+            this.startPlaceholder = document.createComment(START_PLACEHOLDER);
+            this.endPlaceholder = document.createComment(END_PLACEHOLDER);
+        }
+
+        _createClass(ArrayWrapper, [{
+            key: "appendChild",
+            value: function appendChild(child) {
+                if (!this.domParent) {
+                    throw new Error('Array requires to be attached to a parent element, in order to add children');
+                }
+                if (typeof child === 'string') {
+                    this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+                } else {
+                    var childDom = child.domElement;
+                    childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
+                    child.provideParent(this);
+                }
+            }
+        }, {
+            key: "provideParent",
+            value: function provideParent(parent) {
+                if (parent instanceof ArrayWrapper) {
+                    this.domParent = parent.domParent;
+                    this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
+                    this.domParent.insertBefore(this.endPlaceholder, parent.endPlaceholder);
+                } else {
+                    this.domParent = parent.domElement;
+                    this.domParent.appendChild(this.startPlaceholder);
+                    this.domParent.appendChild(this.endPlaceholder);
+                }
+            }
+        }, {
+            key: "detach",
+            value: function detach() {
+                for (var child = this.startPlaceholder.nextSibling; child !== this.endPlaceholder; child = this.startPlaceholder.nextSibling) {
+                    this.domParent.removeChild(child);
+                }
+                this.domParent.removeChild(this.startPlaceholder);
+                this.domParent.removeChild(this.endPlaceholder);
+            }
+        }]);
+
+        return ArrayWrapper;
+    }();
+
+    var TextWrapper = function () {
+        function TextWrapper(domElement) {
+            _classCallCheck(this, TextWrapper);
+
+            this.domElement = domElement;
+        }
+
+        _createClass(TextWrapper, [{
+            key: "appendChild",
+            value: function appendChild(child) {}
+        }, {
+            key: "provideParent",
+            value: function provideParent(parent) {}
+        }, {
+            key: "detach",
+            value: function detach() {
+                var domParent = this.domElement.parentNode;
+                domParent && domParent.removeChild(this.domElement);
+            }
+        }]);
+
+        return TextWrapper;
+    }();
+})(DomWrappers = exports.DomWrappers || (exports.DomWrappers = {}));
+
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1110,7 +1230,7 @@ var dp;
     dp.listen = listen;
 })(dp = exports.dp || (exports.dp = {}));
 
-},{"./Builder":3,"./component/BaseComponent":4,"./event/listener":13}],12:[function(require,module,exports){
+},{"./Builder":3,"./component/BaseComponent":4,"./event/listener":14}],13:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1275,7 +1395,7 @@ var ObservationNode = function () {
 
 exports.ObservationNode = ObservationNode;
 
-},{"symbol-observable":1}],13:[function(require,module,exports){
+},{"symbol-observable":1}],14:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1343,7 +1463,7 @@ var Listener = function () {
 
 exports.Listener = Listener;
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1369,12 +1489,20 @@ var NativeUtil;
         }
         return obj;
     }
-    function applyClass(element, classProp) {
-        classProp.split(' ').forEach(function (_class) {
-            return element.classList.add(_class);
+    function applyClass(element, cssClass) {
+        if (typeof cssClass === 'string') {
+            var classes = cssClass.split(' ');
+        } else if (Array.isArray(cssClass)) {
+            classes = cssClass;
+        } else {
+            classes = Object.keys(cssClass).filter(function (className) {
+                return cssClass[className];
+            });
+        }
+        classes.forEach(function (className) {
+            return element.classList.add(className);
         });
     }
-    NativeUtil.applyClass = applyClass;
     function applyStyle(element, style) {
         if (typeof style === 'string') {
             var styleObj = stringToStyleObject(style);
@@ -1386,99 +1514,199 @@ var NativeUtil;
             return elementStyle[key] = styleObj[key];
         });
     }
-    NativeUtil.applyStyle = applyStyle;
-    function applyProperties(element, properties) {
+    function applyProperty(node, _ref) {
+        var name = _ref.name,
+            value = _ref.value;
+
+        if (name === const_1.STYLE_PROPERTIES.CLASS) {
+            return applyClass(node, value);
+        }
+        if (name === const_1.STYLE_PROPERTIES.STYLE) {
+            return applyStyle(node, value);
+        }
+        if (name.startsWith('on') && typeof value === 'function') {
+            return node.addEventListener(name.substr(2), value);
+        }
+        var attr = document.createAttribute(name);
+        attr.value = value;
+        node.attributes.setNamedItem(attr);
+    }
+    NativeUtil.applyProperty = applyProperty;
+    function extractProperty(node, name) {
+        if (name === const_1.STYLE_PROPERTIES.CLASS) {
+            var classList = node.classList;
+
+            var cssClass = [];
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = classList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var className = _step.value;
+
+                    cssClass.push(className);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return cssClass;
+        }
+        if (name === const_1.STYLE_PROPERTIES.STYLE) {
+            var style = node.style;
+
+            var styleValue = {};
+            var propCount = style.length;
+            for (var i = 0; i < propCount; i++) {
+                var prop = style[i];
+                styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
+            }
+            return styleValue;
+        }
+        var attr = node.attributes.getNamedItem(name);
+        if (attr != null) {
+            return attr.value;
+        }
+    }
+    NativeUtil.extractProperty = extractProperty;
+    function applyProperties(node, properties) {
         /* The 'type' is better to set before others */
         if (properties[const_1.NATIVE_PROPERTIES.TYPE]) {
-            element[const_1.NATIVE_PROPERTIES.TYPE] = properties[const_1.NATIVE_PROPERTIES.TYPE];
+            applyProperty(node, { name: const_1.NATIVE_PROPERTIES.TYPE, value: properties[const_1.NATIVE_PROPERTIES.TYPE] });
         }
-        Object.keys(properties).forEach(function (prop) {
-            if (prop === const_1.NATIVE_PROPERTIES.TYPE) {
+        Object.keys(properties).forEach(function (name) {
+            if (name === const_1.NATIVE_PROPERTIES.TYPE) {
                 return;
             }
-            var propValue = properties[prop];
-            if (prop.startsWith('on') && typeof propValue === 'function') {
-                element.addEventListener(prop.substr(2), propValue);
-            } else {
-                element[prop] = propValue;
-            }
+            var value = properties[name];
+            applyProperty(node, { name: name, value: value });
         });
     }
     NativeUtil.applyProperties = applyProperties;
 })(NativeUtil = exports.NativeUtil || (exports.NativeUtil = {}));
 
-},{"./const":16}],15:[function(require,module,exports){
+},{"./const":17}],16:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 Object.defineProperty(exports, "__esModule", { value: true });
+var DomBinder_1 = require("../component/dom/DomBinder");
 var const_1 = require("./const");
-var PropertiesUtil;
-(function (PropertiesUtil) {
-    function getDataNodeProperties(properties) {
-        return {
-            id: properties[const_1.DATA_NODE_PROPERTIES.ID],
-            name: properties[const_1.DATA_NODE_PROPERTIES.NAME]
-        };
-    }
-    PropertiesUtil.getDataNodeProperties = getDataNodeProperties;
-    function getTransformer(properties) {
-        var type = properties[const_1.SPECIFIC_PROPERTIES.VALUE_TYPE];
-        switch (type) {
-            case 'number':
-                return function (value) {
-                    return parseInt(value);
-                };
-            case 'number.float':
-                return function (value) {
-                    return parseFloat(value);
-                };
-            default:
-                return function (value) {
-                    return value;
-                };
-        }
-    }
-    PropertiesUtil.getTransformer = getTransformer;
-    function getGenerator(properties) {
-        var generator = properties[const_1.SPECIFIC_PROPERTIES.GENERATOR];
-        if (typeof generator === 'function') {
-            return generator;
-        }
-    }
-    PropertiesUtil.getGenerator = getGenerator;
-    function getStyleProperties(properties) {
-        return {
-            class: properties[const_1.STYLE_PROPERTIES.CLASS],
-            style: properties[const_1.STYLE_PROPERTIES.STYLE]
-        };
-    }
-    PropertiesUtil.getStyleProperties = getStyleProperties;
-    function getNativeProperties(properties) {
-        var nativeProps = Object.assign({}, properties);
-        delete nativeProps[const_1.DATA_NODE_PROPERTIES.ID];
-        delete nativeProps[const_1.SPECIFIC_PROPERTIES.VALUE_TYPE];
-        delete nativeProps[const_1.SPECIFIC_PROPERTIES.GENERATOR];
-        delete nativeProps[const_1.STYLE_PROPERTIES.CLASS];
-        delete nativeProps[const_1.STYLE_PROPERTIES.STYLE];
-        return nativeProps;
-    }
-    PropertiesUtil.getNativeProperties = getNativeProperties;
-    function getObservationProperties(properties) {
-        var observationProperties = {};
-        Object.keys(properties).forEach(function (prop) {
-            var propValue = properties[prop];
-            if (prop.startsWith('on') && (typeof propValue === "undefined" ? "undefined" : _typeof(propValue)) === 'object') {
-                observationProperties[prop.substr(2)] = Object.assign({}, propValue);
+
+var PropertiesReader = function () {
+    function PropertiesReader(properties) {
+        var _this = this;
+
+        _classCallCheck(this, PropertiesReader);
+
+        this.dataNodeProperties = {};
+        this.nativeProperties = {};
+        this.observationProperties = {};
+        this.bindProperties = {};
+        Object.keys(properties).forEach(function (key) {
+            if (!_this.checkGenerator(key, properties) && !_this.checkObservationProperty(key, properties) && !_this.checkBindProperties(key, properties)) {
+                _this.registerDataNodeProperty(key, properties);
+                _this.registerAsNative(key, properties);
             }
         });
-        return observationProperties;
     }
-    PropertiesUtil.getObservationProperties = getObservationProperties;
-})(PropertiesUtil = exports.PropertiesUtil || (exports.PropertiesUtil = {}));
 
-},{"./const":16}],16:[function(require,module,exports){
+    _createClass(PropertiesReader, [{
+        key: "registerDataNodeProperty",
+        value: function registerDataNodeProperty(key, properties) {
+            switch (key.toLowerCase()) {
+                case const_1.DATA_NODE_PROPERTIES.ID:
+                    this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.ID] = properties[key];
+                    break;
+                case const_1.DATA_NODE_PROPERTIES.NAME:
+                    this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.NAME] = properties[key];
+                    break;
+            }
+        }
+    }, {
+        key: "checkGenerator",
+        value: function checkGenerator(key, properties) {
+            switch (key.toLowerCase()) {
+                case const_1.SPECIFIC_PROPERTIES.GENERATOR:
+                    var generator = properties[const_1.SPECIFIC_PROPERTIES.GENERATOR];
+                    if (typeof generator === 'function') {
+                        this.generator = generator;
+                    }
+                    return true;
+            }
+        }
+    }, {
+        key: "checkObservationProperty",
+        value: function checkObservationProperty(key, properties) {
+            var prop = key.toLowerCase();
+            var propValue = properties[key];
+            if (prop.startsWith('on') && (typeof propValue === "undefined" ? "undefined" : _typeof(propValue)) === 'object') {
+                this.observationProperties[prop.substr(2)] = Object.assign({}, propValue);
+                return true;
+            }
+        }
+    }, {
+        key: "checkBindProperties",
+        value: function checkBindProperties(key, properties) {
+            var prop = key.toLowerCase();
+            var propValue = properties[key];
+            switch (prop) {
+                case const_1.BIND_PROPERTIES.BIND:
+                    this.bindProperties[DomBinder_1.DEFAULT_BIND] = Object.assign({}, propValue);
+                    return true;
+            }
+            if ((typeof propValue === "undefined" ? "undefined" : _typeof(propValue)) === 'object' || propValue.get || propValue.set) {
+                this.bindProperties[prop] = Object.assign({}, propValue);
+                return true;
+            }
+            if (typeof propValue === 'function') {
+                this.bindProperties[prop] = { set: propValue };
+                return true;
+            }
+        }
+    }, {
+        key: "registerAsNative",
+        value: function registerAsNative(key, properties) {
+            var prop = key.toLowerCase();
+            switch (prop) {
+                case const_1.NATIVE_PROPERTIES.TYPE:
+                    this.nativeProperties[const_1.NATIVE_PROPERTIES.TYPE] = properties[key].toLowerCase();
+                    break;
+                default:
+                    this.nativeProperties[prop] = properties[key];
+                    break;
+            }
+        }
+    }], [{
+        key: "create",
+        value: function create(properties) {
+            return new PropertiesReader(properties);
+        }
+    }]);
+
+    return PropertiesReader;
+}();
+
+exports.PropertiesReader = PropertiesReader;
+
+},{"../component/dom/DomBinder":10,"./const":17}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1521,6 +1749,9 @@ exports.STYLE_PROPERTIES = {
 exports.NATIVE_PROPERTIES = {
     TYPE: 'type'
 };
+exports.BIND_PROPERTIES = {
+    BIND: 'bind'
+};
 
-},{}]},{},[11])(11)
+},{}]},{},[12])(12)
 });

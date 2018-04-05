@@ -2,12 +2,14 @@ import { ObservationProperties } from '../event/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { Component, IsContainer } from './Components';
 import { DataNodeProperties } from './DataNode';
+import { BindProperties } from './dom/DomBinder';
 /**
  * Basic element.
  * @template E The type of DOM node.
  */
 export declare class Container<D, E extends Element> extends DataDrivenComponentImpl<D, E> implements IsContainer {
-    constructor(element: E, dataNodeProps?: DataNodeProperties, observationProperties?: ObservationProperties);
+    private domBinder;
+    constructor(element: E, dataNodeProps?: DataNodeProperties, bindProperties?: BindProperties, observationProperties?: ObservationProperties);
     setData(data: D): void;
     getData(): any;
     queryByName<C extends Component>(name: string): C[];
