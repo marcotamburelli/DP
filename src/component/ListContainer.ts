@@ -2,8 +2,7 @@ import { BaseComponent, DataDrivenComponentImpl, DomBasedComponent } from './Bas
 import { Component, IsDataDriven, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './dom/DomWrappers';
-
-export type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponent & IsDataDriven<D>);
+import { ComponentGenerator } from './generator';
 
 export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
   private children: (Component | IsDataDriven<any>)[];

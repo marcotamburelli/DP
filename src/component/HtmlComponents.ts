@@ -64,7 +64,7 @@ export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputE
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement | HTMLTextAreaElement>, properties, observationProperties);
+    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement | HTMLTextAreaElement>, properties, observationProperties);
 
     this.domBinder = DomBinder.create(bindProperties);
   }
@@ -101,7 +101,7 @@ export class CheckBoxInputComponent<D> extends DataDrivenComponentImpl<D, HTMLIn
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
+    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
 
     this.domBinder = DomBinder.create(bindProperties);
   }
@@ -138,7 +138,7 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.input(element) as DomWrapper<HTMLSelectElement>, properties, observationProperties);
+    super(DomWrappers.simple(element) as DomWrapper<HTMLSelectElement>, properties, observationProperties);
 
     this.domBinder = DomBinder.create(bindProperties);
   }
@@ -211,7 +211,7 @@ export class RadioInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInput
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.input(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
+    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
 
     this.domBinder = DomBinder.create(bindProperties);
   }

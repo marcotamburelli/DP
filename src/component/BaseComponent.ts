@@ -48,8 +48,7 @@ export abstract class BaseComponent<N extends Node> implements Component {
 
     this.dataNode.remove(child.dataNode);
     this.observationNode.remove(child.observationNode);
-
-    child.domWrapper.detach();
+    this.domWrapper.removeChild(child.domWrapper);
   }
 
   get domNode() {

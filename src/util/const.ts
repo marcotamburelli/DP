@@ -28,11 +28,6 @@ export const DATA_NODE_PROPERTIES = {
   NAME: 'name'
 };
 
-export const SPECIFIC_PROPERTIES = {
-  VALUE_TYPE: 'value-type',
-  GENERATOR: 'generator'
-};
-
 export const STYLE_PROPERTIES = {
   CLASS: 'class',
   STYLE: 'style'

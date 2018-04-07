@@ -1,22 +1,39 @@
 export interface DomWrapper<N extends Node> {
   readonly domElement?: N;
 
+  parentDomWrapper: DomWrapper<any>;
+
   appendChild<F extends Node>(child: DomWrapper<F> | string);
 
   provideParent<P extends Node>(parent: DomWrapper<P>);
 
-  detach();
+  removeChild(child: DomWrapper<any>);
 }
 
 export namespace DomWrappers {
-  export function simple<E extends Element>(element: E): DomWrapper<E> {
-    return new SimpleDomWrapper(element);
+  type ChildDomWrapper<F extends Node> = DomWrapper<F> | string;
+
+  abstract class AbstractDomWrapper<N extends Node> implements DomWrapper<N> {
+    parentDomWrapper: DomWrapper<any>;
+    readonly domElement?: N;
+
+    abstract appendChild<F extends Node>(child: ChildDomWrapper<F>);
+
+    provideParent<P extends Node>(parent: DomWrapper<P>) {
+      this.parentDomWrapper = parent;
+    }
+
+    removeChild(child: DomWrapper<any>) {
+      if (child instanceof AbstractDomWrapper) {
+        child.detach();
+      }
+    }
+
+    protected abstract detach();
   }
 
-  export function input(
-    element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-  ): DomWrapper<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
-    return new InputDomWrapper(element);
+  export function simple<E extends Element>(element: E): DomWrapper<E> {
+    return new SimpleDomWrapper(element);
   }
 
   export function group(): DomWrapper<Node> {
@@ -27,11 +44,12 @@ export namespace DomWrappers {
     return new TextWrapper(document.createTextNode(str));
   }
 
-  class SimpleDomWrapper<E extends Element> implements DomWrapper<E> {
+  class SimpleDomWrapper<E extends Element> extends AbstractDomWrapper<E> {
     constructor(public readonly domElement: E) {
+      super();
     }
 
-    appendChild<F extends Node>(child: string | DomWrapper<F>) {
+    appendChild<F extends Node>(child: ChildDomWrapper<F>) {
       if (typeof child === 'string') {
         this.domElement.appendChild(document.createTextNode(child));
       } else {
@@ -42,59 +60,57 @@ export namespace DomWrappers {
       }
     }
 
-    provideParent<P extends Node>(parent: DomWrapper<P>) {
+    removeChild(child: DomWrapper<any>) {
+      this.domElement.removeChild(child.domElement);
+      delete child.parentDomWrapper;
     }
 
     detach() {
       const domParent = this.domElement.parentNode;
 
-      domParent && domParent.removeChild(this.domElement);
-    }
-  }
-
-  class InputDomWrapper extends SimpleDomWrapper<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
-    constructor(domElement: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
-      super(domElement);
-    }
-
-    registerDomName(namespace: string, name: string) {
-      this.domElement.name = `${namespace}.${name}`;
+      if (this.parentDomWrapper && domParent) {
+        domParent.removeChild(this.domElement);
+      }
     }
   }
 
   const START_PLACEHOLDER = 'START';
   const END_PLACEHOLDER = 'END';
 
-  class GroupWrapper implements DomWrapper<Node> {
-    private domParent: Node;
-
+  class GroupWrapper extends AbstractDomWrapper<Node> {
     private startPlaceholder = document.createComment(START_PLACEHOLDER);
     private endPlaceholder = document.createComment(END_PLACEHOLDER);
 
-    private pendingChildNodes: (string | DomWrapper<any>)[] = [];
+    private children = new Set<ChildDomWrapper<any>>();
 
-    appendChild<F extends Node>(child: string | DomWrapper<F>) {
-      if (!this.domParent) {
-        this.pendingChildNodes.push(child);
-      } else {
-        this._append(child);
-      }
+    appendChild<F extends Node>(child: ChildDomWrapper<F>) {
+      this.children.add(child);
+
+      this.fireAppend(child);
     }
 
     provideParent<P extends Node>(parent: DomWrapper<P>) {
-      if (parent instanceof GroupWrapper) {
-        this.domParent = parent.domParent;
+      super.provideParent(parent);
 
+      if (!this.domParent) {
+        return;
+      }
+
+      if (parent instanceof GroupWrapper) {
         this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
         this.domParent.insertBefore(this.endPlaceholder, parent.endPlaceholder);
       } else {
-        this.domParent = parent.domElement;
-
         this.domParent.appendChild(this.startPlaceholder);
         this.domParent.appendChild(this.endPlaceholder);
       }
 
-      this.pendingChildNodes.forEach(child => this._append(child));
+      this.children.forEach(child => this.fireAppend(child));
+    }
+
+    removeChild(child: DomWrapper<any>) {
+      this.children.delete(child);
+
+      super.removeChild(child);
     }
 
     detach() {
@@ -110,26 +126,47 @@ export namespace DomWrappers {
       this.domParent.removeChild(this.endPlaceholder);
     }
 
-    private _append(child: string | DomWrapper<any>) {
-      if (typeof child === 'string') {
-        this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
-      } else {
-        const childDom = child.domElement;
+    private fireAppend<F extends Node>(child: ChildDomWrapper<F>) {
+      if (!this.domParent) {
+        return;
+      }
 
-        childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
+      if (typeof child === 'string') {
+        var childNode: Node = document.createTextNode(child);
+      } else {
+        childNode = child.domElement;
+
         child.provideParent(this);
+      }
+
+      if (!childNode) {
+        return;
+      }
+
+      if (this.domParent) {
+        this.domParent.insertBefore(childNode, this.endPlaceholder);
+      }
+    }
+
+    private get domParent() {
+      var parentWrapper = this.parentDomWrapper;
+
+      while (parentWrapper) {
+        if (parentWrapper.domElement) {
+          return parentWrapper.domElement;
+        } else {
+          parentWrapper = parentWrapper.parentDomWrapper;
+        }
       }
     }
   }
 
-  class TextWrapper implements DomWrapper<Text> {
+  class TextWrapper extends AbstractDomWrapper<Text> {
     constructor(public readonly domElement: Text) {
+      super();
     }
 
-    appendChild<F extends Node>(child: string | DomWrapper<F>) {
-    }
-
-    provideParent<P extends Node>(parent: DomWrapper<P>) {
+    appendChild<F extends Node>(child: ChildDomWrapper<F>) {
     }
 
     detach() {

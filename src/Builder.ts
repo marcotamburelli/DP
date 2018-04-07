@@ -126,7 +126,7 @@ export namespace Builder {
   export function createList<D>(properties: Properties) {
     const propReader = PropertiesReader.create(properties);
 
-    return new ListContainer<D>(propReader.generator, propReader.dataNodeProperties);
+    return new ListContainer<D>(null, propReader.dataNodeProperties);
   }
 
   export function createGroup<D>(properties: Properties) {
