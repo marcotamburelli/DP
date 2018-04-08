@@ -6,6 +6,7 @@ export interface DataNodeProperties {
 }
 
 export class DataNode {
+  // TODO Is the idx required? Consider to use a set instead of a map for children.
   private idx?: number;
 
   private childSeq = 0;

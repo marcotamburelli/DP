@@ -4,7 +4,7 @@ import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './dom/DomWrappers';
 
 export class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implements IsContainer {
-  constructor(dataNodeProps?: DataNodeProperties) {
+  constructor(private dataNodeProps?: DataNodeProperties) {
     super(DomWrappers.group(), dataNodeProps);
   }
 
@@ -22,5 +22,11 @@ export class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implement
 
   queryById<C extends Component>(id: string) {
     return this.dataNode.getById(id) as C;
+  }
+
+  protected prepareCopy() {
+    return new (this.constructor as {
+      new(dataNodeProps?: DataNodeProperties): GroupContainer<D>
+    })(this.dataNodeProps);
   }
 }

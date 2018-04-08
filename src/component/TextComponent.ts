@@ -6,7 +6,7 @@ import { DomWrappers } from './dom/DomWrappers';
 export class TextComponent<D> extends DataDrivenComponentImpl<D, Text>  {
   private domBinder: DomBinder;
 
-  constructor(dataNodeProps?: DataNodeProperties, bindProperties?: BindProperties) {
+  constructor(private dataNodeProps?: DataNodeProperties, private bindProperties?: BindProperties) {
     super(DomWrappers.text(), dataNodeProps);
 
     this.domBinder = DomBinder.create(bindProperties);
@@ -32,5 +32,17 @@ export class TextComponent<D> extends DataDrivenComponentImpl<D, Text>  {
     const get = this.domBinder.getDefaultBinder<D, string>().get;
 
     return get && get(this.domWrapper.domElement.data);
+  }
+
+  protected prepareCopy() {
+    return new (this.constructor as {
+      new(
+        dataNodeProps: DataNodeProperties,
+        bindProperties?: BindProperties
+      ): TextComponent<D>
+    })(
+      this.dataNodeProps,
+      this.bindProperties
+    );
   }
 }

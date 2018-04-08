@@ -12,6 +12,7 @@ export abstract class BaseComponent<N extends Node> implements Component {
   }
 
   protected parent: DomBasedComponent;
+  protected children = [];
 
   protected abstract readonly dataNode: DataNode;
   protected abstract readonly observationNode: ObservationNode;
@@ -33,6 +34,8 @@ export abstract class BaseComponent<N extends Node> implements Component {
     } else {
       this.domWrapper.appendChild(`${child}`);
     }
+
+    this.children.push(child);
   }
 
   remove(child: Component) {
@@ -49,6 +52,12 @@ export abstract class BaseComponent<N extends Node> implements Component {
     this.dataNode.remove(child.dataNode);
     this.observationNode.remove(child.observationNode);
     this.domWrapper.removeChild(child.domWrapper);
+
+    const idx = this.children.indexOf(child);
+
+    if (idx >= 0) {
+      this.children.splice(idx, 1);
+    }
   }
 
   get domNode() {
@@ -58,6 +67,22 @@ export abstract class BaseComponent<N extends Node> implements Component {
   createObservable<P>(observedEvent?: EventType): IsObservable<P> {
     return this.observationNode.createObservable<P>(observedEvent);
   }
+
+  cloneComponent<C extends BaseComponent<N>>(deep = true) {
+    const copy = this.prepareCopy() as C;
+
+    deep && this.children.forEach(child => {
+      if (child instanceof BaseComponent) {
+        copy.append(child.cloneComponent());
+      } else {
+        copy.append(child);
+      }
+    });
+
+    return copy;
+  }
+
+  protected abstract prepareCopy(): BaseComponent<N>;
 }
 
 export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {

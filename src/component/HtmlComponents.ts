@@ -2,20 +2,47 @@ import { ObservationProperties } from '../event/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { DataNodeProperties } from './DataNode';
 import { BindProperties, DomBinder } from './dom/DomBinder';
-import { DomWrapper, DomWrappers } from './dom/DomWrappers';
+import { DomWrappers } from './dom/DomWrappers';
 
-export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElement> {
-  private domBinder: DomBinder;
+abstract class HtmlComponent<D, N extends Element> extends DataDrivenComponentImpl<D, N> {
+  protected domBinder: DomBinder;
 
   constructor(
+    private element: N,
+    private dataNodeProperties: DataNodeProperties = {},
+    private bindProperties?: BindProperties,
+    private observationProperties?: ObservationProperties
+  ) {
+    super(DomWrappers.simple(element), dataNodeProperties, observationProperties);
+
+    this.domBinder = DomBinder.create(bindProperties);
+  }
+
+  protected prepareCopy<C extends HtmlComponent<D, N>>() {
+    return new (this.constructor as {
+      new(
+        element: N,
+        dataNodeProperties: DataNodeProperties,
+        bindProperties?: BindProperties,
+        observationProperties?: ObservationProperties
+      ): C
+    })(
+      this.element.cloneNode() as N,
+      this.dataNodeProperties,
+      this.bindProperties,
+      this.observationProperties
+    );
+  }
+}
+
+export class HtmlElementComponent<D> extends HtmlComponent<D, HTMLElement> {
+  constructor(
     element: HTMLElement,
-    properties: DataNodeProperties = {},
+    dataNodeProperties: DataNodeProperties = {},
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.simple(element), properties, observationProperties);
-
-    this.domBinder = DomBinder.create(bindProperties);
+    super(element, dataNodeProperties, bindProperties, observationProperties);
   }
 
   setData(data: D) {
@@ -55,18 +82,14 @@ export class HtmlElementComponent<D> extends DataDrivenComponentImpl<D, HTMLElem
   }
 }
 
-export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement | HTMLTextAreaElement>  {
-  private domBinder: DomBinder;
-
+export class TextInputComponent<D> extends HtmlComponent<D, HTMLInputElement | HTMLTextAreaElement>  {
   constructor(
     element: HTMLInputElement | HTMLTextAreaElement,
-    properties: DataNodeProperties = {},
+    dataNodeProperties: DataNodeProperties = {},
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement | HTMLTextAreaElement>, properties, observationProperties);
-
-    this.domBinder = DomBinder.create(bindProperties);
+    super(element, dataNodeProperties, bindProperties, observationProperties);
   }
 
   setData(data: D) {
@@ -92,18 +115,14 @@ export class TextInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputE
   }
 }
 
-export class CheckBoxInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement> {
-  private domBinder: DomBinder;
-
+export class CheckBoxInputComponent<D> extends HtmlComponent<D, HTMLInputElement> {
   constructor(
     element: HTMLInputElement,
-    properties: DataNodeProperties = {},
+    dataNodeProperties: DataNodeProperties = {},
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
-
-    this.domBinder = DomBinder.create(bindProperties);
+    super(element, dataNodeProperties, bindProperties, observationProperties);
   }
 
   setData(data: D) {
@@ -129,18 +148,14 @@ export class CheckBoxInputComponent<D> extends DataDrivenComponentImpl<D, HTMLIn
   }
 }
 
-export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSelectElement> {
-  private domBinder: DomBinder;
-
+export class SelectComponent<D> extends HtmlComponent<D[] | D, HTMLSelectElement> {
   constructor(
     element: HTMLSelectElement,
-    properties: DataNodeProperties = {},
+    dataNodeProperties: DataNodeProperties = {},
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.simple(element) as DomWrapper<HTMLSelectElement>, properties, observationProperties);
-
-    this.domBinder = DomBinder.create(bindProperties);
+    super(element, dataNodeProperties, bindProperties, observationProperties);
   }
 
   setData(data: D[] | D = []) {
@@ -202,18 +217,14 @@ export class SelectComponent<D> extends DataDrivenComponentImpl<D[] | D, HTMLSel
   }
 }
 
-export class RadioInputComponent<D> extends DataDrivenComponentImpl<D, HTMLInputElement>  {
-  private domBinder: DomBinder;
-
+export class RadioInputComponent<D> extends HtmlComponent<D, HTMLInputElement>  {
   constructor(
     element: HTMLInputElement,
-    properties: DataNodeProperties = {},
+    dataNodeProperties: DataNodeProperties = {},
     bindProperties?: BindProperties,
     observationProperties?: ObservationProperties
   ) {
-    super(DomWrappers.simple(element) as DomWrapper<HTMLInputElement>, properties, observationProperties);
-
-    this.domBinder = DomBinder.create(bindProperties);
+    super(element, dataNodeProperties, bindProperties, observationProperties);
   }
 
   setData(data: D) {

@@ -5,30 +5,16 @@ import { DomWrappers } from './dom/DomWrappers';
 import { ComponentGenerator } from './generator';
 
 export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
-  private children: (Component | IsDataDriven<any>)[];
-
-  constructor(private generator: ComponentGenerator<D>, dataNodeProps?: DataNodeProperties) {
+  constructor(private generator: ComponentGenerator<D>, private dataNodeProps?: DataNodeProperties) {
     super(DomWrappers.group(), dataNodeProps);
-
-    this.children = [];
   }
 
   append(child: any) {
+    if (!(child instanceof BaseComponent)) {
+      throw new Error('List can only append component');
+    }
+
     super.append(child);
-
-    if (child instanceof BaseComponent) {
-      this.children.push(child);
-    }
-  }
-
-  remove(child: DomBasedComponent) {
-    super.remove(child);
-
-    for (var i = 0; i < this.children.length; i++) {
-      if (this.children[i] === child) {
-        this.children.splice(i, 1);
-      }
-    }
   }
 
   setData(data: D[]) {
@@ -40,8 +26,8 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
       super.remove(this.children.pop() as DomBasedComponent);
     }
 
-    data.forEach((dataItem, i) => {
-      const child = this.generator(dataItem, i);
+    data.forEach((dataItem) => {
+      const child = this.generator();
 
       child.setData(dataItem);
       this.append(child);
@@ -74,5 +60,14 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
 
   queryById<C extends Component>(id: string) {
     return this.dataNode.getById(id) as C;
+  }
+
+  protected prepareCopy() {
+    return new (this.constructor as {
+      new(
+        generator: ComponentGenerator<D>,
+        dataNodeProps: DataNodeProperties
+      ): ListContainer<D>
+    })(this.generator, this.dataNodeProps);
   }
 }

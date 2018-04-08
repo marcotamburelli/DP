@@ -8,6 +8,8 @@ export interface DomWrapper<N extends Node> {
   provideParent<P extends Node>(parent: DomWrapper<P>);
 
   removeChild(child: DomWrapper<any>);
+
+  clone(): DomWrapper<N>;
 }
 
 export namespace DomWrappers {
@@ -15,7 +17,9 @@ export namespace DomWrappers {
 
   abstract class AbstractDomWrapper<N extends Node> implements DomWrapper<N> {
     parentDomWrapper: DomWrapper<any>;
-    readonly domElement?: N;
+
+    constructor(public readonly domElement?: N) {
+    }
 
     abstract appendChild<F extends Node>(child: ChildDomWrapper<F>);
 
@@ -27,6 +31,12 @@ export namespace DomWrappers {
       if (child instanceof AbstractDomWrapper) {
         child.detach();
       }
+    }
+
+    clone() {
+      const domCopy = this.domElement && this.domElement.cloneNode() as N;
+
+      return new (this.constructor as { new(domElement?: N): AbstractDomWrapper<N> })(domCopy);
     }
 
     protected abstract detach();
@@ -45,8 +55,8 @@ export namespace DomWrappers {
   }
 
   class SimpleDomWrapper<E extends Element> extends AbstractDomWrapper<E> {
-    constructor(public readonly domElement: E) {
-      super();
+    constructor(domElement: E) {
+      super(domElement);
     }
 
     appendChild<F extends Node>(child: ChildDomWrapper<F>) {
@@ -66,10 +76,10 @@ export namespace DomWrappers {
     }
 
     detach() {
-      const domParent = this.domElement.parentNode;
+      const { parentNode } = this.domElement;
 
-      if (this.parentDomWrapper && domParent) {
-        domParent.removeChild(this.domElement);
+      if (this.parentDomWrapper && parentNode) {
+        parentNode.removeChild(this.domElement);
       }
     }
   }
@@ -82,6 +92,10 @@ export namespace DomWrappers {
     private endPlaceholder = document.createComment(END_PLACEHOLDER);
 
     private children = new Set<ChildDomWrapper<any>>();
+
+    constructor() {
+      super();
+    }
 
     appendChild<F extends Node>(child: ChildDomWrapper<F>) {
       this.children.add(child);
@@ -162,17 +176,17 @@ export namespace DomWrappers {
   }
 
   class TextWrapper extends AbstractDomWrapper<Text> {
-    constructor(public readonly domElement: Text) {
-      super();
+    constructor(domElement: Text) {
+      super(domElement);
     }
 
     appendChild<F extends Node>(child: ChildDomWrapper<F>) {
     }
 
     detach() {
-      const domParent = this.domElement.parentNode;
+      const { parentNode } = this.domElement;
 
-      domParent && domParent.removeChild(this.domElement);
+      parentNode && parentNode.removeChild(this.domElement);
     }
   }
 }

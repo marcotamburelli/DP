@@ -9,10 +9,10 @@ import { GenericObservable, Message } from './event/types';
 import { Properties } from './util/types';
 
 export namespace dp {
-  function compose<C extends DomBasedComponent>(component: DomBasedComponent, children: any[]) {
+  function compose(component: DomBasedComponent, children: any[]) {
     children.forEach(child => component.append(child));
 
-    return component as C;
+    return component;
   }
 
   export type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
@@ -21,8 +21,8 @@ export namespace dp {
   export type TextComponent<D> = ExtTextComponent<D>;
   export type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
 
-  export function List<D>(props: Properties) {
-    return Builder.createList<D>(props) as ListContainer<D>;
+  export function List<D>(props: Properties, children: any[]) {
+    return Builder.createList<D>(props, children) as ListContainer<D>;
   }
 
   export function Group<D>(props: Properties) {
@@ -34,18 +34,22 @@ export namespace dp {
   }
 
   export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C {
-    if (typeof definition === 'function') {
-      return compose(definition(properties || {}), children);
+    var component: DomBasedComponent;
+
+    if (definition === List) {
+      component = List(properties, children);
+    } else if (typeof definition === 'function') {
+      component = compose(definition(properties || {}), children);
+    } else if (definition instanceof BaseComponent) {
+      component = compose(definition, children);
+    } else {
+      component = compose(
+        Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent)),
+        children
+      );
     }
 
-    if (definition instanceof BaseComponent) {
-      return compose(definition, children);
-    }
-
-    return compose(
-      Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent)),
-      children
-    );
+    return component as C;
   }
 
   export function listen<P>(stream: GenericObservable<Message<P>>) {

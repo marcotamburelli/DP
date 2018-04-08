@@ -1,5 +1,6 @@
 import { DomBasedComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
+import { createGenerator } from './component/generator';
 import { GroupContainer } from './component/GroupContainer';
 import {
   CheckBoxInputComponent,
@@ -15,7 +16,7 @@ import { NativeUtil } from './util/NativeUtil';
 import { PropertiesReader } from './util/PropertiesReader';
 import { HTML, Properties } from './util/types';
 
-export type Definition = HTML | ((props: Properties) => DomBasedComponent) | DomBasedComponent;
+export type Definition = HTML | ((props: Properties, children?: any[]) => DomBasedComponent) | DomBasedComponent;
 
 namespace DomFactory {
   export function createElement<E extends HTMLElement>(tag: HTML, nativeProperties: Properties) {
@@ -123,10 +124,8 @@ export namespace Builder {
     throw new Error(`'${tag}' not supported`);
   }
 
-  export function createList<D>(properties: Properties) {
-    const propReader = PropertiesReader.create(properties);
-
-    return new ListContainer<D>(null, propReader.dataNodeProperties);
+  export function createList<D>(properties: Properties, children: any[]) {
+    return new ListContainer<D>(createGenerator(children), PropertiesReader.create(properties).dataNodeProperties);
   }
 
   export function createGroup<D>(properties: Properties) {

@@ -94,6 +94,23 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
+  it('checks model with properties', () => {
+    const component: dp.Container<{ align: string }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define('div', { align: DomBinder.IDENTITY_BINDER, id: 'div' })
+    );
+
+    component.setData({ align: 'left' });
+
+    const div = component.queryById<dp.Container<string, HTMLDivElement>>('div').domNode;
+
+    expect(div.align).toBe('left');
+
+    div.align = 'right';
+
+    expect(component.getData()).toEqual({ align: 'right' });
+  });
+
   it('checks model of group container', () => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
@@ -137,33 +154,35 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ age: 10 });
   });
 
-  // it('checks select with array', () => {
-  //   function generator(model: { id: string, text: string }) {
-  //     return dp.define('option', { value: model.id }, model.text);
-  //   }
+  it('checks select with array', () => {
+    const component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(
+        'select', { name: 'type', bind: DomBinder.IDENTITY_BINDER },
+        dp.define(dp.List, { id: 'list' },
+          dp.define('option', { value: DomBinder.IDENTITY_BINDER },
+            dp.define(dp.Text, { name: 'text' })
+          )
+        )
+      ),
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER })
+    );
 
-  //   const component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
-  //     'div', null,
-  //     dp.define(
-  //       'select', { name: 'type', bind: DomBinder.IDENTITY_BINDER },
-  //       dp.List({ generator, id: 'list' })),
-  //     dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER })
-  //   );
+    const list = component.queryById<dp.ListContainer<any>>('list');
+    list.setData([{ value: 'a', text: '_a' }, { value: 'b', text: '_b' }]);
+    component.setData({ name: 'text_name', type: 'a' });
 
-  //   component.queryById<dp.ListContainer<any>>('list').setData([{ id: 'a', text: '_a' }, { id: 'b', text: '_b' }]);
-  //   component.setData({ name: 'text_name', type: 'a' });
+    const typeSelect = component.queryByName<dp.Component<string, HTMLSelectElement>>('type')[0].domNode;
+    const nameInput = component.queryByName<dp.Component<string, HTMLInputElement>>('name')[0].domNode;
 
-  //   const typeSelect = component.queryByName<dp.Component<string, HTMLSelectElement>>('type')[0].domNode;
-  //   const nameInput = component.queryByName<dp.Component<string, HTMLInputElement>>('name')[0].domNode;
+    expect(typeSelect.value).toBe('a');
+    expect(nameInput.value).toBe('text_name');
 
-  //   expect(typeSelect.value).toBe('a');
-  //   expect(nameInput.value).toBe('text_name');
+    nameInput.value = 'test test';
+    typeSelect.options.item(1).selected = true;
 
-  //   nameInput.value = 'test test';
-  //   typeSelect.options.item(1).selected = true;
-
-  //   expect(component.getData()).toEqual({ name: 'test test', type: 'b' });
-  // });
+    expect(component.getData()).toEqual({ name: 'test test', type: 'b' });
+  });
 
 });
 

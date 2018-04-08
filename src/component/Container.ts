@@ -13,10 +13,10 @@ export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, 
   private domBinder: DomBinder;
 
   constructor(
-    element: E,
-    dataNodeProps?: DataNodeProperties,
-    bindProperties?: BindProperties,
-    observationProperties?: ObservationProperties
+    private element: E,
+    private dataNodeProps?: DataNodeProperties,
+    private bindProperties?: BindProperties,
+    private observationProperties?: ObservationProperties
   ) {
     super(DomWrappers.simple(element), dataNodeProps, observationProperties);
 
@@ -38,5 +38,21 @@ export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, 
 
   queryById<C extends Component>(id: string) {
     return this.dataNode.getById(id) as C;
+  }
+
+  protected prepareCopy() {
+    return new (this.constructor as {
+      new(
+        element: E,
+        properties: DataNodeProperties,
+        bindProperties?: BindProperties,
+        observationProperties?: ObservationProperties
+      ): Container<D, E>
+    })(
+      this.element.cloneNode() as E,
+      this.dataNodeProps,
+      this.bindProperties,
+      this.observationProperties
+    );
   }
 }
