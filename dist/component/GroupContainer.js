@@ -5,6 +5,7 @@ const DomWrappers_1 = require("./dom/DomWrappers");
 class GroupContainer extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(dataNodeProps) {
         super(DomWrappers_1.DomWrappers.group(), dataNodeProps);
+        this.dataNodeProps = dataNodeProps;
     }
     setData(data) {
         this.dataNode.setData(data);
@@ -17,6 +18,9 @@ class GroupContainer extends BaseComponent_1.DataDrivenComponentImpl {
     }
     queryById(id) {
         return this.dataNode.getById(id);
+    }
+    prepareCopy() {
+        return new this.constructor(this.dataNodeProps);
     }
 }
 exports.GroupContainer = GroupContainer;

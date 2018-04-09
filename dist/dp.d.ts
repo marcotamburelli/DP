@@ -13,7 +13,7 @@ export declare namespace dp {
     type GroupContainer<D> = ExtGroupContainer<D>;
     type TextComponent<D> = ExtTextComponent<D>;
     type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
-    function List<D>(props: Properties): ExtListContainer<D>;
+    function List<D>(props: Properties, children: any[]): ExtListContainer<D>;
     function Group<D>(props: Properties): ExtGroupContainer<D>;
     function Text<D>(props: Properties): TextComponent<D>;
     function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C;

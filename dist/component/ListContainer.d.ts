@@ -1,13 +1,12 @@
-import { DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
-import { Component, IsDataDriven, IsList } from './Components';
+import { DataDrivenComponentImpl } from './BaseComponent';
+import { Component, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
-export declare type ComponentGenerator<D> = ((data: D, idx?: number) => DomBasedComponent & IsDataDriven<D>);
+import { ComponentGenerator } from './generator';
 export declare class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
     private generator;
-    private children;
+    private dataNodeProps;
     constructor(generator: ComponentGenerator<D>, dataNodeProps?: DataNodeProperties);
     append(child: any): void;
-    remove(child: DomBasedComponent): void;
     setData(data: D[]): void;
     getData(): any[];
     getChildCount(): number;
@@ -16,4 +15,5 @@ export declare class ListContainer<D> extends DataDrivenComponentImpl<D[], any> 
     queryByIdx<C extends Component>(idx: number): C;
     queryByName<C extends Component>(name: string): C[];
     queryById<C extends Component>(id: string): C;
+    protected prepareCopy(): ListContainer<D>;
 }

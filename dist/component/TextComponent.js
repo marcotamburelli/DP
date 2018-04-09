@@ -6,6 +6,8 @@ const DomWrappers_1 = require("./dom/DomWrappers");
 class TextComponent extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(dataNodeProps, bindProperties) {
         super(DomWrappers_1.DomWrappers.text(), dataNodeProps);
+        this.dataNodeProps = dataNodeProps;
+        this.bindProperties = bindProperties;
         this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
@@ -23,6 +25,9 @@ class TextComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
         const get = this.domBinder.getDefaultBinder().get;
         return get && get(this.domWrapper.domElement.data);
+    }
+    prepareCopy() {
+        return new this.constructor(this.dataNodeProps, this.bindProperties);
     }
 }
 exports.TextComponent = TextComponent;

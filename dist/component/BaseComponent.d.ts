@@ -8,6 +8,7 @@ export declare abstract class BaseComponent<N extends Node> implements Component
     protected domWrapper: DomWrapper<N>;
     protected static getDataNode<N extends Node>(component: BaseComponent<N>): DataNode;
     protected parent: DomBasedComponent;
+    protected children: any[];
     protected readonly abstract dataNode: DataNode;
     protected readonly abstract observationNode: ObservationNode;
     protected constructor(domWrapper: DomWrapper<N>);
@@ -15,6 +16,8 @@ export declare abstract class BaseComponent<N extends Node> implements Component
     remove(child: Component): void;
     readonly domNode: N;
     createObservable<P>(observedEvent?: EventType): IsObservable<P>;
+    cloneComponent<C extends BaseComponent<N>>(deep?: boolean): C;
+    protected abstract prepareCopy(): BaseComponent<N>;
 }
 export declare abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
     protected readonly dataNode: DataNode;

@@ -28,10 +28,6 @@ exports.DATA_NODE_PROPERTIES = {
     ID: 'id',
     NAME: 'name'
 };
-exports.SPECIFIC_PROPERTIES = {
-    VALUE_TYPE: 'value-type',
-    GENERATOR: 'generator'
-};
 exports.STYLE_PROPERTIES = {
     CLASS: 'class',
     STYLE: 'style'

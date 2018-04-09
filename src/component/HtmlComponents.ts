@@ -4,7 +4,7 @@ import { DataMappingBehavior, DataNodeProperties } from './DataNode';
 import { BindProperties, DomBinder } from './dom/DomBinder';
 import { DomWrappers } from './dom/DomWrappers';
 
-abstract class HtmlComponent<D, N extends Element> extends DataDrivenComponentImpl<D, N> {
+export abstract class HtmlComponent<D, N extends Element> extends DataDrivenComponentImpl<D, N> {
   protected domBinder: DomBinder;
 
   constructor(

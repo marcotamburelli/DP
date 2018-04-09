@@ -10,6 +10,10 @@ const DomWrappers_1 = require("./dom/DomWrappers");
 class Container extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(element, dataNodeProps, bindProperties, observationProperties) {
         super(DomWrappers_1.DomWrappers.simple(element), dataNodeProps, observationProperties);
+        this.element = element;
+        this.dataNodeProps = dataNodeProps;
+        this.bindProperties = bindProperties;
+        this.observationProperties = observationProperties;
         this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {
@@ -24,6 +28,9 @@ class Container extends BaseComponent_1.DataDrivenComponentImpl {
     }
     queryById(id) {
         return this.dataNode.getById(id);
+    }
+    prepareCopy() {
+        return new this.constructor(this.element.cloneNode(), this.dataNodeProps, this.bindProperties, this.observationProperties);
     }
 }
 exports.Container = Container;

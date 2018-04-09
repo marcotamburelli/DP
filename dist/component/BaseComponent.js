@@ -5,6 +5,7 @@ const DataNode_1 = require("./DataNode");
 class BaseComponent {
     constructor(domWrapper) {
         this.domWrapper = domWrapper;
+        this.children = [];
     }
     static getDataNode(component) {
         return component.dataNode;
@@ -22,6 +23,7 @@ class BaseComponent {
         else {
             this.domWrapper.appendChild(`${child}`);
         }
+        this.children.push(child);
     }
     remove(child) {
         if (!(child instanceof BaseComponent)) {
@@ -33,7 +35,11 @@ class BaseComponent {
         delete child.parent;
         this.dataNode.remove(child.dataNode);
         this.observationNode.remove(child.observationNode);
-        child.domWrapper.detach();
+        this.domWrapper.removeChild(child.domWrapper);
+        const idx = this.children.indexOf(child);
+        if (idx >= 0) {
+            this.children.splice(idx, 1);
+        }
     }
     get domNode() {
         return this.domWrapper.domElement;
@@ -41,12 +47,24 @@ class BaseComponent {
     createObservable(observedEvent) {
         return this.observationNode.createObservable(observedEvent);
     }
+    cloneComponent(deep = true) {
+        const copy = this.prepareCopy();
+        deep && this.children.forEach(child => {
+            if (child instanceof BaseComponent) {
+                copy.append(child.cloneComponent());
+            }
+            else {
+                copy.append(child);
+            }
+        });
+        return copy;
+    }
 }
 exports.BaseComponent = BaseComponent;
 class DataDrivenComponentImpl extends BaseComponent {
     constructor(domWrapper, dataNodeProps = {}, observationProperties = {}) {
         super(domWrapper);
-        this.dataNode = new DataNode_1.DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);
+        this.dataNode = new DataNode_1.DataNode(dataNodeProps, this);
         this.observationNode = new ObservationNode_1.ObservationNode(domWrapper.domElement, observationProperties, () => this.getData());
     }
 }

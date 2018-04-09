@@ -26,10 +26,6 @@ export declare const DATA_NODE_PROPERTIES: {
     ID: string;
     NAME: string;
 };
-export declare const SPECIFIC_PROPERTIES: {
-    VALUE_TYPE: string;
-    GENERATOR: string;
-};
 export declare const STYLE_PROPERTIES: {
     CLASS: string;
     STYLE: string;

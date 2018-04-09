@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Container_1 = require("./component/Container");
+const generator_1 = require("./component/generator");
 const GroupContainer_1 = require("./component/GroupContainer");
 const HtmlComponents_1 = require("./component/HtmlComponents");
 const ListContainer_1 = require("./component/ListContainer");
@@ -72,9 +73,8 @@ var Builder;
         throw new Error(`'${tag}' not supported`);
     }
     Builder.createComponent = createComponent;
-    function createList(properties) {
-        const propReader = PropertiesReader_1.PropertiesReader.create(properties);
-        return new ListContainer_1.ListContainer(propReader.generator, propReader.dataNodeProperties);
+    function createList(properties, children) {
+        return new ListContainer_1.ListContainer(generator_1.createGenerator(children), PropertiesReader_1.PropertiesReader.create(properties).dataNodeProperties);
     }
     Builder.createList = createList;
     function createGroup(properties) {

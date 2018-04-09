@@ -9,8 +9,8 @@ var dp;
         children.forEach(child => component.append(child));
         return component;
     }
-    function List(props) {
-        return Builder_1.Builder.createList(props);
+    function List(props, children) {
+        return Builder_1.Builder.createList(props, children);
     }
     dp.List = List;
     function Group(props) {
@@ -22,13 +22,20 @@ var dp;
     }
     dp.Text = Text;
     function define(definition, properties, ...children) {
-        if (typeof definition === 'function') {
-            return compose(definition(properties || {}), children);
+        var component;
+        if (definition === List) {
+            component = List(properties, children);
         }
-        if (definition instanceof BaseComponent_1.BaseComponent) {
-            return compose(definition, children);
+        else if (typeof definition === 'function') {
+            component = compose(definition(properties || {}), children);
         }
-        return compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.BaseComponent)), children);
+        else if (definition instanceof BaseComponent_1.BaseComponent) {
+            component = compose(definition, children);
+        }
+        else {
+            component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.BaseComponent)), children);
+        }
+        return component;
     }
     dp.define = define;
     function listen(stream) {

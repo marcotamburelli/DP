@@ -6,21 +6,13 @@ class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
     constructor(generator, dataNodeProps) {
         super(DomWrappers_1.DomWrappers.group(), dataNodeProps);
         this.generator = generator;
-        this.children = [];
+        this.dataNodeProps = dataNodeProps;
     }
     append(child) {
+        if (!(child instanceof BaseComponent_1.BaseComponent)) {
+            throw new Error('List can only append component');
+        }
         super.append(child);
-        if (child instanceof BaseComponent_1.BaseComponent) {
-            this.children.push(child);
-        }
-    }
-    remove(child) {
-        super.remove(child);
-        for (var i = 0; i < this.children.length; i++) {
-            if (this.children[i] === child) {
-                this.children.splice(i, 1);
-            }
-        }
     }
     setData(data) {
         if (!this.generator) {
@@ -29,8 +21,8 @@ class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
         while (this.children.length) {
             super.remove(this.children.pop());
         }
-        data.forEach((dataItem, i) => {
-            const child = this.generator(dataItem, i);
+        data.forEach((dataItem) => {
+            const child = this.generator();
             child.setData(dataItem);
             this.append(child);
         });
@@ -55,6 +47,9 @@ class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
     }
     queryById(id) {
         return this.dataNode.getById(id);
+    }
+    prepareCopy() {
+        return new this.constructor(this.generator, this.dataNodeProps);
     }
 }
 exports.ListContainer = ListContainer;

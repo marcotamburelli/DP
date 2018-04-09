@@ -1,15 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const BaseComponent_1 = require("./BaseComponent");
+const DataNode_1 = require("./DataNode");
 const DomBinder_1 = require("./dom/DomBinder");
 const DomWrappers_1 = require("./dom/DomWrappers");
-class HtmlElementComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, bindProperties, observationProperties) {
-        super(DomWrappers_1.DomWrappers.simple(element), properties, observationProperties);
+class HtmlComponent extends BaseComponent_1.DataDrivenComponentImpl {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(DomWrappers_1.DomWrappers.simple(element), dataNodeProperties, observationProperties);
+        this.element = element;
+        this.dataNodeProperties = dataNodeProperties;
+        this.bindProperties = bindProperties;
+        this.observationProperties = observationProperties;
         this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
+    prepareCopy() {
+        return new this.constructor(this.element.cloneNode(), this.dataNodeProperties, this.bindProperties, this.observationProperties);
+    }
+}
+exports.HtmlComponent = HtmlComponent;
+class HtmlElementComponent extends HtmlComponent {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(element, dataNodeProperties, bindProperties, observationProperties);
+    }
     setData(data) {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         if (this.domBinder.isDefault()) {
@@ -21,7 +35,7 @@ class HtmlElementComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
     }
     getData() {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         if (this.domBinder.isDefault()) {
@@ -40,13 +54,12 @@ class HtmlElementComponent extends BaseComponent_1.DataDrivenComponentImpl {
     }
 }
 exports.HtmlElementComponent = HtmlElementComponent;
-class TextInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, bindProperties, observationProperties) {
-        super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+class TextInputComponent extends HtmlComponent {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(element, dataNodeProperties, bindProperties, observationProperties);
     }
     setData(data) {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const set = this.domBinder.getDefaultBinder().set;
@@ -55,7 +68,7 @@ class TextInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
     }
     getData() {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const get = this.domBinder.getDefaultBinder().get;
@@ -63,13 +76,12 @@ class TextInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
     }
 }
 exports.TextInputComponent = TextInputComponent;
-class CheckBoxInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, bindProperties, observationProperties) {
-        super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+class CheckBoxInputComponent extends HtmlComponent {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(element, dataNodeProperties, bindProperties, observationProperties);
     }
     setData(data) {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const set = this.domBinder.getDefaultBinder().set;
@@ -78,7 +90,7 @@ class CheckBoxInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
     }
     getData() {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const get = this.domBinder.getDefaultBinder().get;
@@ -86,13 +98,12 @@ class CheckBoxInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
     }
 }
 exports.CheckBoxInputComponent = CheckBoxInputComponent;
-class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, bindProperties, observationProperties) {
-        super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+class SelectComponent extends HtmlComponent {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(element, dataNodeProperties, bindProperties, observationProperties);
     }
     setData(data = []) {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const set = this.domBinder.getDefaultBinder().set;
@@ -115,7 +126,7 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
         }
     }
     getData() {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const get = this.domBinder.getDefaultBinder().get;
@@ -139,13 +150,12 @@ class SelectComponent extends BaseComponent_1.DataDrivenComponentImpl {
     }
 }
 exports.SelectComponent = SelectComponent;
-class RadioInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
-    constructor(element, properties = {}, bindProperties, observationProperties) {
-        super(DomWrappers_1.DomWrappers.input(element), properties, observationProperties);
-        this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
+class RadioInputComponent extends HtmlComponent {
+    constructor(element, dataNodeProperties = {}, bindProperties, observationProperties) {
+        super(element, dataNodeProperties, bindProperties, observationProperties);
     }
     setData(data) {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const set = this.domBinder.getDefaultBinder().set;
@@ -156,7 +166,7 @@ class RadioInputComponent extends BaseComponent_1.DataDrivenComponentImpl {
         radioInput.checked = (radioInput.value === set(data));
     }
     getData() {
-        if (!this.dataNode.name) {
+        if (this.dataNode.dataBehavior === DataNode_1.DataMappingBehavior.Search) {
             return;
         }
         const get = this.domBinder.getDefaultBinder().get;

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const DataNode_1 = require("../component/DataNode");
 const DomBinder_1 = require("../component/dom/DomBinder");
 const const_1 = require("./const");
 class PropertiesReader {
@@ -9,13 +10,20 @@ class PropertiesReader {
         this.observationProperties = {};
         this.bindProperties = {};
         Object.keys(properties).forEach(key => {
-            if (!this.checkGenerator(key, properties) &&
-                !this.checkObservationProperty(key, properties) &&
-                !this.checkBindProperties(key, properties)) {
+            if (!this.checkObservationProperty(key, properties) && !this.checkBindProperties(key, properties)) {
                 this.registerDataNodeProperty(key, properties);
                 this.registerAsNative(key, properties);
             }
         });
+        if (this.dataNodeProperties.name) {
+            this.dataNodeProperties.dataBehavior = DataNode_1.DataMappingBehavior.Named;
+        }
+        else if (Object.keys(this.bindProperties).some(prop => prop !== DomBinder_1.DEFAULT_BIND)) {
+            this.dataNodeProperties.dataBehavior = DataNode_1.DataMappingBehavior.Spread;
+        }
+        else {
+            this.dataNodeProperties.dataBehavior = DataNode_1.DataMappingBehavior.Search;
+        }
     }
     static create(properties) {
         return new PropertiesReader(properties);
@@ -28,16 +36,6 @@ class PropertiesReader {
             case const_1.DATA_NODE_PROPERTIES.NAME:
                 this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.NAME] = properties[key];
                 break;
-        }
-    }
-    checkGenerator(key, properties) {
-        switch (key.toLowerCase()) {
-            case const_1.SPECIFIC_PROPERTIES.GENERATOR:
-                const generator = properties[const_1.SPECIFIC_PROPERTIES.GENERATOR];
-                if (typeof generator === 'function') {
-                    this.generator = generator;
-                }
-                return true;
         }
     }
     checkObservationProperty(key, properties) {

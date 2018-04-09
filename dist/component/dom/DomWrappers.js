@@ -2,14 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var DomWrappers;
 (function (DomWrappers) {
+    class AbstractDomWrapper {
+        constructor(domElement) {
+            this.domElement = domElement;
+        }
+        provideParent(parent) {
+            this.parentDomWrapper = parent;
+        }
+        removeChild(child) {
+            if (child instanceof AbstractDomWrapper) {
+                child.detach();
+            }
+        }
+        clone() {
+            const domCopy = this.domElement && this.domElement.cloneNode();
+            return new this.constructor(domCopy);
+        }
+    }
     function simple(element) {
         return new SimpleDomWrapper(element);
     }
     DomWrappers.simple = simple;
-    function input(element) {
-        return new InputDomWrapper(element);
-    }
-    DomWrappers.input = input;
     function group() {
         return new GroupWrapper();
     }
@@ -18,9 +31,9 @@ var DomWrappers;
         return new TextWrapper(document.createTextNode(str));
     }
     DomWrappers.text = text;
-    class SimpleDomWrapper {
+    class SimpleDomWrapper extends AbstractDomWrapper {
         constructor(domElement) {
-            this.domElement = domElement;
+            super(domElement);
         }
         appendChild(child) {
             if (typeof child === 'string') {
@@ -32,49 +45,48 @@ var DomWrappers;
                 child.provideParent(this);
             }
         }
-        provideParent(parent) {
+        removeChild(child) {
+            this.domElement.removeChild(child.domElement);
+            delete child.parentDomWrapper;
         }
         detach() {
-            const domParent = this.domElement.parentNode;
-            domParent && domParent.removeChild(this.domElement);
-        }
-    }
-    class InputDomWrapper extends SimpleDomWrapper {
-        constructor(domElement) {
-            super(domElement);
-        }
-        registerDomName(namespace, name) {
-            this.domElement.name = `${namespace}.${name}`;
+            const { parentNode } = this.domElement;
+            if (this.parentDomWrapper && parentNode) {
+                parentNode.removeChild(this.domElement);
+            }
         }
     }
     const START_PLACEHOLDER = 'START';
     const END_PLACEHOLDER = 'END';
-    class GroupWrapper {
+    class GroupWrapper extends AbstractDomWrapper {
         constructor() {
+            super();
             this.startPlaceholder = document.createComment(START_PLACEHOLDER);
             this.endPlaceholder = document.createComment(END_PLACEHOLDER);
-            this.pendingChildNodes = [];
+            this.children = new Set();
         }
         appendChild(child) {
-            if (!this.domParent) {
-                this.pendingChildNodes.push(child);
-            }
-            else {
-                this._append(child);
-            }
+            this.children.add(child);
+            this.fireAppend(child);
         }
         provideParent(parent) {
+            super.provideParent(parent);
+            if (!this.domParent) {
+                return;
+            }
             if (parent instanceof GroupWrapper) {
-                this.domParent = parent.domParent;
                 this.domParent.insertBefore(this.startPlaceholder, parent.endPlaceholder);
                 this.domParent.insertBefore(this.endPlaceholder, parent.endPlaceholder);
             }
             else {
-                this.domParent = parent.domElement;
                 this.domParent.appendChild(this.startPlaceholder);
                 this.domParent.appendChild(this.endPlaceholder);
             }
-            this.pendingChildNodes.forEach(child => this._append(child));
+            this.children.forEach(child => this.fireAppend(child));
+        }
+        removeChild(child) {
+            this.children.delete(child);
+            super.removeChild(child);
         }
         detach() {
             for (let child = this.startPlaceholder.nextSibling; child !== this.endPlaceholder; child = this.startPlaceholder.nextSibling) {
@@ -83,28 +95,45 @@ var DomWrappers;
             this.domParent.removeChild(this.startPlaceholder);
             this.domParent.removeChild(this.endPlaceholder);
         }
-        _append(child) {
+        fireAppend(child) {
+            if (!this.domParent) {
+                return;
+            }
             if (typeof child === 'string') {
-                this.domParent.insertBefore(document.createTextNode(child), this.endPlaceholder);
+                var childNode = document.createTextNode(child);
             }
             else {
-                const childDom = child.domElement;
-                childDom && this.domParent.insertBefore(childDom, this.endPlaceholder);
+                childNode = child.domElement;
                 child.provideParent(this);
+            }
+            if (!childNode) {
+                return;
+            }
+            if (this.domParent) {
+                this.domParent.insertBefore(childNode, this.endPlaceholder);
+            }
+        }
+        get domParent() {
+            var parentWrapper = this.parentDomWrapper;
+            while (parentWrapper) {
+                if (parentWrapper.domElement) {
+                    return parentWrapper.domElement;
+                }
+                else {
+                    parentWrapper = parentWrapper.parentDomWrapper;
+                }
             }
         }
     }
-    class TextWrapper {
+    class TextWrapper extends AbstractDomWrapper {
         constructor(domElement) {
-            this.domElement = domElement;
+            super(domElement);
         }
         appendChild(child) {
         }
-        provideParent(parent) {
-        }
         detach() {
-            const domParent = this.domElement.parentNode;
-            domParent && domParent.removeChild(this.domElement);
+            const { parentNode } = this.domElement;
+            parentNode && parentNode.removeChild(this.domElement);
         }
     }
 })(DomWrappers = exports.DomWrappers || (exports.DomWrappers = {}));
