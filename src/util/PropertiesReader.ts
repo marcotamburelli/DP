@@ -1,4 +1,4 @@
-import { DataNodeProperties } from '../component/DataNode';
+import { DataMappingBehavior, DataNodeProperties } from '../component/DataNode';
 import { Binder, BindProperties, DEFAULT_BIND } from '../component/dom/DomBinder';
 import { ObservationProperties } from '../event/types';
 import { BIND_PROPERTIES, DATA_NODE_PROPERTIES, NATIVE_PROPERTIES } from './const';
@@ -21,6 +21,14 @@ export class PropertiesReader {
         this.registerAsNative(key, properties);
       }
     });
+
+    if (this.dataNodeProperties.name) {
+      this.dataNodeProperties.dataBehavior = DataMappingBehavior.Named;
+    } else if (Object.keys(this.bindProperties).some(prop => prop !== DEFAULT_BIND)) {
+      this.dataNodeProperties.dataBehavior = DataMappingBehavior.Spread;
+    } else {
+      this.dataNodeProperties.dataBehavior = DataMappingBehavior.Search;
+    }
   }
 
   private registerDataNodeProperty(key: string, properties: Properties) {

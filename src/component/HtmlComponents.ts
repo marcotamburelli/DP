@@ -1,6 +1,6 @@
 import { ObservationProperties } from '../event/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
-import { DataNodeProperties } from './DataNode';
+import { DataMappingBehavior, DataNodeProperties } from './DataNode';
 import { BindProperties, DomBinder } from './dom/DomBinder';
 import { DomWrappers } from './dom/DomWrappers';
 
@@ -46,7 +46,7 @@ export class HtmlElementComponent<D> extends HtmlComponent<D, HTMLElement> {
   }
 
   setData(data: D) {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -60,7 +60,7 @@ export class HtmlElementComponent<D> extends HtmlComponent<D, HTMLElement> {
   }
 
   getData() {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -93,7 +93,7 @@ export class TextInputComponent<D> extends HtmlComponent<D, HTMLInputElement | H
   }
 
   setData(data: D) {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -105,7 +105,7 @@ export class TextInputComponent<D> extends HtmlComponent<D, HTMLInputElement | H
   }
 
   getData() {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -126,7 +126,7 @@ export class CheckBoxInputComponent<D> extends HtmlComponent<D, HTMLInputElement
   }
 
   setData(data: D) {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -138,7 +138,7 @@ export class CheckBoxInputComponent<D> extends HtmlComponent<D, HTMLInputElement
   }
 
   getData() {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -159,7 +159,7 @@ export class SelectComponent<D> extends HtmlComponent<D[] | D, HTMLSelectElement
   }
 
   setData(data: D[] | D = []) {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -188,7 +188,7 @@ export class SelectComponent<D> extends HtmlComponent<D[] | D, HTMLSelectElement
   }
 
   getData() {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -228,7 +228,7 @@ export class RadioInputComponent<D> extends HtmlComponent<D, HTMLInputElement>  
   }
 
   setData(data: D) {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 
@@ -244,7 +244,7 @@ export class RadioInputComponent<D> extends HtmlComponent<D, HTMLInputElement>  
   }
 
   getData() {
-    if (!this.dataNode.name) {
+    if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
 

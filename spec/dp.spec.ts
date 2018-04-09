@@ -73,6 +73,13 @@ describe('Definition of containers', () => {
     age: number;
   }
 
+  interface PropertyModel {
+    id: string;
+    name: {
+      align: string
+    };
+  }
+
   it('checks model', () => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
@@ -109,6 +116,26 @@ describe('Definition of containers', () => {
     div.align = 'right';
 
     expect(component.getData()).toEqual({ align: 'right' });
+  });
+
+  it('checks model with more properties', () => {
+    const component: dp.Container<PropertyModel, HTMLDivElement> = dp.define(
+      'div', { id: DomBinder.IDENTITY_BINDER },
+      dp.define('div', { name: 'name', align: DomBinder.IDENTITY_BINDER, id: 'div' })
+    );
+
+    component.setData({ id: '#1', name: { align: 'left' } });
+
+    const container = component.domNode;
+    const child = component.queryById<dp.Container<string, HTMLDivElement>>('div').domNode;
+
+    expect(container.id).toBe('#1');
+    expect(child.align).toBe('left');
+
+    container.id = '#2';
+    child.align = 'right';
+
+    expect(component.getData()).toEqual({ id: '#2', name: { align: 'right' } });
   });
 
   it('checks model of group container', () => {

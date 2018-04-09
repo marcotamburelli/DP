@@ -1,18 +1,21 @@
 import { Component, IsDataDriven } from './Components';
 
+export enum DataMappingBehavior { Named, Spread, Search }
+
 export interface DataNodeProperties {
   id?: string;
   name?: string;
+  dataBehavior?: DataMappingBehavior;
 }
 
 export class DataNode {
-  // TODO Is the idx required? Consider to use a set instead of a map for children.
-  private idx?: number;
+  private parent: DataNode;
+  private children = new Set<DataNode>();
 
-  private childSeq = 0;
-  private children = new Map<number, DataNode>();
-
-  constructor(private dataNodeProperties: DataNodeProperties = {}, private component?: Component & IsDataDriven<any>) {
+  constructor(
+    private dataNodeProperties: DataNodeProperties = {},
+    private component?: Component & IsDataDriven<any>
+  ) {
   }
 
   get name() {
@@ -23,21 +26,25 @@ export class DataNode {
     return this.dataNodeProperties.id;
   }
 
+  get dataBehavior() {
+    return this.dataNodeProperties.dataBehavior || (this.name ? DataMappingBehavior.Named : DataMappingBehavior.Search);
+  }
+
   append(dataNode: DataNode) {
-    if (dataNode.idx != null) {
+    if (dataNode.parent != null) {
       throw new Error('Data node cannot be appended since it already has a parent.');
     }
 
-    dataNode.idx = ++this.childSeq;
+    dataNode.parent = this;
 
-    this.children.set(dataNode.idx, dataNode);
+    this.children.add(dataNode);
   }
 
   remove(dataNode: DataNode) {
-    if (dataNode.idx != null) {
-      this.children.delete(dataNode.idx);
+    if (dataNode.parent === this) {
+      this.children.delete(dataNode);
 
-      delete dataNode.idx;
+      delete dataNode.parent;
     }
   }
 
@@ -81,35 +88,46 @@ export class DataNode {
     return components;
   }
 
-  private getDataRecursive(model) {
+  private getDataRecursive(data) {
     this.children.forEach((childDataNode) => {
-      const { name, component } = childDataNode;
+      const { name, component, dataBehavior } = childDataNode;
 
-      if (name && component) {
-        if (model[name] == null) {
-          model[name] = component.getData();
-        }
-      } else {
-        childDataNode.getDataRecursive(model);
+      switch (dataBehavior) {
+        case DataMappingBehavior.Named:
+          if (data[name] == null) {
+            data[name] = component.getData();
+          }
+          break;
+
+        case DataMappingBehavior.Spread:
+          const childData = component.getData() || {};
+
+          Object.keys(childData).forEach(n => data[n] = childData[n]);
+          break;
+
+        case DataMappingBehavior.Search:
+          childDataNode.getDataRecursive(data);
+          break;
       }
     });
 
-    return model;
+    return data;
   }
 
   private setDataRecursive(data) {
     this.children.forEach((childDataNode) => {
-      const { name, component } = childDataNode;
+      const { name, component, dataBehavior } = childDataNode;
 
-      if (!name) {
-        return childDataNode.setDataRecursive(data);
+      switch (dataBehavior) {
+        case DataMappingBehavior.Named:
+          return component.setData(data[name]);
+
+        case DataMappingBehavior.Spread:
+          return component.setData(data);
+
+        case DataMappingBehavior.Search:
+          return childDataNode.setDataRecursive(data);
       }
-
-      if (!component) {
-        return childDataNode.setDataRecursive(data[name]);
-      }
-
-      component.setData(data[name]);
     });
   }
 }

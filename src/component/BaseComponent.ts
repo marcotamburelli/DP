@@ -96,7 +96,7 @@ export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseCom
   ) {
     super(domWrapper);
 
-    this.dataNode = new DataNode(dataNodeProps, (dataNodeProps.name || dataNodeProps.id) && this);
+    this.dataNode = new DataNode(dataNodeProps, this);
     this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties, () => this.getData());
   }
 
