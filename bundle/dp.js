@@ -1245,12 +1245,6 @@ var DomWrappers;
                 }
             }
         }, {
-            key: "removeChild",
-            value: function removeChild(child) {
-                this.domElement.removeChild(child.domElement);
-                delete child.parentDomWrapper;
-            }
-        }, {
             key: "detach",
             value: function detach() {
                 var parentNode = this.domElement.parentNode;

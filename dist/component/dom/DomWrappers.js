@@ -45,10 +45,6 @@ var DomWrappers;
                 child.provideParent(this);
             }
         }
-        removeChild(child) {
-            this.domElement.removeChild(child.domElement);
-            delete child.parentDomWrapper;
-        }
         detach() {
             const { parentNode } = this.domElement;
             if (this.parentDomWrapper && parentNode) {

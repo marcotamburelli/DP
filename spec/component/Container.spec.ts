@@ -179,3 +179,21 @@ describe('Data in container with custom binder', () => {
   });
 
 });
+
+describe('Attaching and removing component', () => {
+
+  it('attaches and removes simple HTML', () => {
+    const element = document.createElement('div');
+    const container = new Container(element, { name: 'test' });
+    const control = createSimpleHtml('name', '1');
+
+    container.append(control);
+
+    expect(element.childElementCount).toBe(1);
+
+    container.remove(control);
+
+    expect(element.childElementCount).toBe(0);
+  });
+
+});

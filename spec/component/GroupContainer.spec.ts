@@ -88,4 +88,133 @@ describe('Attach to/detach from group ', () => {
     expect(element.childElementCount).toBe(0);
   });
 
+  it('checks attach/detach to second level group', () => {
+    const element = document.createElement('div');
+
+    const container = new Container(element, { name: 'test' });
+    const superGroup = new GroupContainer({ name: 'obj1' });
+    const group = new GroupContainer({ name: 'obj2' });
+
+    const control1 = createSimpleHtml('name_1', '1');
+    const control2 = createSimpleHtml('name_2', '2');
+
+    container.append(superGroup);
+    superGroup.append(group);
+    group.append(control1);
+    group.append(control2);
+
+    expect(element.childElementCount).toBe(2);
+    expect(element.firstElementChild).toBe(control1.domNode);
+    expect(element.lastElementChild).toBe(control2.domNode);
+
+    group.remove(control2);
+
+    expect(element.childElementCount).toBe(1);
+    expect(element.firstElementChild).toBe(control1.domNode);
+    expect(element.lastElementChild).toBe(control1.domNode);
+
+    group.remove(control1);
+
+    expect(element.childElementCount).toBe(0);
+  });
+
+  it('checks attach/reattach group', () => {
+    const element1 = document.createElement('div');
+    const element2 = document.createElement('div');
+
+    const container1 = new Container(element1, { name: 'test' });
+    const container2 = new Container(element2, { name: 'test' });
+    const group = new GroupContainer({ name: 'obj' });
+
+    const control1 = createSimpleHtml('name_1', '1');
+    const control2 = createSimpleHtml('name_2', '2');
+
+    group.append(control1);
+    group.append(control2);
+
+    container1.append(group);
+
+    expect(element1.childElementCount).toBe(2);
+    expect(element1.firstElementChild).toBe(control1.domNode);
+    expect(element1.lastElementChild).toBe(control2.domNode);
+
+    container1.remove(group);
+
+    expect(element1.childNodes.length).toBe(0);
+
+    container2.append(group);
+
+    expect(element2.childElementCount).toBe(2);
+    expect(element2.firstElementChild).toBe(control1.domNode);
+    expect(element2.lastElementChild).toBe(control2.domNode);
+  });
+
+  it('checks attach/reattach super-group', () => {
+    const element1 = document.createElement('div');
+    const element2 = document.createElement('div');
+
+    const container1 = new Container(element1, { name: 'test' });
+    const container2 = new Container(element2, { name: 'test' });
+    const superGroup = new GroupContainer({ name: 'obj1' });
+    const group = new GroupContainer({ name: 'obj2' });
+
+    const control1 = createSimpleHtml('name_1', '1');
+    const control2 = createSimpleHtml('name_2', '2');
+
+    group.append(control1);
+    group.append(control2);
+
+    superGroup.append(group);
+    container1.append(superGroup);
+
+    expect(element1.childElementCount).toBe(2);
+    expect(element1.firstElementChild).toBe(control1.domNode);
+    expect(element1.lastElementChild).toBe(control2.domNode);
+
+    container1.remove(superGroup);
+
+    expect(element1.childNodes.length).toBe(0);
+
+    container2.append(superGroup);
+
+    expect(element2.childElementCount).toBe(2);
+    expect(element2.firstElementChild).toBe(control1.domNode);
+    expect(element2.lastElementChild).toBe(control2.domNode);
+  });
+
+  it('checks attach/reattach second-level group', () => {
+    const element1 = document.createElement('div');
+    const element2 = document.createElement('div');
+
+    const container1 = new Container(element1, { name: 'test' });
+    const superGroup1 = new GroupContainer({ name: 'obj1' });
+    const container2 = new Container(element2, { name: 'test' });
+    const superGroup2 = new GroupContainer({ name: 'obj1' });
+    const group = new GroupContainer({ name: 'obj2' });
+
+    const control1 = createSimpleHtml('name_1', '1');
+    const control2 = createSimpleHtml('name_2', '2');
+
+    group.append(control1);
+    group.append(control2);
+
+    superGroup1.append(group);
+    container1.append(superGroup1);
+    container2.append(superGroup2);
+
+    expect(element1.childElementCount).toBe(2);
+    expect(element1.firstElementChild).toBe(control1.domNode);
+    expect(element1.lastElementChild).toBe(control2.domNode);
+
+    superGroup1.remove(group);
+
+    expect(element1.childNodes.length).toBe(2); /* 2 is the number of expected placeholder comments */
+
+    superGroup2.append(group);
+
+    expect(element2.childElementCount).toBe(2);
+    expect(element2.firstElementChild).toBe(control1.domNode);
+    expect(element2.lastElementChild).toBe(control2.domNode);
+  });
+
 });

@@ -70,11 +70,6 @@ export namespace DomWrappers {
       }
     }
 
-    removeChild(child: DomWrapper<any>) {
-      this.domElement.removeChild(child.domElement);
-      delete child.parentDomWrapper;
-    }
-
     detach() {
       const { parentNode } = this.domElement;
 

@@ -53,3 +53,21 @@ describe('Text component and container', () => {
   });
 
 });
+
+describe('Attaching and removing text', () => {
+
+  it('attaches and removes simple HTML', () => {
+    const element = document.createElement('div');
+    const container = new Container(element, { name: 'test' });
+    const text = new TextComponent({ name: 'name' });
+
+    container.append(text);
+
+    expect(element.childNodes.length).toBe(1);
+
+    container.remove(text);
+
+    expect(element.childNodes.length).toBe(0);
+  });
+
+});
