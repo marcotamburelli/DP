@@ -24,7 +24,6 @@ export const NODES = {
 };
 
 export const DATA_NODE_PROPERTIES = {
-  ID: 'id',
   NAME: 'name'
 };
 
@@ -34,7 +33,8 @@ export const STYLE_PROPERTIES = {
 };
 
 export const NATIVE_PROPERTIES = {
-  TYPE: 'type'
+  TYPE: 'type',
+  ID: 'id'
 };
 
 export const BIND_PROPERTIES = {

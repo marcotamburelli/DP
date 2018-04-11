@@ -23,7 +23,6 @@ export declare const NODES: {
     BR: string;
 };
 export declare const DATA_NODE_PROPERTIES: {
-    ID: string;
     NAME: string;
 };
 export declare const STYLE_PROPERTIES: {
@@ -32,6 +31,7 @@ export declare const STYLE_PROPERTIES: {
 };
 export declare const NATIVE_PROPERTIES: {
     TYPE: string;
+    ID: string;
 };
 export declare const BIND_PROPERTIES: {
     BIND: string;

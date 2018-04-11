@@ -1,9 +1,12 @@
+import { Properties } from '../util/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { Component, IsContainer } from './Components';
 import { DataNodeProperties } from './DataNode';
 export declare class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implements IsContainer {
     private dataNodeProps;
-    constructor(dataNodeProps?: DataNodeProperties);
+    private nativeProperties;
+    constructor(dataNodeProps?: DataNodeProperties, nativeProperties?: Properties);
+    readonly id: any;
     setData(data: D): void;
     getData(): any;
     queryByName<C extends Component>(name: string): C[];

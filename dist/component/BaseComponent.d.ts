@@ -12,6 +12,7 @@ export declare abstract class BaseComponent<N extends Node> implements Component
     protected readonly abstract dataNode: DataNode;
     protected readonly abstract observationNode: ObservationNode;
     protected constructor(domWrapper: DomWrapper<N>);
+    readonly id: string;
     append(child: any): void;
     remove(child: Component): void;
     readonly domNode: N;

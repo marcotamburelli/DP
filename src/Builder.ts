@@ -125,16 +125,20 @@ export namespace Builder {
   }
 
   export function createList<D>(properties: Properties, children: any[]) {
-    return new ListContainer<D>(createGenerator(children), PropertiesReader.create(properties).dataNodeProperties);
+    const { dataNodeProperties, nativeProperties } = PropertiesReader.create(properties);
+
+    return new ListContainer<D>(createGenerator(children), dataNodeProperties, nativeProperties);
   }
 
   export function createGroup<D>(properties: Properties) {
-    return new GroupContainer<D>(PropertiesReader.create(properties).bindProperties);
+    const { dataNodeProperties, nativeProperties } = PropertiesReader.create(properties);
+
+    return new GroupContainer<D>(dataNodeProperties, nativeProperties);
   }
 
   export function createText<D>(properties: Properties) {
-    const { dataNodeProperties, bindProperties } = PropertiesReader.create(properties);
+    const { dataNodeProperties, bindProperties, nativeProperties } = PropertiesReader.create(properties);
 
-    return new TextComponent<D>(dataNodeProperties, bindProperties);
+    return new TextComponent<D>(dataNodeProperties, bindProperties, nativeProperties);
   }
 }

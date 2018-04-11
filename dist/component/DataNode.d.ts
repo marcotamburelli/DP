@@ -5,7 +5,6 @@ export declare enum DataMappingBehavior {
     Search = 2,
 }
 export interface DataNodeProperties {
-    id?: string;
     name?: string;
     dataBehavior?: DataMappingBehavior;
 }
@@ -16,7 +15,6 @@ export declare class DataNode {
     private children;
     constructor(dataNodeProperties?: DataNodeProperties, component?: Component & IsDataDriven<any>);
     readonly name: string;
-    readonly id: string;
     readonly dataBehavior: DataMappingBehavior;
     append(dataNode: DataNode): void;
     remove(dataNode: DataNode): void;

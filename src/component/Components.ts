@@ -1,6 +1,8 @@
 import { EventType, IsObservable } from '../event/types';
 
 export interface Component {
+  readonly id: string;
+
   append(child);
 
   remove(child: Component);

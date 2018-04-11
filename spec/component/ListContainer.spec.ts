@@ -14,15 +14,19 @@ describe('Data from List (no generator)', () => {
   function createHtml(idx: number) {
     const div = document.createElement('div');
 
-    return new HtmlElementComponent<string>(div, { id: `${idx}`, name: 'val' }, {});
+    div.id = `${idx}`;
+
+    return new HtmlElementComponent<string>(div, { name: 'val' }, {});
   }
 
   function createContainer(idx: number) {
     const element = document.createElement('div');
     const controlElement = document.createElement('div');
 
+    controlElement.id = `${idx}`;
+
     const container = new Container<{ val: string }, HTMLDivElement>(element);
-    const child = new HtmlElementComponent<string>(controlElement, { id: `${idx}`, name: 'val' }, {});
+    const child = new HtmlElementComponent<string>(controlElement, { name: 'val' }, {});
 
     container.append(child);
 

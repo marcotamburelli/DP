@@ -25,7 +25,6 @@ exports.NODES = {
     BR: 'br'
 };
 exports.DATA_NODE_PROPERTIES = {
-    ID: 'id',
     NAME: 'name'
 };
 exports.STYLE_PROPERTIES = {
@@ -33,7 +32,8 @@ exports.STYLE_PROPERTIES = {
     STYLE: 'style'
 };
 exports.NATIVE_PROPERTIES = {
-    TYPE: 'type'
+    TYPE: 'type',
+    ID: 'id'
 };
 exports.BIND_PROPERTIES = {
     BIND: 'bind'

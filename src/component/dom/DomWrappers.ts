@@ -1,7 +1,7 @@
 export interface DomWrapper<N extends Node> {
-  readonly domElement?: N;
-
   parentDomWrapper: DomWrapper<any>;
+  readonly domElement?: N;
+  id: string;
 
   appendChild<F extends Node>(child: DomWrapper<F> | string);
 
@@ -17,6 +17,7 @@ export namespace DomWrappers {
 
   abstract class AbstractDomWrapper<N extends Node> implements DomWrapper<N> {
     parentDomWrapper: DomWrapper<any>;
+    abstract id: string;
 
     constructor(public readonly domElement?: N) {
     }
@@ -59,6 +60,14 @@ export namespace DomWrappers {
       super(domElement);
     }
 
+    get id() {
+      return this.domElement.id;
+    }
+
+    set id(id) {
+      this.domElement.id = id;
+    }
+
     appendChild<F extends Node>(child: ChildDomWrapper<F>) {
       if (typeof child === 'string') {
         this.domElement.appendChild(document.createTextNode(child));
@@ -83,6 +92,8 @@ export namespace DomWrappers {
   const END_PLACEHOLDER = 'END';
 
   class GroupWrapper extends AbstractDomWrapper<Node> {
+    id: string;
+
     private startPlaceholder = document.createComment(START_PLACEHOLDER);
     private endPlaceholder = document.createComment(END_PLACEHOLDER);
 
@@ -171,6 +182,8 @@ export namespace DomWrappers {
   }
 
   class TextWrapper extends AbstractDomWrapper<Text> {
+    id: string;
+
     constructor(domElement: Text) {
       super(domElement);
     }

@@ -15,9 +15,9 @@ class DataNode {
     get name() {
         return this.dataNodeProperties.name;
     }
-    get id() {
-        return this.dataNodeProperties.id;
-    }
+    // get id() {
+    //   return this.dataNodeProperties.id;
+    // }
     get dataBehavior() {
         return this.dataNodeProperties.dataBehavior || (this.name ? DataMappingBehavior.Named : DataMappingBehavior.Search);
     }
@@ -41,7 +41,10 @@ class DataNode {
         this.setDataRecursive(data);
     }
     getById(id) {
-        if (this.id === id) {
+        if (!id) {
+            return;
+        }
+        if (this.component.id === id) {
             return this.component;
         }
         for (const dataNode of this.children.values()) {

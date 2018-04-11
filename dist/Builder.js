@@ -74,16 +74,18 @@ var Builder;
     }
     Builder.createComponent = createComponent;
     function createList(properties, children) {
-        return new ListContainer_1.ListContainer(generator_1.createGenerator(children), PropertiesReader_1.PropertiesReader.create(properties).dataNodeProperties);
+        const { dataNodeProperties, nativeProperties } = PropertiesReader_1.PropertiesReader.create(properties);
+        return new ListContainer_1.ListContainer(generator_1.createGenerator(children), dataNodeProperties, nativeProperties);
     }
     Builder.createList = createList;
     function createGroup(properties) {
-        return new GroupContainer_1.GroupContainer(PropertiesReader_1.PropertiesReader.create(properties).bindProperties);
+        const { dataNodeProperties, nativeProperties } = PropertiesReader_1.PropertiesReader.create(properties);
+        return new GroupContainer_1.GroupContainer(dataNodeProperties, nativeProperties);
     }
     Builder.createGroup = createGroup;
     function createText(properties) {
-        const { dataNodeProperties, bindProperties } = PropertiesReader_1.PropertiesReader.create(properties);
-        return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties);
+        const { dataNodeProperties, bindProperties, nativeProperties } = PropertiesReader_1.PropertiesReader.create(properties);
+        return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
 })(Builder = exports.Builder || (exports.Builder = {}));

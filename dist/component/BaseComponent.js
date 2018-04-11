@@ -10,6 +10,9 @@ class BaseComponent {
     static getDataNode(component) {
         return component.dataNode;
     }
+    get id() {
+        return this.domWrapper.id;
+    }
     append(child) {
         if (child instanceof BaseComponent) {
             if (child.parent) {

@@ -33,12 +33,14 @@ export class PropertiesReader {
 
   private registerDataNodeProperty(key: string, properties: Properties) {
     switch (key.toLowerCase()) {
-      case DATA_NODE_PROPERTIES.ID:
-        this.dataNodeProperties[DATA_NODE_PROPERTIES.ID] = properties[key];
-        break;
-
       case DATA_NODE_PROPERTIES.NAME:
-        this.dataNodeProperties[DATA_NODE_PROPERTIES.NAME] = properties[key];
+        const value = properties[key];
+
+        if (typeof value !== 'string') {
+          throw new Error('Property "name" must be of type string.');
+        }
+
+        this.dataNodeProperties[DATA_NODE_PROPERTIES.NAME] = value;
         break;
     }
   }
@@ -66,12 +68,20 @@ export class PropertiesReader {
     }
 
     if (typeof propValue === 'object' || propValue.get || propValue.set) {
+      if (prop === DATA_NODE_PROPERTIES.NAME) {
+        throw new Error('Property "name" must be of type string.');
+      }
+
       this.bindProperties[prop] = { ...propValue as Binder<any, any> };
 
       return true;
     }
 
     if (typeof propValue === 'function') {
+      if (prop === DATA_NODE_PROPERTIES.NAME) {
+        throw new Error('Property "name" must be of type string.');
+      }
+
       this.bindProperties[prop] = { set: propValue };
 
       return true;

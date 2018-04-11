@@ -12,7 +12,9 @@ global['document'] = dom.window.document;
 function createSimpleHtml(name: string, id: string) {
   const controlElement = document.createElement('div');
 
-  return new HtmlElementComponent(controlElement, { id, name }, {});
+  controlElement.id = id;
+
+  return new HtmlElementComponent(controlElement, { name }, {});
 }
 
 describe('Query inside the group', () => {
@@ -28,6 +30,7 @@ describe('Query inside the group', () => {
     group.append(createSimpleHtml('name_2', '2'));
 
     expect(container.queryById('')).toBeUndefined();
+    expect(container.queryById('3')).toBeUndefined();
     expect(container.queryById('1')).toBeDefined();
   });
 

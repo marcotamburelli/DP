@@ -35,6 +35,12 @@ var DomWrappers;
         constructor(domElement) {
             super(domElement);
         }
+        get id() {
+            return this.domElement.id;
+        }
+        set id(id) {
+            this.domElement.id = id;
+        }
         appendChild(child) {
             if (typeof child === 'string') {
                 this.domElement.appendChild(document.createTextNode(child));

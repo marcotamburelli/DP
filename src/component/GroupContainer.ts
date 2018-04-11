@@ -1,11 +1,17 @@
+import { NATIVE_PROPERTIES } from '../util/const';
+import { Properties } from '../util/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { Component, IsContainer } from './Components';
 import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './dom/DomWrappers';
 
 export class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implements IsContainer {
-  constructor(private dataNodeProps?: DataNodeProperties) {
+  constructor(private dataNodeProps?: DataNodeProperties, private nativeProperties?: Properties) {
     super(DomWrappers.group(), dataNodeProps);
+  }
+
+  get id() {
+    return this.nativeProperties && this.nativeProperties[NATIVE_PROPERTIES.ID];
   }
 
   setData(data: D) {

@@ -3,7 +3,6 @@ import { Component, IsDataDriven } from './Components';
 export enum DataMappingBehavior { Named, Spread, Search }
 
 export interface DataNodeProperties {
-  id?: string;
   name?: string;
   dataBehavior?: DataMappingBehavior;
 }
@@ -22,9 +21,9 @@ export class DataNode {
     return this.dataNodeProperties.name;
   }
 
-  get id() {
-    return this.dataNodeProperties.id;
-  }
+  // get id() {
+  //   return this.dataNodeProperties.id;
+  // }
 
   get dataBehavior() {
     return this.dataNodeProperties.dataBehavior || (this.name ? DataMappingBehavior.Named : DataMappingBehavior.Search);
@@ -57,7 +56,11 @@ export class DataNode {
   }
 
   getById(id: string): Component {
-    if (this.id === id) {
+    if (!id) {
+      return;
+    }
+
+    if (this.component.id === id) {
       return this.component;
     }
 

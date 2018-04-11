@@ -136,19 +136,28 @@ var Builder;
     }
     Builder.createComponent = createComponent;
     function createList(properties, children) {
-        return new ListContainer_1.ListContainer(generator_1.createGenerator(children), PropertiesReader_1.PropertiesReader.create(properties).dataNodeProperties);
+        var _PropertiesReader_1$P = PropertiesReader_1.PropertiesReader.create(properties),
+            dataNodeProperties = _PropertiesReader_1$P.dataNodeProperties,
+            nativeProperties = _PropertiesReader_1$P.nativeProperties;
+
+        return new ListContainer_1.ListContainer(generator_1.createGenerator(children), dataNodeProperties, nativeProperties);
     }
     Builder.createList = createList;
     function createGroup(properties) {
-        return new GroupContainer_1.GroupContainer(PropertiesReader_1.PropertiesReader.create(properties).bindProperties);
+        var _PropertiesReader_1$P2 = PropertiesReader_1.PropertiesReader.create(properties),
+            dataNodeProperties = _PropertiesReader_1$P2.dataNodeProperties,
+            nativeProperties = _PropertiesReader_1$P2.nativeProperties;
+
+        return new GroupContainer_1.GroupContainer(dataNodeProperties, nativeProperties);
     }
     Builder.createGroup = createGroup;
     function createText(properties) {
-        var _PropertiesReader_1$P = PropertiesReader_1.PropertiesReader.create(properties),
-            dataNodeProperties = _PropertiesReader_1$P.dataNodeProperties,
-            bindProperties = _PropertiesReader_1$P.bindProperties;
+        var _PropertiesReader_1$P3 = PropertiesReader_1.PropertiesReader.create(properties),
+            dataNodeProperties = _PropertiesReader_1$P3.dataNodeProperties,
+            bindProperties = _PropertiesReader_1$P3.bindProperties,
+            nativeProperties = _PropertiesReader_1$P3.nativeProperties;
 
-        return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties);
+        return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
 })(Builder = exports.Builder || (exports.Builder = {}));
@@ -229,6 +238,11 @@ var BaseComponent = function () {
                 }
             });
             return copy;
+        }
+    }, {
+        key: "id",
+        get: function get() {
+            return this.domWrapper.id;
         }
     }, {
         key: "domNode",
@@ -396,7 +410,10 @@ var DataNode = function () {
     }, {
         key: "getById",
         value: function getById(id) {
-            if (this.id === id) {
+            if (!id) {
+                return;
+            }
+            if (this.component.id === id) {
                 return this.component;
             }
             var _iteratorNormalCompletion = true;
@@ -514,11 +531,10 @@ var DataNode = function () {
         get: function get() {
             return this.dataNodeProperties.name;
         }
-    }, {
-        key: "id",
-        get: function get() {
-            return this.dataNodeProperties.id;
-        }
+        // get id() {
+        //   return this.dataNodeProperties.id;
+        // }
+
     }, {
         key: "dataBehavior",
         get: function get() {
@@ -543,18 +559,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var const_1 = require("../util/const");
 var BaseComponent_1 = require("./BaseComponent");
 var DomWrappers_1 = require("./dom/DomWrappers");
 
 var GroupContainer = function (_BaseComponent_1$Data) {
     _inherits(GroupContainer, _BaseComponent_1$Data);
 
-    function GroupContainer(dataNodeProps) {
+    function GroupContainer(dataNodeProps, nativeProperties) {
         _classCallCheck(this, GroupContainer);
 
         var _this = _possibleConstructorReturn(this, (GroupContainer.__proto__ || Object.getPrototypeOf(GroupContainer)).call(this, DomWrappers_1.DomWrappers.group(), dataNodeProps));
 
         _this.dataNodeProps = dataNodeProps;
+        _this.nativeProperties = nativeProperties;
         return _this;
     }
 
@@ -583,6 +601,11 @@ var GroupContainer = function (_BaseComponent_1$Data) {
         value: function prepareCopy() {
             return new this.constructor(this.dataNodeProps);
         }
+    }, {
+        key: "id",
+        get: function get() {
+            return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];
+        }
     }]);
 
     return GroupContainer;
@@ -590,7 +613,7 @@ var GroupContainer = function (_BaseComponent_1$Data) {
 
 exports.GroupContainer = GroupContainer;
 
-},{"./BaseComponent":4,"./dom/DomWrappers":12}],8:[function(require,module,exports){
+},{"../util/const":19,"./BaseComponent":4,"./dom/DomWrappers":12}],8:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -930,19 +953,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var const_1 = require("../util/const");
 var BaseComponent_1 = require("./BaseComponent");
 var DomWrappers_1 = require("./dom/DomWrappers");
 
 var ListContainer = function (_BaseComponent_1$Data) {
     _inherits(ListContainer, _BaseComponent_1$Data);
 
-    function ListContainer(generator, dataNodeProps) {
+    function ListContainer(generator, dataNodeProps, nativeProperties) {
         _classCallCheck(this, ListContainer);
 
         var _this = _possibleConstructorReturn(this, (ListContainer.__proto__ || Object.getPrototypeOf(ListContainer)).call(this, DomWrappers_1.DomWrappers.group(), dataNodeProps));
 
         _this.generator = generator;
         _this.dataNodeProps = dataNodeProps;
+        _this.nativeProperties = nativeProperties;
         return _this;
     }
 
@@ -1013,6 +1038,11 @@ var ListContainer = function (_BaseComponent_1$Data) {
         value: function prepareCopy() {
             return new this.constructor(this.generator, this.dataNodeProps);
         }
+    }, {
+        key: "id",
+        get: function get() {
+            return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];
+        }
     }]);
 
     return ListContainer;
@@ -1020,7 +1050,7 @@ var ListContainer = function (_BaseComponent_1$Data) {
 
 exports.ListContainer = ListContainer;
 
-},{"./BaseComponent":4,"./dom/DomWrappers":12}],10:[function(require,module,exports){
+},{"../util/const":19,"./BaseComponent":4,"./dom/DomWrappers":12}],10:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1032,6 +1062,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var const_1 = require("../util/const");
 var BaseComponent_1 = require("./BaseComponent");
 var DomBinder_1 = require("./dom/DomBinder");
 var DomWrappers_1 = require("./dom/DomWrappers");
@@ -1039,13 +1070,14 @@ var DomWrappers_1 = require("./dom/DomWrappers");
 var TextComponent = function (_BaseComponent_1$Data) {
     _inherits(TextComponent, _BaseComponent_1$Data);
 
-    function TextComponent(dataNodeProps, bindProperties) {
+    function TextComponent(dataNodeProps, bindProperties, nativeProperties) {
         _classCallCheck(this, TextComponent);
 
         var _this = _possibleConstructorReturn(this, (TextComponent.__proto__ || Object.getPrototypeOf(TextComponent)).call(this, DomWrappers_1.DomWrappers.text(), dataNodeProps));
 
         _this.dataNodeProps = dataNodeProps;
         _this.bindProperties = bindProperties;
+        _this.nativeProperties = nativeProperties;
         _this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this;
     }
@@ -1075,6 +1107,11 @@ var TextComponent = function (_BaseComponent_1$Data) {
         value: function prepareCopy() {
             return new this.constructor(this.dataNodeProps, this.bindProperties);
         }
+    }, {
+        key: "id",
+        get: function get() {
+            return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];
+        }
     }]);
 
     return TextComponent;
@@ -1082,7 +1119,7 @@ var TextComponent = function (_BaseComponent_1$Data) {
 
 exports.TextComponent = TextComponent;
 
-},{"./BaseComponent":4,"./dom/DomBinder":11,"./dom/DomWrappers":12}],11:[function(require,module,exports){
+},{"../util/const":19,"./BaseComponent":4,"./dom/DomBinder":11,"./dom/DomWrappers":12}],11:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1252,6 +1289,14 @@ var DomWrappers;
                 if (this.parentDomWrapper && parentNode) {
                     parentNode.removeChild(this.domElement);
                 }
+            }
+        }, {
+            key: "id",
+            get: function get() {
+                return this.domElement.id;
+            },
+            set: function set(id) {
+                this.domElement.id = id;
             }
         }]);
 
@@ -1869,11 +1914,12 @@ var PropertiesReader = function () {
         key: "registerDataNodeProperty",
         value: function registerDataNodeProperty(key, properties) {
             switch (key.toLowerCase()) {
-                case const_1.DATA_NODE_PROPERTIES.ID:
-                    this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.ID] = properties[key];
-                    break;
                 case const_1.DATA_NODE_PROPERTIES.NAME:
-                    this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.NAME] = properties[key];
+                    var value = properties[key];
+                    if (typeof value !== 'string') {
+                        throw new Error('Property "name" must be of type string.');
+                    }
+                    this.dataNodeProperties[const_1.DATA_NODE_PROPERTIES.NAME] = value;
                     break;
             }
         }
@@ -1898,10 +1944,16 @@ var PropertiesReader = function () {
                     return true;
             }
             if ((typeof propValue === "undefined" ? "undefined" : _typeof(propValue)) === 'object' || propValue.get || propValue.set) {
+                if (prop === const_1.DATA_NODE_PROPERTIES.NAME) {
+                    throw new Error('Property "name" must be of type string.');
+                }
                 this.bindProperties[prop] = Object.assign({}, propValue);
                 return true;
             }
             if (typeof propValue === 'function') {
+                if (prop === const_1.DATA_NODE_PROPERTIES.NAME) {
+                    throw new Error('Property "name" must be of type string.');
+                }
                 this.bindProperties[prop] = { set: propValue };
                 return true;
             }
@@ -1960,7 +2012,6 @@ exports.NODES = {
     BR: 'br'
 };
 exports.DATA_NODE_PROPERTIES = {
-    ID: 'id',
     NAME: 'name'
 };
 exports.STYLE_PROPERTIES = {
@@ -1968,7 +2019,8 @@ exports.STYLE_PROPERTIES = {
     STYLE: 'style'
 };
 exports.NATIVE_PROPERTIES = {
-    TYPE: 'type'
+    TYPE: 'type',
+    ID: 'id'
 };
 exports.BIND_PROPERTIES = {
     BIND: 'bind'

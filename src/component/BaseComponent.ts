@@ -20,6 +20,10 @@ export abstract class BaseComponent<N extends Node> implements Component {
   protected constructor(protected domWrapper: DomWrapper<N>) {
   }
 
+  get id() {
+    return this.domWrapper.id;
+  }
+
   append(child: any) {
     if (child instanceof BaseComponent) {
       if (child.parent) {

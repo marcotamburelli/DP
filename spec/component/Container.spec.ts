@@ -2,7 +2,10 @@ import { JSDOM } from 'jsdom';
 
 import { Container } from '../../src/component/Container';
 import { DomBinder } from '../../src/component/dom/DomBinder';
+import { GroupContainer } from '../../src/component/GroupContainer';
 import { HtmlElementComponent, RadioInputComponent } from '../../src/component/HtmlComponents';
+import { ListContainer } from '../../src/component/ListContainer';
+import { TextComponent } from '../../src/component/TextComponent';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
@@ -12,7 +15,9 @@ global['document'] = dom.window.document;
 function createSimpleHtml(name: string, id: string) {
   const controlElement = document.createElement('div');
 
-  return new HtmlElementComponent(controlElement, { id, name }, {});
+  controlElement.id = id;
+
+  return new HtmlElementComponent<HTMLDivElement>(controlElement, { name }, {});
 }
 
 function createRadio(name: string, value: string) {
@@ -35,11 +40,55 @@ describe('Query inside the container', () => {
 
     container.append(childContainer);
 
-    childContainer.append(createSimpleHtml('name_1', '1'));
-    childContainer.append(createSimpleHtml('name_2', '2'));
+    const child1 = createSimpleHtml('name_1', '1');
+    const child2 = createSimpleHtml('name_2', '2');
+
+    childContainer.append(child1);
+    childContainer.append(child2);
 
     expect(container.queryById('')).toBeUndefined();
-    expect(container.queryById('1')).toBeDefined();
+    expect(container.queryById('3')).toBeUndefined();
+    expect(container.queryById('1')).toBe(child1);
+
+    child1.domNode.id = 'new_id';
+
+    expect(container.queryById('new_id')).toBe(child1);
+  });
+
+  it('checks query of group', () => {
+    const element = document.createElement('div');
+    const container = new Container(element);
+    const group = new GroupContainer({ name: 'obj' }, { id: '1' });
+
+    container.append(group);
+
+    expect(container.queryById('')).toBeUndefined();
+    expect(container.queryById('3')).toBeUndefined();
+    expect(container.queryById('1')).toBe(group);
+  });
+
+  it('checks query of list', () => {
+    const element = document.createElement('div');
+    const container = new Container(element);
+    const list = new ListContainer<any>(null, { name: 'obj' }, { id: '1' });
+
+    container.append(list);
+
+    expect(container.queryById('')).toBeUndefined();
+    expect(container.queryById('3')).toBeUndefined();
+    expect(container.queryById('1')).toBe(list);
+  });
+
+  it('checks query of text', () => {
+    const element = document.createElement('div');
+    const container = new Container(element);
+    const text = new TextComponent({ name: 'name' }, {}, { id: '1' });
+
+    container.append(text);
+
+    expect(container.queryById('')).toBeUndefined();
+    expect(container.queryById('3')).toBeUndefined();
+    expect(container.queryById('1')).toBe(text);
   });
 
 });

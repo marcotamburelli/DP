@@ -1,3 +1,5 @@
+import { NATIVE_PROPERTIES } from '../util/const';
+import { Properties } from '../util/types';
 import { BaseComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
 import { Component, IsDataDriven, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
@@ -5,8 +7,12 @@ import { DomWrappers } from './dom/DomWrappers';
 import { ComponentGenerator } from './generator';
 
 export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
-  constructor(private generator: ComponentGenerator<D>, private dataNodeProps?: DataNodeProperties) {
+  constructor(private generator: ComponentGenerator<D>, private dataNodeProps?: DataNodeProperties, private nativeProperties?: Properties) {
     super(DomWrappers.group(), dataNodeProps);
+  }
+
+  get id() {
+    return this.nativeProperties && this.nativeProperties[NATIVE_PROPERTIES.ID];
   }
 
   append(child: any) {
