@@ -38,4 +38,8 @@ DomBinder.IDENTITY_BINDER = {
     get(v) { return v; },
     set(v) { return v; }
 };
+DomBinder.INT_BINDER = {
+    set: (n) => `${n}`,
+    get: (v) => parseInt(v)
+};
 exports.DomBinder = DomBinder;

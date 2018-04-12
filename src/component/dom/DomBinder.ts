@@ -14,6 +14,11 @@ export class DomBinder {
     set(v) { return v; }
   };
 
+  static readonly INT_BINDER = {
+    set: (n) => `${n}`,
+    get: (v) => parseInt(v)
+  };
+
   static create(properties: BindProperties = {}) {
     if (properties[DEFAULT_BIND]) {
       return new DomBinder({ ...properties });

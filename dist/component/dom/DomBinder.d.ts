@@ -12,6 +12,10 @@ export declare class DomBinder {
         get(v: any): any;
         set(v: any): any;
     };
+    static readonly INT_BINDER: {
+        set: (n: any) => string;
+        get: (v: any) => number;
+    };
     static create(properties?: BindProperties): DomBinder;
     private names;
     private constructor();

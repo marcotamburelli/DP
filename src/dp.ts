@@ -1,6 +1,7 @@
 import { Builder, Definition } from './Builder';
 import { BaseComponent, DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
+import { DomBinder } from './component/dom/DomBinder';
 import { GroupContainer as ExtGroupContainer } from './component/GroupContainer';
 import { ListContainer as ExtListContainer } from './component/ListContainer';
 import { TextComponent as ExtTextComponent } from './component/TextComponent';
@@ -20,6 +21,12 @@ export namespace dp {
   export type GroupContainer<D> = ExtGroupContainer<D>;
   export type TextComponent<D> = ExtTextComponent<D>;
   export type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
+
+  export const IDENTITY_BINDER = DomBinder.IDENTITY_BINDER;
+  export const INT_BINDER = DomBinder.INT_BINDER;
+
+  export const DATA_EVENT = 'DATA_EVENT';
+  export const DATA_EMITTER = (eventType = DATA_EVENT) => ({ eventType });
 
   export function List<D>(props: Properties, children: any[]) {
     return Builder.createList<D>(props, children) as ListContainer<D>;

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Builder_1 = require("./Builder");
 const BaseComponent_1 = require("./component/BaseComponent");
+const DomBinder_1 = require("./component/dom/DomBinder");
 const listener_1 = require("./event/listener");
 var dp;
 (function (dp) {
@@ -9,6 +10,10 @@ var dp;
         children.forEach(child => component.append(child));
         return component;
     }
+    dp.IDENTITY_BINDER = DomBinder_1.DomBinder.IDENTITY_BINDER;
+    dp.INT_BINDER = DomBinder_1.DomBinder.INT_BINDER;
+    dp.DATA_EVENT = 'DATA_EVENT';
+    dp.DATA_EMITTER = (eventType = dp.DATA_EVENT) => ({ eventType });
     function List(props, children) {
         return Builder_1.Builder.createList(props, children);
     }

@@ -9,13 +9,11 @@ const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 // tslint:disable-next-line:no-string-literal
 global['document'] = dom.window.document;
 
-const intBinder = { set: (n) => `${n}`, get: (v) => parseInt(v) };
-
 describe('Definition of simple HTML components with bound data', () => {
 
   it('checks html', () => {
     const div: dp.Component<number, HTMLDivElement> = dp.define(
-      'div', { name: 'val', bind: intBinder },
+      'div', { name: 'val', bind: DomBinder.INT_BINDER },
       '321'
     );
 
@@ -28,7 +26,7 @@ describe('Definition of simple HTML components with bound data', () => {
 
   it('checks html', () => {
     const div: dp.Component<number, HTMLDivElement> = dp.define(
-      'div', { name: 'val', bind: intBinder },
+      'div', { name: 'val', bind: DomBinder.INT_BINDER },
       321
     );
 
@@ -42,7 +40,7 @@ describe('Definition of simple HTML components with bound data', () => {
   it('checks input', () => {
     const input: dp.Component<number, HTMLInputElement> = dp.define(
       'input',
-      { name: 'val', bind: intBinder }
+      { name: 'val', bind: DomBinder.INT_BINDER }
     );
     const nativeInput = input.domNode;
 
@@ -84,7 +82,7 @@ describe('Definition of containers', () => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
-      dp.define('input', { name: 'age', bind: intBinder })
+      dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER })
     );
 
     component.setData({ name: 'test', age: 123 });
@@ -143,7 +141,7 @@ describe('Definition of containers', () => {
       'div', null,
       dp.define(dp.Group, null,
         dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
-        dp.define('input', { name: 'age', bind: intBinder })
+        dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER })
       )
     );
 
@@ -164,8 +162,8 @@ describe('Definition of containers', () => {
   it('checks radio group', () => {
     const component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
       'div', null,
-      dp.define('input', { name: 'age', value: 10, type: 'RADIO', bind: intBinder, id: '10' }),
-      dp.define('input', { name: 'age', value: 20, type: 'RADIO', bind: intBinder, id: '20' })
+      dp.define('input', { name: 'age', value: 10, type: 'RADIO', bind: DomBinder.INT_BINDER, id: '10' }),
+      dp.define('input', { name: 'age', value: 20, type: 'RADIO', bind: DomBinder.INT_BINDER, id: '20' })
     );
 
     component.setData({ age: 20 });
@@ -272,16 +270,16 @@ describe('Observer', () => {
     const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
-      dp.define('input', { name: 'age', bind: intBinder }),
+      dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
       dp.define<dp.Component<any, HTMLButtonElement>>(
         'button',
-        { id: 'button', onclick: { eventType: 'EVENT' } }
+        { id: 'button', onclick: dp.DATA_EMITTER() }
       )
     );
 
     component.setData({ name: 'test', age: 123 });
 
-    const observable = Observable.from(component.createObservable<string>('EVENT'));
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
 
     const subscription = observable.subscribe(({ payload }) => {
       expect(payload).toEqual({ name: 'test', age: 123 });

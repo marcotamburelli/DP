@@ -1198,6 +1198,14 @@ DomBinder.IDENTITY_BINDER = {
         return v;
     }
 };
+DomBinder.INT_BINDER = {
+    set: function set(n) {
+        return "" + n;
+    },
+    get: function get(v) {
+        return parseInt(v);
+    }
+};
 exports.DomBinder = DomBinder;
 
 },{"../../util/NativeUtil":17}],12:[function(require,module,exports){
@@ -1454,6 +1462,7 @@ exports.createGenerator = function (content) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Builder_1 = require("./Builder");
 var BaseComponent_1 = require("./component/BaseComponent");
+var DomBinder_1 = require("./component/dom/DomBinder");
 var listener_1 = require("./event/listener");
 var dp;
 (function (dp) {
@@ -1463,6 +1472,13 @@ var dp;
         });
         return component;
     }
+    dp.IDENTITY_BINDER = DomBinder_1.DomBinder.IDENTITY_BINDER;
+    dp.INT_BINDER = DomBinder_1.DomBinder.INT_BINDER;
+    dp.DATA_EVENT = 'DATA_EVENT';
+    dp.DATA_EMITTER = function () {
+        var eventType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : dp.DATA_EVENT;
+        return { eventType: eventType };
+    };
     function List(props, children) {
         return Builder_1.Builder.createList(props, children);
     }
@@ -1502,7 +1518,7 @@ var dp;
     dp.listen = listen;
 })(dp = exports.dp || (exports.dp = {}));
 
-},{"./Builder":3,"./component/BaseComponent":4,"./event/listener":16}],15:[function(require,module,exports){
+},{"./Builder":3,"./component/BaseComponent":4,"./component/dom/DomBinder":11,"./event/listener":16}],15:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();

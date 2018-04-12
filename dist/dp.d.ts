@@ -13,6 +13,18 @@ export declare namespace dp {
     type GroupContainer<D> = ExtGroupContainer<D>;
     type TextComponent<D> = ExtTextComponent<D>;
     type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
+    const IDENTITY_BINDER: {
+        get(v: any): any;
+        set(v: any): any;
+    };
+    const INT_BINDER: {
+        set: (n: any) => string;
+        get: (v: any) => number;
+    };
+    const DATA_EVENT = "DATA_EVENT";
+    const DATA_EMITTER: (eventType?: string) => {
+        eventType: string;
+    };
     function List<D>(props: Properties, children: any[]): ExtListContainer<D>;
     function Group<D>(props: Properties): ExtGroupContainer<D>;
     function Text<D>(props: Properties): TextComponent<D>;
