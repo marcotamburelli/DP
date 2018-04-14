@@ -5,7 +5,7 @@ import { GroupContainer } from './GroupContainer';
 export type ComponentGenerator<D> = () => DomBasedComponent & IsDataDriven<D>;
 
 export const createGenerator = <D>(content: any[]): ComponentGenerator<D> => () => {
-  if (content.length) {
+  if (content.length > 1) {
     const group = new GroupContainer<D>();
 
     content.forEach(child => {

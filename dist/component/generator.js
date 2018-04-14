@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const BaseComponent_1 = require("./BaseComponent");
 const GroupContainer_1 = require("./GroupContainer");
 exports.createGenerator = (content) => () => {
-    if (content.length) {
+    if (content.length > 1) {
         const group = new GroupContainer_1.GroupContainer();
         content.forEach(child => {
             if (child instanceof BaseComponent_1.BaseComponent) {

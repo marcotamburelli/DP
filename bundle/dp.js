@@ -1438,7 +1438,7 @@ var BaseComponent_1 = require("./BaseComponent");
 var GroupContainer_1 = require("./GroupContainer");
 exports.createGenerator = function (content) {
     return function () {
-        if (content.length) {
+        if (content.length > 1) {
             var group = new GroupContainer_1.GroupContainer();
             content.forEach(function (child) {
                 if (child instanceof BaseComponent_1.BaseComponent) {
