@@ -1200,7 +1200,7 @@ DomBinder.IDENTITY_BINDER = {
 };
 DomBinder.INT_BINDER = {
     set: function set(n) {
-        return "" + n;
+        return n == null ? '' : "" + n;
     },
     get: function get(v) {
         return parseInt(v);

@@ -15,7 +15,7 @@ export class DomBinder {
   };
 
   static readonly INT_BINDER = {
-    set: (n) => `${n}`,
+    set: (n) => n == null ? '' : `${n}`,
     get: (v) => parseInt(v)
   };
 

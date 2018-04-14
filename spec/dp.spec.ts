@@ -55,31 +55,31 @@ describe('Definition of simple HTML components with bound data', () => {
 
 });
 
-interface TestModel {
-  name: string;
-  age: number;
+interface TestData {
+  name?: string;
+  age?: number;
 }
 
 describe('Definition of containers', () => {
 
-  interface TypeModel {
+  interface TypeData {
     type: string;
     name: string;
   }
 
-  interface RadioModel {
+  interface RadioData {
     age: number;
   }
 
-  interface PropertyModel {
+  interface PropertyData {
     id: string;
     name: {
       align: string
     };
   }
 
-  it('checks model', () => {
-    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+  it('checks data', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
       dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER })
@@ -99,7 +99,29 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
-  it('checks model with properties', () => {
+  it('checks null with int binder', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+      dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER })
+    );
+
+    component.setData({ name: 'test' });
+
+    const ageInput = component.queryByName<dp.Container<number, HTMLInputElement>>('age')[0].domNode;
+
+    expect(ageInput.value).toBe('');
+
+    component.setData({ name: 'test', age: null });
+
+    expect(ageInput.value).toBe('');
+
+    ageInput.value = 'xxx';
+
+    expect(component.getData()).toEqual({ name: 'test', age: NaN });
+  });
+
+  it('checks data with properties', () => {
     const component: dp.Container<{ align: string }, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('div', { align: DomBinder.IDENTITY_BINDER, id: 'div' })
@@ -116,8 +138,8 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ align: 'right' });
   });
 
-  it('checks model with more properties', () => {
-    const component: dp.Container<PropertyModel, HTMLDivElement> = dp.define(
+  it('checks data with more properties', () => {
+    const component: dp.Container<PropertyData, HTMLDivElement> = dp.define(
       'div', { id: DomBinder.IDENTITY_BINDER },
       dp.define('div', { name: 'name', align: DomBinder.IDENTITY_BINDER, id: 'div' })
     );
@@ -136,8 +158,8 @@ describe('Definition of containers', () => {
     expect(component.getData()).toEqual({ id: '#2', name: { align: 'right' } });
   });
 
-  it('checks model of group container', () => {
-    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+  it('checks data of group container', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define(dp.Group, null,
         dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
@@ -160,7 +182,7 @@ describe('Definition of containers', () => {
   });
 
   it('checks radio group', () => {
-    const component: dp.Container<RadioModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<RadioData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { name: 'age', value: 10, type: 'RADIO', bind: DomBinder.INT_BINDER, id: '10' }),
       dp.define('input', { name: 'age', value: 20, type: 'RADIO', bind: DomBinder.INT_BINDER, id: '20' })
@@ -180,7 +202,7 @@ describe('Definition of containers', () => {
   });
 
   it('checks select with array', () => {
-    const component: dp.Container<TypeModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TypeData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define(
         'select', { name: 'type', bind: DomBinder.IDENTITY_BINDER },
@@ -214,7 +236,7 @@ describe('Definition of containers', () => {
 describe('Observer', () => {
 
   it('checks observer', (done) => {
-    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } }),
       dp.define('button', { id: 'button_2', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_2' } })
@@ -239,7 +261,7 @@ describe('Observer', () => {
   });
 
   it('checks observer when modifying structure', (done) => {
-    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('button', { id: 'button_1', onclick: { eventType: 'EVENT', emitter: () => 'PAYLOAD_1' } })
     );
@@ -266,8 +288,8 @@ describe('Observer', () => {
     child2.domNode.click();
   });
 
-  it('checks model payload', (done) => {
-    const component: dp.Container<TestModel, HTMLDivElement> = dp.define(
+  it('checks data payload', (done) => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
       dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
