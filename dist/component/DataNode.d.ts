@@ -10,7 +10,7 @@ export interface DataNodeProperties {
 }
 export declare class DataNode {
     private dataNodeProperties;
-    private component;
+    readonly component: Component & IsDataDriven<any>;
     private parent;
     private children;
     constructor(dataNodeProperties?: DataNodeProperties, component?: Component & IsDataDriven<any>);
@@ -18,6 +18,7 @@ export declare class DataNode {
     readonly dataBehavior: DataMappingBehavior;
     append(dataNode: DataNode): void;
     remove(dataNode: DataNode): void;
+    getMinimalNamedComponent(): Component & IsDataDriven<any>;
     getData<D>(): any;
     setData<D>(data: D): void;
     getById(id: string): Component;

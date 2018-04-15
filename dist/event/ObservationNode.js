@@ -19,27 +19,23 @@ class SubscriptionImpl {
     }
 }
 class ObservationNode {
-    constructor(domNode, observationProperties = {}, defaultEmitter) {
-        this.domNode = domNode;
+    constructor(dataNode, observationProperties = {}) {
+        this.dataNode = dataNode;
         this.observationProperties = observationProperties;
-        this.defaultEmitter = defaultEmitter;
-        this.childSeq = 0;
-        this.children = new Map();
+        this.children = new Set();
         this.activeSubscriptions = new Set();
     }
     append(child) {
-        if (child.idx != null) {
+        if (child.parent != null) {
             throw new Error('Observation node cannot be appended since it already has a parent.');
         }
-        child.idx = ++this.childSeq;
         child.parent = this;
-        this.children.set(child.idx, child);
+        this.children.add(child);
         this.rebuildDependentSubscriptions();
     }
     remove(child) {
-        if (child.idx != null) {
-            this.children.delete(child.idx);
-            delete child.idx;
+        if (child.parent === this) {
+            this.children.delete(child);
             delete child.parent;
             this.rebuildDependentSubscriptions();
         }
@@ -64,23 +60,34 @@ class ObservationNode {
             observationNode = observationNode.parent;
         }
     }
-    collectSubscriptions(subscriber, observedType, defaultEmitter = this.defaultEmitter) {
+    createEmitter(emitter) {
+        if (emitter) {
+            return emitter;
+        }
+        const contextData = this.dataNode.getMinimalNamedComponent().getData();
+        return () => contextData;
+    }
+    collectSubscriptions(subscriber, observedType) {
         const subscriptions = [];
-        if (this.domNode) {
+        const { domNode } = this.dataNode.component;
+        if (domNode) {
             Object.keys(this.observationProperties).map(domEvent => {
                 const { emitter, eventType } = this.observationProperties[domEvent];
                 if (observedType == null || observedType === eventType) {
-                    const handler = (e) => subscriber.next({
-                        eventType,
-                        payload: (emitter || defaultEmitter || (() => null))(e)
-                    });
-                    this.domNode.addEventListener(domEvent, handler);
-                    subscriptions.push(() => this.domNode.removeEventListener(domEvent, handler));
+                    const _emitter = this.createEmitter(emitter);
+                    const handler = (e) => {
+                        subscriber.next({
+                            eventType,
+                            payload: _emitter(e)
+                        });
+                    };
+                    domNode.addEventListener(domEvent, handler);
+                    subscriptions.push(() => domNode.removeEventListener(domEvent, handler));
                 }
             });
         }
         const buffer = [];
-        this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType, defaultEmitter)));
+        this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType)));
         const array = [].concat.apply(subscriptions, buffer);
         return array;
     }

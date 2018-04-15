@@ -1,5 +1,7 @@
 import Symbol_observable from 'symbol-observable';
 
+import { HasDomNode } from '../component/Components';
+import { DataNode } from '../component/DataNode';
 import { EventType, IsObservable, ObservationProperties, Subscriber, Subscription } from './types';
 
 class SubscriptionImpl<P> implements Subscription {
@@ -22,33 +24,29 @@ class SubscriptionImpl<P> implements Subscription {
 
 export class ObservationNode {
   private parent: ObservationNode;
-  private idx?: number;
 
-  private childSeq = 0;
-  private children = new Map<number, ObservationNode>();
+  private children = new Set<ObservationNode>();
 
   private activeSubscriptions = new Set<SubscriptionImpl<any>>();
 
-  constructor(private domNode?: Node, private observationProperties: ObservationProperties = {}, private defaultEmitter?: () => any) { }
+  constructor(private dataNode: DataNode, private observationProperties: ObservationProperties = {}) { }
 
   append(child: ObservationNode) {
-    if (child.idx != null) {
+    if (child.parent != null) {
       throw new Error('Observation node cannot be appended since it already has a parent.');
     }
 
-    child.idx = ++this.childSeq;
     child.parent = this;
 
-    this.children.set(child.idx, child);
+    this.children.add(child);
 
     this.rebuildDependentSubscriptions();
   }
 
   remove(child: ObservationNode) {
-    if (child.idx != null) {
-      this.children.delete(child.idx);
+    if (child.parent === this) {
+      this.children.delete(child);
 
-      delete child.idx;
       delete child.parent;
 
       this.rebuildDependentSubscriptions();
@@ -83,33 +81,44 @@ export class ObservationNode {
     }
   }
 
-  private collectSubscriptions<P>(
-    subscriber: Subscriber<P>,
-    observedType: EventType,
-    defaultEmitter = this.defaultEmitter
-  ): (() => void)[] {
-    const subscriptions: (() => void)[] = [];
+  private createEmitter(emitter?: (e?: Event) => any) {
+    if (emitter) {
+      return emitter;
+    }
 
-    if (this.domNode) {
+    const contextData = this.dataNode.getMinimalNamedComponent().getData();
+
+    return () => contextData;
+  }
+
+  private collectSubscriptions<P>(subscriber: Subscriber<P>, observedType: EventType): (() => void)[] {
+    const subscriptions: (() => void)[] = [];
+    const { domNode } = this.dataNode.component as HasDomNode<any>;
+
+    if (domNode) {
       Object.keys(this.observationProperties).map(domEvent => {
         const { emitter, eventType } = this.observationProperties[domEvent];
 
         if (observedType == null || observedType === eventType) {
-          const handler = (e: Event) => subscriber.next({
-            eventType,
-            payload: (emitter || defaultEmitter || (() => null))(e) as P
-          });
+          const _emitter = this.createEmitter(emitter);
 
-          this.domNode.addEventListener(domEvent, handler);
+          const handler = (e: Event) => {
+            subscriber.next({
+              eventType,
+              payload: _emitter(e) as P
+            });
+          };
 
-          subscriptions.push(() => this.domNode.removeEventListener(domEvent, handler));
+          domNode.addEventListener(domEvent, handler);
+
+          subscriptions.push(() => domNode.removeEventListener(domEvent, handler));
         }
       });
     }
 
     const buffer: (() => void)[][] = [];
 
-    this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType, defaultEmitter)));
+    this.children.forEach(observationNode => buffer.push(observationNode.collectSubscriptions(subscriber, observedType)));
 
     const array = [].concat.apply(subscriptions, buffer);
     return array;

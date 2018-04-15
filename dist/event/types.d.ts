@@ -17,7 +17,7 @@ export interface GenericObservable<M> {
 export interface ObservationProperties {
     [domEvent: string]: {
         eventType: EventType;
-        emitter?(e: Event): any;
+        emitter?(e?: Event): any;
     };
 }
 export interface Message<P> {

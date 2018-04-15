@@ -15,9 +15,6 @@ class DataNode {
     get name() {
         return this.dataNodeProperties.name;
     }
-    // get id() {
-    //   return this.dataNodeProperties.id;
-    // }
     get dataBehavior() {
         return this.dataNodeProperties.dataBehavior || (this.name ? DataMappingBehavior.Named : DataMappingBehavior.Search);
     }
@@ -32,6 +29,20 @@ class DataNode {
         if (dataNode.parent === this) {
             this.children.delete(dataNode);
             delete dataNode.parent;
+        }
+    }
+    getMinimalNamedComponent() {
+        if (this.name) {
+            return this.component;
+        }
+        var dataNode = this;
+        var parentDataNode = dataNode.parent;
+        while (true) {
+            if (!parentDataNode || parentDataNode.name) {
+                return dataNode.component;
+            }
+            dataNode = parentDataNode;
+            parentDataNode = dataNode.parent;
         }
     }
     getData() {

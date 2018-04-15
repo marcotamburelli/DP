@@ -68,7 +68,7 @@ class DataDrivenComponentImpl extends BaseComponent {
     constructor(domWrapper, dataNodeProps = {}, observationProperties = {}) {
         super(domWrapper);
         this.dataNode = new DataNode_1.DataNode(dataNodeProps, this);
-        this.observationNode = new ObservationNode_1.ObservationNode(domWrapper.domElement, observationProperties, () => this.getData());
+        this.observationNode = new ObservationNode_1.ObservationNode(this.dataNode, observationProperties);
     }
 }
 exports.DataDrivenComponentImpl = DataDrivenComponentImpl;

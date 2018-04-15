@@ -10,6 +10,10 @@ export interface Component {
   createObservable<P>(observedEvent?: EventType): IsObservable<P>;
 }
 
+export interface HasDomNode<N extends Node> {
+  readonly domNode?: N;
+}
+
 export interface IsContainer {
   queryByName<C extends Component>(name: string): C[];
 

@@ -1,12 +1,12 @@
 import { ObservationNode } from '../event/ObservationNode';
 import { EventType, IsObservable, ObservationProperties } from '../event/types';
-import { Component, IsDataDriven } from './Components';
+import { Component, HasDomNode, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './dom/DomWrappers';
 
 export type DomBasedComponent = BaseComponent<Node>;
 
-export abstract class BaseComponent<N extends Node> implements Component {
+export abstract class BaseComponent<N extends Node> implements Component, HasDomNode<N> {
   protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
     return component.dataNode;
   }
@@ -101,7 +101,7 @@ export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseCom
     super(domWrapper);
 
     this.dataNode = new DataNode(dataNodeProps, this);
-    this.observationNode = new ObservationNode(domWrapper.domElement, observationProperties, () => this.getData());
+    this.observationNode = new ObservationNode(this.dataNode, observationProperties);
   }
 
   abstract getData(): D;

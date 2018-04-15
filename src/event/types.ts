@@ -23,7 +23,7 @@ export interface ObservationProperties {
   [domEvent: string]: {
     eventType: EventType;
 
-    emitter?(e: Event): any;
+    emitter?(e?: Event): any;
   };
 }
 

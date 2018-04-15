@@ -311,4 +311,31 @@ describe('Observer', () => {
     component.queryById<dp.Component<any, HTMLButtonElement>>('button').domNode.click();
   });
 
+  it('checks nested data payload', (done) => {
+    const component: dp.Container<{ data: TestData }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define('div', { name: 'data' },
+        dp.define('div', { id: 'inner' },
+          dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+          dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
+          dp.define<dp.Component<any, HTMLButtonElement>>(
+            'button',
+            { id: 'button', onclick: dp.DATA_EMITTER() }
+          )
+        )
+      )
+    );
+
+    component.setData({ data: { name: 'test', age: 123 } });
+
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
+
+    const subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123 });
+      done();
+    });
+
+    component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
+  });
+
 });

@@ -273,9 +273,7 @@ var DataDrivenComponentImpl = function (_BaseComponent) {
         var _this = _possibleConstructorReturn(this, (DataDrivenComponentImpl.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl)).call(this, domWrapper));
 
         _this.dataNode = new DataNode_1.DataNode(dataNodeProps, _this);
-        _this.observationNode = new ObservationNode_1.ObservationNode(domWrapper.domElement, observationProperties, function () {
-            return _this.getData();
-        });
+        _this.observationNode = new ObservationNode_1.ObservationNode(_this.dataNode, observationProperties);
         return _this;
     }
 
@@ -395,6 +393,22 @@ var DataNode = function () {
             if (dataNode.parent === this) {
                 this.children.delete(dataNode);
                 delete dataNode.parent;
+            }
+        }
+    }, {
+        key: "getMinimalNamedComponent",
+        value: function getMinimalNamedComponent() {
+            if (this.name) {
+                return this.component;
+            }
+            var dataNode = this;
+            var parentDataNode = dataNode.parent;
+            while (true) {
+                if (!parentDataNode || parentDataNode.name) {
+                    return dataNode.component;
+                }
+                dataNode = parentDataNode;
+                parentDataNode = dataNode.parent;
             }
         }
     }, {
@@ -531,10 +545,6 @@ var DataNode = function () {
         get: function get() {
             return this.dataNodeProperties.name;
         }
-        // get id() {
-        //   return this.dataNodeProperties.id;
-        // }
-
     }, {
         key: "dataBehavior",
         get: function get() {
@@ -1563,37 +1573,32 @@ var SubscriptionImpl = function () {
 }();
 
 var ObservationNode = function () {
-    function ObservationNode(domNode) {
+    function ObservationNode(dataNode) {
         var observationProperties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var defaultEmitter = arguments[2];
 
         _classCallCheck(this, ObservationNode);
 
-        this.domNode = domNode;
+        this.dataNode = dataNode;
         this.observationProperties = observationProperties;
-        this.defaultEmitter = defaultEmitter;
-        this.childSeq = 0;
-        this.children = new Map();
+        this.children = new Set();
         this.activeSubscriptions = new Set();
     }
 
     _createClass(ObservationNode, [{
         key: "append",
         value: function append(child) {
-            if (child.idx != null) {
+            if (child.parent != null) {
                 throw new Error('Observation node cannot be appended since it already has a parent.');
             }
-            child.idx = ++this.childSeq;
             child.parent = this;
-            this.children.set(child.idx, child);
+            this.children.add(child);
             this.rebuildDependentSubscriptions();
         }
     }, {
         key: "remove",
         value: function remove(child) {
-            if (child.idx != null) {
-                this.children.delete(child.idx);
-                delete child.idx;
+            if (child.parent === this) {
+                this.children.delete(child);
                 delete child.parent;
                 this.rebuildDependentSubscriptions();
             }
@@ -1640,38 +1645,48 @@ var ObservationNode = function () {
             }
         }
     }, {
+        key: "createEmitter",
+        value: function createEmitter(emitter) {
+            if (emitter) {
+                return emitter;
+            }
+            var contextData = this.dataNode.getMinimalNamedComponent().getData();
+            return function () {
+                return contextData;
+            };
+        }
+    }, {
         key: "collectSubscriptions",
         value: function collectSubscriptions(subscriber, observedType) {
             var _this4 = this;
 
-            var defaultEmitter = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.defaultEmitter;
-
             var subscriptions = [];
-            if (this.domNode) {
+            var domNode = this.dataNode.component.domNode;
+
+            if (domNode) {
                 Object.keys(this.observationProperties).map(function (domEvent) {
                     var _observationPropertie = _this4.observationProperties[domEvent],
                         emitter = _observationPropertie.emitter,
                         eventType = _observationPropertie.eventType;
 
                     if (observedType == null || observedType === eventType) {
+                        var _emitter = _this4.createEmitter(emitter);
                         var handler = function handler(e) {
-                            return subscriber.next({
+                            subscriber.next({
                                 eventType: eventType,
-                                payload: (emitter || defaultEmitter || function () {
-                                    return null;
-                                })(e)
+                                payload: _emitter(e)
                             });
                         };
-                        _this4.domNode.addEventListener(domEvent, handler);
+                        domNode.addEventListener(domEvent, handler);
                         subscriptions.push(function () {
-                            return _this4.domNode.removeEventListener(domEvent, handler);
+                            return domNode.removeEventListener(domEvent, handler);
                         });
                     }
                 });
             }
             var buffer = [];
             this.children.forEach(function (observationNode) {
-                return buffer.push(observationNode.collectSubscriptions(subscriber, observedType, defaultEmitter));
+                return buffer.push(observationNode.collectSubscriptions(subscriber, observedType));
             });
             var array = [].concat.apply(subscriptions, buffer);
             return array;
