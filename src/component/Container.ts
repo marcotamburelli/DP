@@ -10,6 +10,8 @@ import { DomWrappers } from './dom/DomWrappers';
  * @template E The type of DOM node.
  */
 export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, E> implements IsContainer {
+  readonly isContainer: true = true;
+
   private domBinder: DomBinder;
 
   constructor(

@@ -6,6 +6,8 @@ import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './dom/DomWrappers';
 
 export class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implements IsContainer {
+  readonly isContainer: true = true;
+
   constructor(private dataNodeProps?: DataNodeProperties, private nativeProperties?: Properties) {
     super(DomWrappers.group(), dataNodeProps);
   }

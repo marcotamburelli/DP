@@ -8,6 +8,7 @@ class GroupContainer extends BaseComponent_1.DataDrivenComponentImpl {
         super(DomWrappers_1.DomWrappers.group(), dataNodeProps);
         this.dataNodeProps = dataNodeProps;
         this.nativeProperties = nativeProperties;
+        this.isContainer = true;
     }
     get id() {
         return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];

@@ -7,6 +7,8 @@ export declare class ListContainer<D> extends DataDrivenComponentImpl<D[], any> 
     private generator;
     private dataNodeProps;
     private nativeProperties;
+    readonly isContainer: true;
+    readonly isList: true;
     constructor(generator: ComponentGenerator<D>, dataNodeProps?: DataNodeProperties, nativeProperties?: Properties);
     readonly id: any;
     append(child: any): void;

@@ -32,18 +32,24 @@ class DataNode {
         }
     }
     getMinimalNamedComponent() {
-        if (this.name) {
-            return this.component;
-        }
-        var dataNode = this;
-        var parentDataNode = dataNode.parent;
+        let dataNode = this;
+        let parentDataNode = dataNode.parent;
         while (true) {
-            if (!parentDataNode || parentDataNode.name) {
-                return dataNode.component;
+            if (!parentDataNode) {
+                break;
+            }
+            const { isContainer } = (dataNode.component || {});
+            if (dataNode.name && isContainer) {
+                break;
+            }
+            const { isList } = (parentDataNode.component || {});
+            if (isList) {
+                break;
             }
             dataNode = parentDataNode;
             parentDataNode = dataNode.parent;
         }
+        return dataNode.component;
     }
     getData() {
         return this.getDataRecursive({});

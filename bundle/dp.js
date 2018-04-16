@@ -314,6 +314,7 @@ var Container = function (_BaseComponent_1$Data) {
         _this.dataNodeProps = dataNodeProps;
         _this.bindProperties = bindProperties;
         _this.observationProperties = observationProperties;
+        _this.isContainer = true;
         _this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
         return _this;
     }
@@ -398,18 +399,30 @@ var DataNode = function () {
     }, {
         key: "getMinimalNamedComponent",
         value: function getMinimalNamedComponent() {
-            if (this.name) {
-                return this.component;
-            }
             var dataNode = this;
             var parentDataNode = dataNode.parent;
             while (true) {
-                if (!parentDataNode || parentDataNode.name) {
-                    return dataNode.component;
+                if (!parentDataNode) {
+                    break;
+                }
+
+                var _ref = dataNode.component || {},
+                    isContainer = _ref.isContainer;
+
+                if (dataNode.name && isContainer) {
+                    break;
+                }
+
+                var _ref2 = parentDataNode.component || {},
+                    isList = _ref2.isList;
+
+                if (isList) {
+                    break;
                 }
                 dataNode = parentDataNode;
                 parentDataNode = dataNode.parent;
             }
+            return dataNode.component;
         }
     }, {
         key: "getData",
@@ -583,6 +596,7 @@ var GroupContainer = function (_BaseComponent_1$Data) {
 
         _this.dataNodeProps = dataNodeProps;
         _this.nativeProperties = nativeProperties;
+        _this.isContainer = true;
         return _this;
     }
 
@@ -978,6 +992,8 @@ var ListContainer = function (_BaseComponent_1$Data) {
         _this.generator = generator;
         _this.dataNodeProps = dataNodeProps;
         _this.nativeProperties = nativeProperties;
+        _this.isContainer = true;
+        _this.isList = true;
         return _this;
     }
 

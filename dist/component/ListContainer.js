@@ -9,6 +9,8 @@ class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
         this.generator = generator;
         this.dataNodeProps = dataNodeProps;
         this.nativeProperties = nativeProperties;
+        this.isContainer = true;
+        this.isList = true;
     }
     get id() {
         return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];

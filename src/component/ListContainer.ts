@@ -7,6 +7,9 @@ import { DomWrappers } from './dom/DomWrappers';
 import { ComponentGenerator } from './generator';
 
 export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
+  readonly isContainer: true = true;
+  readonly isList: true = true;
+
   constructor(private generator: ComponentGenerator<D>, private dataNodeProps?: DataNodeProperties, private nativeProperties?: Properties) {
     super(DomWrappers.group(), dataNodeProps);
   }

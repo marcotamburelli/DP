@@ -14,6 +14,7 @@ class Container extends BaseComponent_1.DataDrivenComponentImpl {
         this.dataNodeProps = dataNodeProps;
         this.bindProperties = bindProperties;
         this.observationProperties = observationProperties;
+        this.isContainer = true;
         this.domBinder = DomBinder_1.DomBinder.create(bindProperties);
     }
     setData(data) {

@@ -5,6 +5,7 @@ import { DataNodeProperties } from './DataNode';
 export declare class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implements IsContainer {
     private dataNodeProps;
     private nativeProperties;
+    readonly isContainer: true;
     constructor(dataNodeProps?: DataNodeProperties, nativeProperties?: Properties);
     readonly id: any;
     setData(data: D): void;

@@ -15,12 +15,16 @@ export interface HasDomNode<N extends Node> {
 }
 
 export interface IsContainer {
+  readonly isContainer: true;
+
   queryByName<C extends Component>(name: string): C[];
 
   queryById<C extends Component>(id: string): C;
 }
 
 export interface IsList extends IsContainer {
+  readonly isList: true;
+
   queryByIdx<C extends Component>(idx: number): C;
 }
 

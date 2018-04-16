@@ -12,6 +12,7 @@ export declare class Container<D, E extends Element> extends DataDrivenComponent
     private dataNodeProps;
     private bindProperties;
     private observationProperties;
+    readonly isContainer: true;
     private domBinder;
     constructor(element: E, dataNodeProps?: DataNodeProperties, bindProperties?: BindProperties, observationProperties?: ObservationProperties);
     setData(data: D): void;

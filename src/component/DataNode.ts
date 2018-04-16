@@ -1,4 +1,4 @@
-import { Component, IsDataDriven } from './Components';
+import { Component, IsContainer, IsDataDriven, IsList } from './Components';
 
 export enum DataMappingBehavior { Named, Spread, Search }
 
@@ -44,21 +44,31 @@ export class DataNode {
   }
 
   getMinimalNamedComponent() {
-    if (this.name) {
-      return this.component;
-    }
-
-    var dataNode: DataNode = this;
-    var parentDataNode = dataNode.parent;
+    let dataNode: DataNode = this;
+    let parentDataNode = dataNode.parent;
 
     while (true) {
-      if (!parentDataNode || parentDataNode.name) {
-        return dataNode.component;
+      if (!parentDataNode) {
+        break;
+      }
+
+      const { isContainer } = (dataNode.component || {}) as IsContainer;
+
+      if (dataNode.name && isContainer) {
+        break;
+      }
+
+      const { isList } = (parentDataNode.component || {}) as IsList;
+
+      if (isList) {
+        break;
       }
 
       dataNode = parentDataNode;
       parentDataNode = dataNode.parent;
     }
+
+    return dataNode.component;
   }
 
   getData<D>() {
