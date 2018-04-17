@@ -42,16 +42,29 @@ export class DomBinder {
   }
 
   setTo<D>(data: D, node: Node) {
-    this.names
-      .filter(name => this.properties[name].set != null)
-      .forEach(name => {
-        NativeUtil.applyProperty(node, { name, value: this.properties[name].set(data[name]) });
-      });
+    switch (node.nodeType) {
+      case node.ELEMENT_NODE:
+        this.names
+          .filter(name => this.properties[name].set != null)
+          .forEach(name => {
+            NativeUtil.applyProperty(node as Element, { name, value: this.properties[name].set(data[name]) });
+          });
+        break;
+    }
   }
 
-  getFrom<D>(node: Node) {
-    return this.names
-      .filter(name => this.properties[name].get != null)
-      .reduce((data, name) => ({ ...data, [name]: this.properties[name].get(NativeUtil.extractProperty(node, name)) }), {}) as D;
+  getFrom<D>(node: Node): D {
+    switch (node.nodeType) {
+      case node.ELEMENT_NODE:
+        return this.names
+          .filter(name => this.properties[name].get != null)
+          .reduce((data, name) => ({
+            ...data,
+            [name]: this.properties[name].get(NativeUtil.extractProperty(node as Element, name))
+          }), {}) as D;
+
+      default:
+        return null;
+    }
   }
 }

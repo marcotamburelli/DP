@@ -1183,22 +1183,31 @@ var DomBinder = function () {
         value: function setTo(data, node) {
             var _this = this;
 
-            this.names.filter(function (name) {
-                return _this.properties[name].set != null;
-            }).forEach(function (name) {
-                NativeUtil_1.NativeUtil.applyProperty(node, { name: name, value: _this.properties[name].set(data[name]) });
-            });
+            switch (node.nodeType) {
+                case node.ELEMENT_NODE:
+                    this.names.filter(function (name) {
+                        return _this.properties[name].set != null;
+                    }).forEach(function (name) {
+                        NativeUtil_1.NativeUtil.applyProperty(node, { name: name, value: _this.properties[name].set(data[name]) });
+                    });
+                    break;
+            }
         }
     }, {
         key: "getFrom",
         value: function getFrom(node) {
             var _this2 = this;
 
-            return this.names.filter(function (name) {
-                return _this2.properties[name].get != null;
-            }).reduce(function (data, name) {
-                return Object.assign({}, data, _defineProperty({}, name, _this2.properties[name].get(NativeUtil_1.NativeUtil.extractProperty(node, name))));
-            }, {});
+            switch (node.nodeType) {
+                case node.ELEMENT_NODE:
+                    return this.names.filter(function (name) {
+                        return _this2.properties[name].get != null;
+                    }).reduce(function (data, name) {
+                        return Object.assign({}, data, _defineProperty({}, name, _this2.properties[name].get(NativeUtil_1.NativeUtil.extractProperty(node, name))));
+                    }, {});
+                default:
+                    return null;
+            }
         }
     }], [{
         key: "create",
@@ -1834,84 +1843,95 @@ var NativeUtil;
             return elementStyle[key] = styleObj[key];
         });
     }
-    function applyProperty(node, _ref) {
+    function extractStyle(element) {
+        var style = element.style;
+
+        var styleValue = {};
+        var propCount = style.length;
+        for (var i = 0; i < propCount; i++) {
+            var prop = style[i];
+            styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
+        }
+        return styleValue;
+    }
+    function extractClass(element) {
+        var classList = element.classList;
+
+        var cssClass = [];
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = classList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var className = _step.value;
+
+                cssClass.push(className);
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        return cssClass;
+    }
+    function applyProperty(element, _ref) {
         var name = _ref.name,
             value = _ref.value;
+        var classList = element.classList,
+            style = element.style;
 
-        if (name === const_1.STYLE_PROPERTIES.CLASS) {
-            return applyClass(node, value);
+        if (classList && name === const_1.STYLE_PROPERTIES.CLASS) {
+            return applyClass(element, value);
         }
-        if (name === const_1.STYLE_PROPERTIES.STYLE) {
-            return applyStyle(node, value);
+        if (style && name === const_1.STYLE_PROPERTIES.STYLE) {
+            return applyStyle(element, value);
         }
         if (name.startsWith('on') && typeof value === 'function') {
-            return node.addEventListener(name.substr(2), value);
+            return element.addEventListener(name.substr(2), value);
         }
         var attr = document.createAttribute(name);
         attr.value = value;
-        node.attributes.setNamedItem(attr);
+        element.attributes.setNamedItem(attr);
     }
     NativeUtil.applyProperty = applyProperty;
-    function extractProperty(node, name) {
-        if (name === const_1.STYLE_PROPERTIES.CLASS) {
-            var classList = node.classList;
+    function extractProperty(element, name) {
+        var classList = element.classList,
+            style = element.style;
 
-            var cssClass = [];
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = classList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var className = _step.value;
-
-                    cssClass.push(className);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
-
-            return cssClass;
+        if (classList && name === const_1.STYLE_PROPERTIES.CLASS) {
+            return extractClass(element);
         }
-        if (name === const_1.STYLE_PROPERTIES.STYLE) {
-            var style = node.style;
-
-            var styleValue = {};
-            var propCount = style.length;
-            for (var i = 0; i < propCount; i++) {
-                var prop = style[i];
-                styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
-            }
-            return styleValue;
+        if (style && name === const_1.STYLE_PROPERTIES.STYLE) {
+            return extractStyle(element);
         }
-        var attr = node.attributes.getNamedItem(name);
+        var attr = element.attributes.getNamedItem(name);
         if (attr != null) {
             return attr.value;
         }
     }
     NativeUtil.extractProperty = extractProperty;
-    function applyProperties(node, properties) {
+    function applyProperties(element, properties) {
         /* The 'type' is better to set before others */
         if (properties[const_1.NATIVE_PROPERTIES.TYPE]) {
-            applyProperty(node, { name: const_1.NATIVE_PROPERTIES.TYPE, value: properties[const_1.NATIVE_PROPERTIES.TYPE] });
+            applyProperty(element, { name: const_1.NATIVE_PROPERTIES.TYPE, value: properties[const_1.NATIVE_PROPERTIES.TYPE] });
         }
         Object.keys(properties).forEach(function (name) {
             if (name === const_1.NATIVE_PROPERTIES.TYPE) {
                 return;
             }
             var value = properties[name];
-            applyProperty(node, { name: name, value: value });
+            applyProperty(element, { name: name, value: value });
         });
     }
     NativeUtil.applyProperties = applyProperties;

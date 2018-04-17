@@ -1,11 +1,11 @@
 import { Properties } from './types';
 export declare namespace NativeUtil {
-    function applyProperty(node: Node, {name, value}: {
+    function applyProperty(element: Element, {name, value}: {
         name: string;
         value: any;
     }): void;
-    function extractProperty(node: Node, name: string): string | {
+    function extractProperty(element: Element, name: string): string | {
         [prop: string]: any;
     };
-    function applyProperties(node: Node, properties: Properties): void;
+    function applyProperties(element: Element, properties: Properties): void;
 }

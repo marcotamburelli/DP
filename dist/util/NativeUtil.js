@@ -45,57 +45,65 @@ var NativeUtil;
         const elementStyle = element.style;
         Object.keys(styleObj).forEach(key => elementStyle[key] = styleObj[key]);
     }
-    function applyProperty(node, { name, value }) {
-        if (name === const_1.STYLE_PROPERTIES.CLASS) {
-            return applyClass(node, value);
+    function extractStyle(element) {
+        const { style } = element;
+        const styleValue = {};
+        const propCount = style.length;
+        for (let i = 0; i < propCount; i++) {
+            const prop = style[i];
+            styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
         }
-        if (name === const_1.STYLE_PROPERTIES.STYLE) {
-            return applyStyle(node, value);
+        return styleValue;
+    }
+    function extractClass(element) {
+        const { classList } = element;
+        const cssClass = [];
+        for (const className of classList) {
+            cssClass.push(className);
+        }
+        return cssClass;
+    }
+    function applyProperty(element, { name, value }) {
+        const { classList, style } = element;
+        if (classList && name === const_1.STYLE_PROPERTIES.CLASS) {
+            return applyClass(element, value);
+        }
+        if (style && name === const_1.STYLE_PROPERTIES.STYLE) {
+            return applyStyle(element, value);
         }
         if (name.startsWith('on') && typeof value === 'function') {
-            return node.addEventListener(name.substr(2), value);
+            return element.addEventListener(name.substr(2), value);
         }
         const attr = document.createAttribute(name);
         attr.value = value;
-        node.attributes.setNamedItem(attr);
+        element.attributes.setNamedItem(attr);
     }
     NativeUtil.applyProperty = applyProperty;
-    function extractProperty(node, name) {
-        if (name === const_1.STYLE_PROPERTIES.CLASS) {
-            const { classList } = node;
-            const cssClass = [];
-            for (const className of classList) {
-                cssClass.push(className);
-            }
-            return cssClass;
+    function extractProperty(element, name) {
+        const { classList, style } = element;
+        if (classList && name === const_1.STYLE_PROPERTIES.CLASS) {
+            return extractClass(element);
         }
-        if (name === const_1.STYLE_PROPERTIES.STYLE) {
-            const { style } = node;
-            const styleValue = {};
-            const propCount = style.length;
-            for (let i = 0; i < propCount; i++) {
-                const prop = style[i];
-                styleValue[toCamelCase(prop)] = style.getPropertyValue(prop);
-            }
-            return styleValue;
+        if (style && name === const_1.STYLE_PROPERTIES.STYLE) {
+            return extractStyle(element);
         }
-        const attr = node.attributes.getNamedItem(name);
+        const attr = element.attributes.getNamedItem(name);
         if (attr != null) {
             return attr.value;
         }
     }
     NativeUtil.extractProperty = extractProperty;
-    function applyProperties(node, properties) {
+    function applyProperties(element, properties) {
         /* The 'type' is better to set before others */
         if (properties[const_1.NATIVE_PROPERTIES.TYPE]) {
-            applyProperty(node, { name: const_1.NATIVE_PROPERTIES.TYPE, value: properties[const_1.NATIVE_PROPERTIES.TYPE] });
+            applyProperty(element, { name: const_1.NATIVE_PROPERTIES.TYPE, value: properties[const_1.NATIVE_PROPERTIES.TYPE] });
         }
         Object.keys(properties).forEach(name => {
             if (name === const_1.NATIVE_PROPERTIES.TYPE) {
                 return;
             }
             const value = properties[name];
-            applyProperty(node, { name, value });
+            applyProperty(element, { name, value });
         });
     }
     NativeUtil.applyProperties = applyProperties;

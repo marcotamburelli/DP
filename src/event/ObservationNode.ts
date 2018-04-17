@@ -11,9 +11,9 @@ class SubscriptionImpl<P> implements Subscription {
     this.activeSubscriptions.add(this);
   }
 
-  buildSubscription(func: (subscriber: Subscriber<P>, observerType?: string) => (() => void)[]) {
+  buildSubscription(creator: (subscriber: Subscriber<P>, observerType?: string) => (() => void)[]) {
     this.innerSubscriptions.forEach(subscription => subscription());
-    this.innerSubscriptions = func(this.subscriber, this.observerType);
+    this.innerSubscriptions = creator(this.subscriber, this.observerType);
   }
 
   unsubscribe(): void {

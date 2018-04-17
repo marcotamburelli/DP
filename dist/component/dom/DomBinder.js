@@ -22,16 +22,25 @@ class DomBinder {
         return this.properties[exports.DEFAULT_BIND];
     }
     setTo(data, node) {
-        this.names
-            .filter(name => this.properties[name].set != null)
-            .forEach(name => {
-            NativeUtil_1.NativeUtil.applyProperty(node, { name, value: this.properties[name].set(data[name]) });
-        });
+        switch (node.nodeType) {
+            case node.ELEMENT_NODE:
+                this.names
+                    .filter(name => this.properties[name].set != null)
+                    .forEach(name => {
+                    NativeUtil_1.NativeUtil.applyProperty(node, { name, value: this.properties[name].set(data[name]) });
+                });
+                break;
+        }
     }
     getFrom(node) {
-        return this.names
-            .filter(name => this.properties[name].get != null)
-            .reduce((data, name) => (Object.assign({}, data, { [name]: this.properties[name].get(NativeUtil_1.NativeUtil.extractProperty(node, name)) })), {});
+        switch (node.nodeType) {
+            case node.ELEMENT_NODE:
+                return this.names
+                    .filter(name => this.properties[name].get != null)
+                    .reduce((data, name) => (Object.assign({}, data, { [name]: this.properties[name].get(NativeUtil_1.NativeUtil.extractProperty(node, name)) })), {});
+            default:
+                return null;
+        }
     }
 }
 DomBinder.IDENTITY_BINDER = {
