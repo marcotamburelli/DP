@@ -288,30 +288,59 @@ describe('Observer', () => {
     child2.domNode.click();
   });
 
-  // it('checks data payload', (done) => {
-  //   const component: dp.Container<TestData, HTMLDivElement> = dp.define(
-  //     'div', null,
-  //     dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
-  //     dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
-  //     dp.define<dp.Component<any, HTMLButtonElement>>(
-  //       'button',
-  //       { id: 'button', onclick: dp.DATA_EMITTER() }
-  //     )
-  //   );
+  it('checks data payload', (done) => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+      dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
+      dp.define<dp.Component<any, HTMLButtonElement>>(
+        'button',
+        { id: 'button', onclick: dp.DATA_EMITTER() }
+      )
+    );
 
-  //   component.setData({ name: 'test', age: 123 });
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
 
-  //   const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
+    const subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123 });
+      done();
+    });
 
-  //   const subscription = observable.subscribe(({ payload }) => {
-  //     expect(payload).toEqual({ name: 'test', age: 123 });
-  //     done();
-  //   });
+    component.setData({ name: 'test', age: 123 });
+    component.queryById<dp.Component<any, HTMLButtonElement>>('button').domNode.click();
+  });
 
-  //   component.queryById<dp.Component<any, HTMLButtonElement>>('button').domNode.click();
-  // });
+});
 
-  it('checks nested data payload', (done) => {
+describe('Payload emitter in nested scopes', () => {
+
+  it('checks payload in named container', (done) => {
+    const component: dp.Container<{ data: TestData }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(dp.Group, { name: 'data' },
+        dp.define(dp.Group, { id: 'inner' },
+          dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+          dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
+          dp.define<dp.Component<any, HTMLButtonElement>>(
+            'button',
+            { id: 'button', onclick: dp.DATA_EMITTER() }
+          )
+        )
+      )
+    );
+
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
+
+    const subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123 });
+      done();
+    });
+
+    component.setData({ data: { name: 'test', age: 123 } });
+    component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
+  });
+
+  it('checks payload in named group', (done) => {
     const component: dp.Container<{ data: TestData }, HTMLDivElement> = dp.define(
       'div', null,
       dp.define('div', { name: 'data' },
@@ -326,8 +355,6 @@ describe('Observer', () => {
       )
     );
 
-    component.setData({ data: { name: 'test', age: 123 } });
-
     const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
 
     const subscription = observable.subscribe(({ payload }) => {
@@ -335,7 +362,37 @@ describe('Observer', () => {
       done();
     });
 
+    component.setData({ data: { name: 'test', age: 123 } });
     component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
   });
 
+  it('checks payload in list item', (done) => {
+    interface TestDataForList extends TestData {
+      id: string;
+    }
+
+    const component: dp.Container<{ data: TestDataForList[] }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(dp.List, { name: 'data' },
+        dp.define('div', null,
+          dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+          dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
+          dp.define<dp.Component<any, HTMLButtonElement>>(
+            'button',
+            { id: DomBinder.IDENTITY_BINDER, onclick: dp.DATA_EMITTER() }
+          )
+        )
+      )
+    );
+
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
+
+    const subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123, id: 'button' });
+      done();
+    });
+
+    component.setData({ data: [{ name: 'test', age: 123, id: 'button' }] });
+    component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
+  });
 });

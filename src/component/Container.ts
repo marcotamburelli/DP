@@ -30,7 +30,7 @@ export class Container<D, E extends Element> extends DataDrivenComponentImpl<D, 
     this.dataNode.setData(data);
   }
 
-  getData() {
+  getData(): D {
     return { ...this.domBinder.getFrom(this.domNode), ...this.dataNode.getData() };
   }
 

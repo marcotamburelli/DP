@@ -64,8 +64,7 @@ class ObservationNode {
         if (emitter) {
             return emitter;
         }
-        const contextData = this.dataNode.getMinimalNamedComponent().getData();
-        return () => contextData;
+        return () => this.dataNode.getMinimalNamedComponent().getData();
     }
     collectSubscriptions(subscriber, observedType) {
         const subscriptions = [];
@@ -74,11 +73,11 @@ class ObservationNode {
             Object.keys(this.observationProperties).map(domEvent => {
                 const { emitter, eventType } = this.observationProperties[domEvent];
                 if (observedType == null || observedType === eventType) {
-                    const _emitter = this.createEmitter(emitter);
+                    const payloadCreator = this.createEmitter(emitter);
                     const handler = (e) => {
                         subscriber.next({
                             eventType,
-                            payload: _emitter(e)
+                            payload: payloadCreator(e)
                         });
                     };
                     domNode.addEventListener(domEvent, handler);

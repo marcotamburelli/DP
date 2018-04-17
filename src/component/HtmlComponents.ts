@@ -59,7 +59,7 @@ export class HtmlElementComponent<D> extends HtmlComponent<D, HTMLElement> {
     }
   }
 
-  getData() {
+  getData(): D {
     if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
@@ -104,7 +104,7 @@ export class TextInputComponent<D> extends HtmlComponent<D, HTMLInputElement | H
     }
   }
 
-  getData() {
+  getData(): D {
     if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
@@ -137,7 +137,7 @@ export class CheckBoxInputComponent<D> extends HtmlComponent<D, HTMLInputElement
     }
   }
 
-  getData() {
+  getData(): D {
     if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
@@ -187,7 +187,7 @@ export class SelectComponent<D> extends HtmlComponent<D[] | D, HTMLSelectElement
     }
   }
 
-  getData() {
+  getData(): D[] | D {
     if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }
@@ -243,7 +243,7 @@ export class RadioInputComponent<D> extends HtmlComponent<D, HTMLInputElement>  
     radioInput.checked = (radioInput.value === set(data));
   }
 
-  getData() {
+  getData(): D {
     if (this.dataNode.dataBehavior === DataMappingBehavior.Search) {
       return;
     }

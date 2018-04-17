@@ -1663,34 +1663,35 @@ var ObservationNode = function () {
     }, {
         key: "createEmitter",
         value: function createEmitter(emitter) {
+            var _this4 = this;
+
             if (emitter) {
                 return emitter;
             }
-            var contextData = this.dataNode.getMinimalNamedComponent().getData();
             return function () {
-                return contextData;
+                return _this4.dataNode.getMinimalNamedComponent().getData();
             };
         }
     }, {
         key: "collectSubscriptions",
         value: function collectSubscriptions(subscriber, observedType) {
-            var _this4 = this;
+            var _this5 = this;
 
             var subscriptions = [];
             var domNode = this.dataNode.component.domNode;
 
             if (domNode) {
                 Object.keys(this.observationProperties).map(function (domEvent) {
-                    var _observationPropertie = _this4.observationProperties[domEvent],
+                    var _observationPropertie = _this5.observationProperties[domEvent],
                         emitter = _observationPropertie.emitter,
                         eventType = _observationPropertie.eventType;
 
                     if (observedType == null || observedType === eventType) {
-                        var _emitter = _this4.createEmitter(emitter);
+                        var payloadCreator = _this5.createEmitter(emitter);
                         var handler = function handler(e) {
                             subscriber.next({
                                 eventType: eventType,
-                                payload: _emitter(e)
+                                payload: payloadCreator(e)
                             });
                         };
                         domNode.addEventListener(domEvent, handler);

@@ -9,7 +9,7 @@ export declare class GroupContainer<D> extends DataDrivenComponentImpl<D, any> i
     constructor(dataNodeProps?: DataNodeProperties, nativeProperties?: Properties);
     readonly id: any;
     setData(data: D): void;
-    getData(): any;
+    getData(): D;
     queryByName<C extends Component>(name: string): C[];
     queryById<C extends Component>(id: string): C;
     protected prepareCopy(): GroupContainer<D>;

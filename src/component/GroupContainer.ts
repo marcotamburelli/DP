@@ -20,7 +20,7 @@ export class GroupContainer<D> extends DataDrivenComponentImpl<D, any> implement
     this.dataNode.setData(data);
   }
 
-  getData() {
+  getData(): D {
     return this.dataNode.getData();
   }
 

@@ -30,7 +30,7 @@ export class TextComponent<D> extends DataDrivenComponentImpl<D, Text>  {
     }
   }
 
-  getData() {
+  getData(): D {
     if (!this.dataNode.name) {
       return;
     }

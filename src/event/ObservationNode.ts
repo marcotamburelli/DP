@@ -86,9 +86,7 @@ export class ObservationNode {
       return emitter;
     }
 
-    const contextData = this.dataNode.getMinimalNamedComponent().getData();
-
-    return () => contextData;
+    return () => this.dataNode.getMinimalNamedComponent().getData();
   }
 
   private collectSubscriptions<P>(subscriber: Subscriber<P>, observedType: EventType): (() => void)[] {
@@ -100,12 +98,12 @@ export class ObservationNode {
         const { emitter, eventType } = this.observationProperties[domEvent];
 
         if (observedType == null || observedType === eventType) {
-          const _emitter = this.createEmitter(emitter);
+          const payloadCreator = this.createEmitter(emitter);
 
           const handler = (e: Event) => {
             subscriber.next({
               eventType,
-              payload: _emitter(e) as P
+              payload: payloadCreator(e) as P
             });
           };
 

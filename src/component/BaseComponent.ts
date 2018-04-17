@@ -64,7 +64,7 @@ export abstract class BaseComponent<N extends Node> implements Component, HasDom
     }
   }
 
-  get domNode() {
+  get domNode(): N {
     return this.domWrapper.domElement;
   }
 

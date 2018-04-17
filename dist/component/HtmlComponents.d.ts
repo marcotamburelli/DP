@@ -31,7 +31,7 @@ export declare class CheckBoxInputComponent<D> extends HtmlComponent<D, HTMLInpu
 export declare class SelectComponent<D> extends HtmlComponent<D[] | D, HTMLSelectElement> {
     constructor(element: HTMLSelectElement, dataNodeProperties?: DataNodeProperties, bindProperties?: BindProperties, observationProperties?: ObservationProperties);
     setData(data?: D[] | D): void;
-    getData(): D | D[];
+    getData(): D[] | D;
 }
 export declare class RadioInputComponent<D> extends HtmlComponent<D, HTMLInputElement> {
     constructor(element: HTMLInputElement, dataNodeProperties?: DataNodeProperties, bindProperties?: BindProperties, observationProperties?: ObservationProperties);

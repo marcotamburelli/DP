@@ -43,7 +43,7 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
     });
   }
 
-  getData() {
+  getData(): D[] {
     return this.children.map(child => (child as IsDataDriven<any>).getData());
   }
 

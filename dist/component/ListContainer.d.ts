@@ -13,7 +13,7 @@ export declare class ListContainer<D> extends DataDrivenComponentImpl<D[], any> 
     readonly id: any;
     append(child: any): void;
     setData(data: D[]): void;
-    getData(): any[];
+    getData(): D[];
     getChildCount(): number;
     getFirstChild<C extends Component>(): C;
     getLastChild<C extends Component>(): C;

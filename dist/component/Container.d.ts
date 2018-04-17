@@ -16,7 +16,7 @@ export declare class Container<D, E extends Element> extends DataDrivenComponent
     private domBinder;
     constructor(element: E, dataNodeProps?: DataNodeProperties, bindProperties?: BindProperties, observationProperties?: ObservationProperties);
     setData(data: D): void;
-    getData(): any;
+    getData(): D;
     queryByName<C extends Component>(name: string): C[];
     queryById<C extends Component>(id: string): C;
     protected prepareCopy(): Container<D, E>;
