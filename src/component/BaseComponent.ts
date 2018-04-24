@@ -4,35 +4,25 @@ import { Component, HasDomNode, IsDataDriven } from './Components';
 import { DataNode, DataNodeProperties } from './DataNode';
 import { DomWrapper } from './dom/DomWrappers';
 
-export type DomBasedComponent = BaseComponent<Node>;
-
-export abstract class BaseComponent<N extends Node> implements Component, HasDomNode<N> {
-  protected static getDataNode<N extends Node>(component: BaseComponent<N>) {
-    return component.dataNode;
-  }
-
-  protected parent: DomBasedComponent;
+export abstract class DomBasedComponent<N extends Node> implements Component, HasDomNode<N> {
+  protected parent: DomBasedComponent<any>;
   protected children = [];
 
-  protected abstract readonly dataNode: DataNode;
   protected abstract readonly observationNode: ObservationNode;
-
-  protected constructor(protected domWrapper: DomWrapper<N>) {
-  }
+  protected abstract readonly domWrapper: DomWrapper<N>;
 
   get id() {
     return this.domWrapper.id;
   }
 
   append(child: any) {
-    if (child instanceof BaseComponent) {
+    if (child instanceof DomBasedComponent) {
       if (child.parent) {
         throw new Error('Element already appended');
       }
 
       child.parent = this;
 
-      this.dataNode.append(child.dataNode);
       this.observationNode.append(child.observationNode);
       this.domWrapper.appendChild(child.domWrapper);
     } else {
@@ -43,7 +33,7 @@ export abstract class BaseComponent<N extends Node> implements Component, HasDom
   }
 
   remove(child: Component) {
-    if (!(child instanceof BaseComponent)) {
+    if (!(child instanceof DomBasedComponent)) {
       return;
     }
 
@@ -53,7 +43,6 @@ export abstract class BaseComponent<N extends Node> implements Component, HasDom
 
     delete child.parent;
 
-    this.dataNode.remove(child.dataNode);
     this.observationNode.remove(child.observationNode);
     this.domWrapper.removeChild(child.domWrapper);
 
@@ -72,11 +61,11 @@ export abstract class BaseComponent<N extends Node> implements Component, HasDom
     return this.observationNode.createObservable<P>(observedEvent);
   }
 
-  cloneComponent<C extends BaseComponent<N>>(deep = true) {
+  cloneComponent<C extends DomBasedComponent<N>>(deep = true) {
     const copy = this.prepareCopy() as C;
 
     deep && this.children.forEach(child => {
-      if (child instanceof BaseComponent) {
+      if (child instanceof DomBasedComponent) {
         copy.append(child.cloneComponent());
       } else {
         copy.append(child);
@@ -86,22 +75,40 @@ export abstract class BaseComponent<N extends Node> implements Component, HasDom
     return copy;
   }
 
-  protected abstract prepareCopy(): BaseComponent<N>;
+  protected abstract prepareCopy(): DomBasedComponent<N>;
 }
 
-export abstract class DataDrivenComponentImpl<D, N extends Node> extends BaseComponent<N> implements IsDataDriven<D> {
+export type DataDrivenComponent<N extends Node, D> = DomBasedComponent<N> & IsDataDriven<D>;
+
+export abstract class DataDrivenComponentImpl<D, N extends Node> extends DomBasedComponent<N> implements IsDataDriven<D> {
   protected readonly dataNode: DataNode;
   protected readonly observationNode: ObservationNode;
 
   protected constructor(
-    domWrapper: DomWrapper<N>,
+    protected readonly domWrapper: DomWrapper<N>,
     dataNodeProps: DataNodeProperties = {},
     observationProperties: ObservationProperties = {}
   ) {
-    super(domWrapper);
+    super();
 
     this.dataNode = new DataNode(dataNodeProps, this);
     this.observationNode = new ObservationNode(this.dataNode, observationProperties);
+  }
+
+  append(child: any) {
+    super.append(child);
+
+    if (child instanceof DataDrivenComponentImpl) {
+      this.dataNode.append(child.dataNode);
+    }
+  }
+
+  remove(child: Component) {
+    super.remove(child);
+
+    if (child instanceof DataDrivenComponentImpl) {
+      this.dataNode.remove(child.dataNode);
+    }
   }
 
   abstract getData(): D;

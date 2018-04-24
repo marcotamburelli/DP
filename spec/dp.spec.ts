@@ -60,6 +60,10 @@ interface TestData {
   age?: number;
 }
 
+interface TestDataForList extends TestData {
+  id: string;
+}
+
 describe('Definition of containers', () => {
 
   interface TypeData {
@@ -367,10 +371,6 @@ describe('Payload emitter in nested scopes', () => {
   });
 
   it('checks payload in list item', (done) => {
-    interface TestDataForList extends TestData {
-      id: string;
-    }
-
     const component: dp.Container<{ data: TestDataForList[] }, HTMLDivElement> = dp.define(
       'div', null,
       dp.define(dp.List, { name: 'data' },
@@ -395,4 +395,37 @@ describe('Payload emitter in nested scopes', () => {
     component.setData({ data: [{ name: 'test', age: 123, id: 'button' }] });
     component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
   });
+
+  it('checks in generated list item', (done) => {
+    const Generate = () => {
+      const child: dp.Component<TestDataForList, HTMLButtonElement> = dp.define('div', null,
+        dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+        dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER }),
+        dp.define<dp.Component<any, HTMLButtonElement>>(
+          'button',
+          { id: DomBinder.IDENTITY_BINDER, onclick: { eventType: dp.DATA_EVENT, emitter: () => child.getData() } }
+        )
+      );
+
+      return child;
+    };
+
+    const component: dp.Container<{ data: TestDataForList[] }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(dp.List, { name: 'data' },
+        dp.define(Generate, null)
+      )
+    );
+
+    const observable = Observable.from(component.createObservable<string>(dp.DATA_EVENT));
+
+    const subscription = observable.subscribe(({ payload }) => {
+      expect(payload).toEqual({ name: 'test', age: 123, id: 'button' });
+      done();
+    });
+
+    component.setData({ data: [{ name: 'test', age: 123, id: 'button' }] });
+    component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
+  });
+
 });

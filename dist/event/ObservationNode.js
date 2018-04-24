@@ -9,9 +9,9 @@ class SubscriptionImpl {
         this.innerSubscriptions = [];
         this.activeSubscriptions.add(this);
     }
-    buildSubscription(func) {
+    buildSubscription(creator) {
         this.innerSubscriptions.forEach(subscription => subscription());
-        this.innerSubscriptions = func(this.subscriber, this.observerType);
+        this.innerSubscriptions = creator(this.subscriber, this.observerType);
     }
     unsubscribe() {
         this.innerSubscriptions.forEach(subscription => subscription());

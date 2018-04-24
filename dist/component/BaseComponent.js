@@ -2,24 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ObservationNode_1 = require("../event/ObservationNode");
 const DataNode_1 = require("./DataNode");
-class BaseComponent {
-    constructor(domWrapper) {
-        this.domWrapper = domWrapper;
+class DomBasedComponent {
+    constructor() {
         this.children = [];
-    }
-    static getDataNode(component) {
-        return component.dataNode;
     }
     get id() {
         return this.domWrapper.id;
     }
     append(child) {
-        if (child instanceof BaseComponent) {
+        if (child instanceof DomBasedComponent) {
             if (child.parent) {
                 throw new Error('Element already appended');
             }
             child.parent = this;
-            this.dataNode.append(child.dataNode);
             this.observationNode.append(child.observationNode);
             this.domWrapper.appendChild(child.domWrapper);
         }
@@ -29,14 +24,13 @@ class BaseComponent {
         this.children.push(child);
     }
     remove(child) {
-        if (!(child instanceof BaseComponent)) {
+        if (!(child instanceof DomBasedComponent)) {
             return;
         }
         if (child.parent !== this) {
             throw new Error('Impossible to detach a not child component');
         }
         delete child.parent;
-        this.dataNode.remove(child.dataNode);
         this.observationNode.remove(child.observationNode);
         this.domWrapper.removeChild(child.domWrapper);
         const idx = this.children.indexOf(child);
@@ -53,7 +47,7 @@ class BaseComponent {
     cloneComponent(deep = true) {
         const copy = this.prepareCopy();
         deep && this.children.forEach(child => {
-            if (child instanceof BaseComponent) {
+            if (child instanceof DomBasedComponent) {
                 copy.append(child.cloneComponent());
             }
             else {
@@ -63,12 +57,25 @@ class BaseComponent {
         return copy;
     }
 }
-exports.BaseComponent = BaseComponent;
-class DataDrivenComponentImpl extends BaseComponent {
+exports.DomBasedComponent = DomBasedComponent;
+class DataDrivenComponentImpl extends DomBasedComponent {
     constructor(domWrapper, dataNodeProps = {}, observationProperties = {}) {
-        super(domWrapper);
+        super();
+        this.domWrapper = domWrapper;
         this.dataNode = new DataNode_1.DataNode(dataNodeProps, this);
         this.observationNode = new ObservationNode_1.ObservationNode(this.dataNode, observationProperties);
+    }
+    append(child) {
+        super.append(child);
+        if (child instanceof DataDrivenComponentImpl) {
+            this.dataNode.append(child.dataNode);
+        }
+    }
+    remove(child) {
+        super.remove(child);
+        if (child instanceof DataDrivenComponentImpl) {
+            this.dataNode.remove(child.dataNode);
+        }
     }
 }
 exports.DataDrivenComponentImpl = DataDrivenComponentImpl;

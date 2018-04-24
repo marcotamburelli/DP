@@ -1,8 +1,8 @@
+import { ComponentGenerator } from '../generator/generator';
 import { Properties } from '../util/types';
 import { DataDrivenComponentImpl } from './BaseComponent';
 import { Component, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
-import { ComponentGenerator } from './generator';
 export declare class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
     private generator;
     private dataNodeProps;

@@ -1,10 +1,10 @@
+import { ComponentGenerator } from '../generator/generator';
 import { NATIVE_PROPERTIES } from '../util/const';
 import { Properties } from '../util/types';
-import { BaseComponent, DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
+import { DataDrivenComponentImpl, DomBasedComponent } from './BaseComponent';
 import { Component, IsDataDriven, IsList } from './Components';
 import { DataNodeProperties } from './DataNode';
 import { DomWrappers } from './dom/DomWrappers';
-import { ComponentGenerator } from './generator';
 
 export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implements IsList {
   readonly isContainer: true = true;
@@ -19,7 +19,7 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
   }
 
   append(child: any) {
-    if (!(child instanceof BaseComponent)) {
+    if (!(child instanceof DomBasedComponent)) {
       throw new Error('List can only append component');
     }
 
@@ -32,7 +32,7 @@ export class ListContainer<D> extends DataDrivenComponentImpl<D[], any> implemen
     }
 
     while (this.children.length) {
-      super.remove(this.children.pop() as DomBasedComponent);
+      super.remove(this.children.pop() as DomBasedComponent<any>);
     }
 
     data.forEach((dataItem) => {

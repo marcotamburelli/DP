@@ -1,5 +1,5 @@
-import { Builder, Definition } from './Builder';
-import { BaseComponent, DomBasedComponent } from './component/BaseComponent';
+import { Builder } from './Builder';
+import { DataDrivenComponent, DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
 import { DomBinder } from './component/dom/DomBinder';
 import { GroupContainer as ExtGroupContainer } from './component/GroupContainer';
@@ -7,20 +7,22 @@ import { ListContainer as ExtListContainer } from './component/ListContainer';
 import { TextComponent as ExtTextComponent } from './component/TextComponent';
 import { Listener } from './event/listener';
 import { GenericObservable, Message } from './event/types';
-import { Properties } from './util/types';
+import { HTML, Properties } from './util/types';
 
 export namespace dp {
-  function compose(component: DomBasedComponent, children: any[]) {
+  function compose(component: DomBasedComponent<any>, children: any[]) {
     children.forEach(child => component.append(child));
 
     return component;
   }
 
-  export type Container<D, N extends Node> = BaseComponent<N> & IsDataDriven<D> & IsContainer;
+  export type Definition = HTML | ((props: Properties, children?: any[]) => DataDrivenComponent<any, any>) | DomBasedComponent<any>;
+
+  export type Container<D, N extends Node> = DomBasedComponent<N> & IsDataDriven<D> & IsContainer;
   export type ListContainer<D> = ExtListContainer<D>;
   export type GroupContainer<D> = ExtGroupContainer<D>;
   export type TextComponent<D> = ExtTextComponent<D>;
-  export type Component<D, N extends Node> = BaseComponent<N> & IsDataDriven<D>;
+  export type Component<D, N extends Node> = DomBasedComponent<N> & IsDataDriven<D>;
 
   export const IDENTITY_BINDER = DomBinder.IDENTITY_BINDER;
   export const INT_BINDER = DomBinder.INT_BINDER;
@@ -40,20 +42,37 @@ export namespace dp {
     return Builder.createText(props);
   }
 
-  export function define<C extends DomBasedComponent>(definition: Definition, properties: Properties, ...children: any[]): C {
-    var component: DomBasedComponent;
+  export function define<C extends DomBasedComponent<any>>(definition: Definition, properties: Properties, ...children: any[]): C {
+    var component: DomBasedComponent<any>;
 
-    if (definition === List) {
-      component = List(properties, children);
-    } else if (typeof definition === 'function') {
-      component = compose(definition(properties || {}), children);
-    } else if (definition instanceof BaseComponent) {
-      component = compose(definition, children);
-    } else {
-      component = compose(
-        Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent)),
-        children
-      );
+    switch (definition) {
+      case List:
+        component = List(properties || {}, children);
+        break;
+
+      case Group:
+        component = compose(Group(properties || {}), children);
+        break;
+
+      case Text:
+        component = compose(Text(properties || {}), children);
+        break;
+
+      default:
+        if (typeof definition === 'function') {
+          component = compose(
+            Builder.createCustomFromFunction(definition, properties || {}),
+            children
+          );
+        } else if (definition instanceof DomBasedComponent) {
+          component = compose(definition, children);
+        } else {
+          component = compose(
+            Builder.createComponent(definition, properties || {}, children.some(child => child instanceof DomBasedComponent)),
+            children
+          );
+        }
+        break;
     }
 
     return component as C;

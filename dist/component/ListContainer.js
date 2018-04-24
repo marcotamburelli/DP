@@ -16,7 +16,7 @@ class ListContainer extends BaseComponent_1.DataDrivenComponentImpl {
         return this.nativeProperties && this.nativeProperties[const_1.NATIVE_PROPERTIES.ID];
     }
     append(child) {
-        if (!(child instanceof BaseComponent_1.BaseComponent)) {
+        if (!(child instanceof BaseComponent_1.DomBasedComponent)) {
             throw new Error('List can only append component');
         }
         super.append(child);

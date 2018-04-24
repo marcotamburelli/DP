@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Container_1 = require("./component/Container");
-const generator_1 = require("./component/generator");
 const GroupContainer_1 = require("./component/GroupContainer");
 const HtmlComponents_1 = require("./component/HtmlComponents");
 const ListContainer_1 = require("./component/ListContainer");
 const TextComponent_1 = require("./component/TextComponent");
+const CustomComponent_1 = require("./generator/CustomComponent");
+const generator_1 = require("./generator/generator");
 const const_1 = require("./util/const");
 const NativeUtil_1 = require("./util/NativeUtil");
 const PropertiesReader_1 = require("./util/PropertiesReader");
@@ -88,4 +89,15 @@ var Builder;
         return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
+    function createCustomFromFunction(generator, properties) {
+        return new class extends CustomComponent_1.CustomComponent {
+            constructor(props) {
+                super(props);
+            }
+            generateComponent() {
+                return generator(properties);
+            }
+        }(properties);
+    }
+    Builder.createCustomFromFunction = createCustomFromFunction;
 })(Builder = exports.Builder || (exports.Builder = {}));

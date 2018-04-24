@@ -1,6 +1,4 @@
-import { DomBasedComponent } from './component/BaseComponent';
 import { Container } from './component/Container';
-import { createGenerator } from './component/generator';
 import { GroupContainer } from './component/GroupContainer';
 import {
   CheckBoxInputComponent,
@@ -11,12 +9,12 @@ import {
 } from './component/HtmlComponents';
 import { ListContainer } from './component/ListContainer';
 import { TextComponent } from './component/TextComponent';
+import { CustomComponent } from './generator/CustomComponent';
+import { ComponentGenerator, createGenerator } from './generator/generator';
 import { NATIVE_PROPERTIES, NODES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
 import { PropertiesReader } from './util/PropertiesReader';
 import { HTML, Properties } from './util/types';
-
-export type Definition = HTML | ((props: Properties, children?: any[]) => DomBasedComponent) | DomBasedComponent;
 
 namespace DomFactory {
   export function createElement<E extends HTMLElement>(tag: HTML, nativeProperties: Properties) {
@@ -140,5 +138,17 @@ export namespace Builder {
     const { dataNodeProperties, bindProperties, nativeProperties } = PropertiesReader.create(properties);
 
     return new TextComponent<D>(dataNodeProperties, bindProperties, nativeProperties);
+  }
+
+  export function createCustomFromFunction<D>(generator: ComponentGenerator<D>, properties: Properties): CustomComponent<D, Node> {
+    return new class extends CustomComponent<D, Node> {
+      constructor(props: Properties) {
+        super(props);
+      }
+
+      protected generateComponent() {
+        return generator(properties);
+      }
+    }(properties);
   }
 }

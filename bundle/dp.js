@@ -57,13 +57,22 @@ function symbolObservablePonyfill(root) {
 },{}],3:[function(require,module,exports){
 "use strict";
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 Object.defineProperty(exports, "__esModule", { value: true });
 var Container_1 = require("./component/Container");
-var generator_1 = require("./component/generator");
 var GroupContainer_1 = require("./component/GroupContainer");
 var HtmlComponents_1 = require("./component/HtmlComponents");
 var ListContainer_1 = require("./component/ListContainer");
 var TextComponent_1 = require("./component/TextComponent");
+var CustomComponent_1 = require("./generator/CustomComponent");
+var generator_1 = require("./generator/generator");
 var const_1 = require("./util/const");
 var NativeUtil_1 = require("./util/NativeUtil");
 var PropertiesReader_1 = require("./util/PropertiesReader");
@@ -160,10 +169,33 @@ var Builder;
         return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
+    function createCustomFromFunction(generator, properties) {
+        return new (function (_CustomComponent_1$Cu) {
+            _inherits(_class, _CustomComponent_1$Cu);
+
+            function _class(props) {
+                _classCallCheck(this, _class);
+
+                return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, props));
+            }
+
+            _createClass(_class, [{
+                key: "generateComponent",
+                value: function generateComponent() {
+                    return generator(properties);
+                }
+            }]);
+
+            return _class;
+        }(CustomComponent_1.CustomComponent))(properties);
+    }
+    Builder.createCustomFromFunction = createCustomFromFunction;
 })(Builder = exports.Builder || (exports.Builder = {}));
 
-},{"./component/Container":5,"./component/GroupContainer":7,"./component/HtmlComponents":8,"./component/ListContainer":9,"./component/TextComponent":10,"./component/generator":13,"./util/NativeUtil":17,"./util/PropertiesReader":18,"./util/const":19}],4:[function(require,module,exports){
+},{"./component/Container":5,"./component/GroupContainer":7,"./component/HtmlComponents":8,"./component/ListContainer":9,"./component/TextComponent":10,"./generator/CustomComponent":16,"./generator/generator":17,"./util/NativeUtil":18,"./util/PropertiesReader":19,"./util/const":20}],4:[function(require,module,exports){
 "use strict";
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -177,23 +209,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ObservationNode_1 = require("../event/ObservationNode");
 var DataNode_1 = require("./DataNode");
 
-var BaseComponent = function () {
-    function BaseComponent(domWrapper) {
-        _classCallCheck(this, BaseComponent);
+var DomBasedComponent = function () {
+    function DomBasedComponent() {
+        _classCallCheck(this, DomBasedComponent);
 
-        this.domWrapper = domWrapper;
         this.children = [];
     }
 
-    _createClass(BaseComponent, [{
+    _createClass(DomBasedComponent, [{
         key: "append",
         value: function append(child) {
-            if (child instanceof BaseComponent) {
+            if (child instanceof DomBasedComponent) {
                 if (child.parent) {
                     throw new Error('Element already appended');
                 }
                 child.parent = this;
-                this.dataNode.append(child.dataNode);
                 this.observationNode.append(child.observationNode);
                 this.domWrapper.appendChild(child.domWrapper);
             } else {
@@ -204,14 +234,13 @@ var BaseComponent = function () {
     }, {
         key: "remove",
         value: function remove(child) {
-            if (!(child instanceof BaseComponent)) {
+            if (!(child instanceof DomBasedComponent)) {
                 return;
             }
             if (child.parent !== this) {
                 throw new Error('Impossible to detach a not child component');
             }
             delete child.parent;
-            this.dataNode.remove(child.dataNode);
             this.observationNode.remove(child.observationNode);
             this.domWrapper.removeChild(child.domWrapper);
             var idx = this.children.indexOf(child);
@@ -231,7 +260,7 @@ var BaseComponent = function () {
 
             var copy = this.prepareCopy();
             deep && this.children.forEach(function (child) {
-                if (child instanceof BaseComponent) {
+                if (child instanceof DomBasedComponent) {
                     copy.append(child.cloneComponent());
                 } else {
                     copy.append(child);
@@ -249,20 +278,15 @@ var BaseComponent = function () {
         get: function get() {
             return this.domWrapper.domElement;
         }
-    }], [{
-        key: "getDataNode",
-        value: function getDataNode(component) {
-            return component.dataNode;
-        }
     }]);
 
-    return BaseComponent;
+    return DomBasedComponent;
 }();
 
-exports.BaseComponent = BaseComponent;
+exports.DomBasedComponent = DomBasedComponent;
 
-var DataDrivenComponentImpl = function (_BaseComponent) {
-    _inherits(DataDrivenComponentImpl, _BaseComponent);
+var DataDrivenComponentImpl = function (_DomBasedComponent) {
+    _inherits(DataDrivenComponentImpl, _DomBasedComponent);
 
     function DataDrivenComponentImpl(domWrapper) {
         var dataNodeProps = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -270,19 +294,38 @@ var DataDrivenComponentImpl = function (_BaseComponent) {
 
         _classCallCheck(this, DataDrivenComponentImpl);
 
-        var _this = _possibleConstructorReturn(this, (DataDrivenComponentImpl.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl)).call(this, domWrapper));
+        var _this = _possibleConstructorReturn(this, (DataDrivenComponentImpl.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl)).call(this));
 
+        _this.domWrapper = domWrapper;
         _this.dataNode = new DataNode_1.DataNode(dataNodeProps, _this);
         _this.observationNode = new ObservationNode_1.ObservationNode(_this.dataNode, observationProperties);
         return _this;
     }
 
+    _createClass(DataDrivenComponentImpl, [{
+        key: "append",
+        value: function append(child) {
+            _get(DataDrivenComponentImpl.prototype.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl.prototype), "append", this).call(this, child);
+            if (child instanceof DataDrivenComponentImpl) {
+                this.dataNode.append(child.dataNode);
+            }
+        }
+    }, {
+        key: "remove",
+        value: function remove(child) {
+            _get(DataDrivenComponentImpl.prototype.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl.prototype), "remove", this).call(this, child);
+            if (child instanceof DataDrivenComponentImpl) {
+                this.dataNode.remove(child.dataNode);
+            }
+        }
+    }]);
+
     return DataDrivenComponentImpl;
-}(BaseComponent);
+}(DomBasedComponent);
 
 exports.DataDrivenComponentImpl = DataDrivenComponentImpl;
 
-},{"../event/ObservationNode":15,"./DataNode":6}],5:[function(require,module,exports){
+},{"../event/ObservationNode":14,"./DataNode":6}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -637,7 +680,7 @@ var GroupContainer = function (_BaseComponent_1$Data) {
 
 exports.GroupContainer = GroupContainer;
 
-},{"../util/const":19,"./BaseComponent":4,"./dom/DomWrappers":12}],8:[function(require,module,exports){
+},{"../util/const":20,"./BaseComponent":4,"./dom/DomWrappers":12}],8:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1000,7 +1043,7 @@ var ListContainer = function (_BaseComponent_1$Data) {
     _createClass(ListContainer, [{
         key: "append",
         value: function append(child) {
-            if (!(child instanceof BaseComponent_1.BaseComponent)) {
+            if (!(child instanceof BaseComponent_1.DomBasedComponent)) {
                 throw new Error('List can only append component');
             }
             _get(ListContainer.prototype.__proto__ || Object.getPrototypeOf(ListContainer.prototype), "append", this).call(this, child);
@@ -1076,7 +1119,7 @@ var ListContainer = function (_BaseComponent_1$Data) {
 
 exports.ListContainer = ListContainer;
 
-},{"../util/const":19,"./BaseComponent":4,"./dom/DomWrappers":12}],10:[function(require,module,exports){
+},{"../util/const":20,"./BaseComponent":4,"./dom/DomWrappers":12}],10:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1145,7 +1188,7 @@ var TextComponent = function (_BaseComponent_1$Data) {
 
 exports.TextComponent = TextComponent;
 
-},{"../util/const":19,"./BaseComponent":4,"./dom/DomBinder":11,"./dom/DomWrappers":12}],11:[function(require,module,exports){
+},{"../util/const":20,"./BaseComponent":4,"./dom/DomBinder":11,"./dom/DomWrappers":12}],11:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1243,7 +1286,7 @@ DomBinder.INT_BINDER = {
 };
 exports.DomBinder = DomBinder;
 
-},{"../../util/NativeUtil":17}],12:[function(require,module,exports){
+},{"../../util/NativeUtil":18}],12:[function(require,module,exports){
 "use strict";
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -1469,32 +1512,6 @@ var DomWrappers;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var BaseComponent_1 = require("./BaseComponent");
-var GroupContainer_1 = require("./GroupContainer");
-exports.createGenerator = function (content) {
-    return function () {
-        if (content.length > 1) {
-            var group = new GroupContainer_1.GroupContainer();
-            content.forEach(function (child) {
-                if (child instanceof BaseComponent_1.BaseComponent) {
-                    group.append(child.cloneComponent());
-                } else {
-                    group.append(child);
-                }
-            });
-            return group;
-        }
-        var component = content[0];
-        if (component instanceof BaseComponent_1.BaseComponent) {
-            return component.cloneComponent();
-        }
-    };
-};
-
-},{"./BaseComponent":4,"./GroupContainer":7}],14:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var Builder_1 = require("./Builder");
 var BaseComponent_1 = require("./component/BaseComponent");
 var DomBinder_1 = require("./component/dom/DomBinder");
@@ -1533,16 +1550,27 @@ var dp;
             children[_key - 2] = arguments[_key];
         }
 
-        if (definition === List) {
-            component = List(properties, children);
-        } else if (typeof definition === 'function') {
-            component = compose(definition(properties || {}), children);
-        } else if (definition instanceof BaseComponent_1.BaseComponent) {
-            component = compose(definition, children);
-        } else {
-            component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
-                return child instanceof BaseComponent_1.BaseComponent;
-            })), children);
+        switch (definition) {
+            case List:
+                component = List(properties || {}, children);
+                break;
+            case Group:
+                component = compose(Group(properties || {}), children);
+                break;
+            case Text:
+                component = compose(Text(properties || {}), children);
+                break;
+            default:
+                if (typeof definition === 'function') {
+                    component = compose(Builder_1.Builder.createCustomFromFunction(definition, properties || {}), children);
+                } else if (definition instanceof BaseComponent_1.DomBasedComponent) {
+                    component = compose(definition, children);
+                } else {
+                    component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
+                        return child instanceof BaseComponent_1.DomBasedComponent;
+                    })), children);
+                }
+                break;
         }
         return component;
     }
@@ -1553,7 +1581,7 @@ var dp;
     dp.listen = listen;
 })(dp = exports.dp || (exports.dp = {}));
 
-},{"./Builder":3,"./component/BaseComponent":4,"./component/dom/DomBinder":11,"./event/listener":16}],15:[function(require,module,exports){
+},{"./Builder":3,"./component/BaseComponent":4,"./component/dom/DomBinder":11,"./event/listener":15}],14:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1578,11 +1606,11 @@ var SubscriptionImpl = function () {
 
     _createClass(SubscriptionImpl, [{
         key: "buildSubscription",
-        value: function buildSubscription(func) {
+        value: function buildSubscription(creator) {
             this.innerSubscriptions.forEach(function (subscription) {
                 return subscription();
             });
-            this.innerSubscriptions = func(this.subscriber, this.observerType);
+            this.innerSubscriptions = creator(this.subscriber, this.observerType);
         }
     }, {
         key: "unsubscribe",
@@ -1724,7 +1752,7 @@ var ObservationNode = function () {
 
 exports.ObservationNode = ObservationNode;
 
-},{"symbol-observable":1}],16:[function(require,module,exports){
+},{"symbol-observable":1}],15:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1792,7 +1820,123 @@ var Listener = function () {
 
 exports.Listener = Listener;
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var DomWrappers_1 = require("../component//dom/DomWrappers");
+var BaseComponent_1 = require("../component/BaseComponent");
+var const_1 = require("../util/const");
+var PropertiesReader_1 = require("../util/PropertiesReader");
+
+var CustomComponent = function (_BaseComponent_1$Data) {
+    _inherits(CustomComponent, _BaseComponent_1$Data);
+
+    function CustomComponent() {
+        var properties = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, CustomComponent);
+
+        var _this = _possibleConstructorReturn(this, (CustomComponent.__proto__ || Object.getPrototypeOf(CustomComponent)).call(this, DomWrappers_1.DomWrappers.group(), PropertiesReader_1.PropertiesReader.create(properties).dataNodeProperties));
+
+        _this.properties = properties;
+        _this.isContainer = true;
+        var generated = _this.generateComponent(properties);
+        if (Array.isArray(generated)) {
+            generated.forEach(function (component) {
+                return _this.append(component);
+            });
+        } else {
+            _this.append(generated);
+        }
+        return _this;
+    }
+
+    _createClass(CustomComponent, [{
+        key: "setData",
+        value: function setData(data) {
+            this.dataNode.setData(data);
+        }
+    }, {
+        key: "getData",
+        value: function getData() {
+            return this.dataNode.getData();
+        }
+    }, {
+        key: "queryByName",
+        value: function queryByName(name) {
+            return this.dataNode.getByName(name);
+        }
+    }, {
+        key: "queryById",
+        value: function queryById(id) {
+            return this.dataNode.getById(id);
+        }
+    }, {
+        key: "prepareCopy",
+        value: function prepareCopy() {
+            return new this.constructor(this.properties);
+        }
+    }, {
+        key: "id",
+        get: function get() {
+            return this.properties[const_1.NATIVE_PROPERTIES.ID];
+        }
+    }]);
+
+    return CustomComponent;
+}(BaseComponent_1.DataDrivenComponentImpl);
+
+exports.CustomComponent = CustomComponent;
+
+},{"../component//dom/DomWrappers":12,"../component/BaseComponent":4,"../util/PropertiesReader":19,"../util/const":20}],17:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var BaseComponent_1 = require("../component//BaseComponent");
+var CustomComponent_1 = require("./CustomComponent");
+exports.createGenerator = function (content) {
+    return function () {
+        return new (function (_CustomComponent_1$Cu) {
+            _inherits(_class, _CustomComponent_1$Cu);
+
+            function _class() {
+                _classCallCheck(this, _class);
+
+                return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this));
+            }
+
+            _createClass(_class, [{
+                key: "generateComponent",
+                value: function generateComponent() {
+                    return content.map(function (child) {
+                        return child instanceof BaseComponent_1.DomBasedComponent ? child.cloneComponent() : child;
+                    });
+                }
+            }]);
+
+            return _class;
+        }(CustomComponent_1.CustomComponent))();
+    };
+};
+
+},{"../component//BaseComponent":4,"./CustomComponent":16}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -1937,7 +2081,7 @@ var NativeUtil;
     NativeUtil.applyProperties = applyProperties;
 })(NativeUtil = exports.NativeUtil || (exports.NativeUtil = {}));
 
-},{"./const":19}],18:[function(require,module,exports){
+},{"./const":20}],19:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -2051,7 +2195,7 @@ var PropertiesReader = function () {
 
 exports.PropertiesReader = PropertiesReader;
 
-},{"../component/DataNode":6,"../component/dom/DomBinder":11,"./const":19}],19:[function(require,module,exports){
+},{"../component/DataNode":6,"../component/dom/DomBinder":11,"./const":20}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2094,5 +2238,5 @@ exports.BIND_PROPERTIES = {
     BIND: 'bind'
 };
 
-},{}]},{},[14])(14)
+},{}]},{},[13])(13)
 });
