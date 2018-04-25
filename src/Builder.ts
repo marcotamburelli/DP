@@ -140,14 +140,23 @@ export namespace Builder {
     return new TextComponent<D>(dataNodeProperties, bindProperties, nativeProperties);
   }
 
-  export function createCustomFromFunction<D>(generator: ComponentGenerator<D>, properties: Properties): CustomComponent<D, Node> {
-    return new class extends CustomComponent<D, Node> {
+  export function createCustom<D>(
+    generator: ComponentGenerator<D> | { new(): CustomComponent<D, any> },
+    properties: Properties
+  ): CustomComponent<D, any> {
+    const proto = generator.prototype;
+
+    if (proto && proto instanceof CustomComponent) {
+      return new (proto.constructor as { new(properties?: Properties): CustomComponent<D, any> })(properties);
+    }
+
+    return new class extends CustomComponent<D, any> {
       constructor(props: Properties) {
         super(props);
       }
 
       protected generateComponent() {
-        return generator(properties);
+        return (generator as ComponentGenerator<D>)(properties);
       }
     }(properties);
   }

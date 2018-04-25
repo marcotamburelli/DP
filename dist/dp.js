@@ -40,7 +40,7 @@ var dp;
                 break;
             default:
                 if (typeof definition === 'function') {
-                    component = compose(Builder_1.Builder.createCustomFromFunction(definition, properties || {}), children);
+                    component = compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
                 }
                 else if (definition instanceof BaseComponent_1.DomBasedComponent) {
                     component = compose(definition, children);

@@ -89,7 +89,11 @@ var Builder;
         return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
-    function createCustomFromFunction(generator, properties) {
+    function createCustom(generator, properties) {
+        const proto = generator.prototype;
+        if (proto && proto instanceof CustomComponent_1.CustomComponent) {
+            return new proto.constructor(properties);
+        }
         return new class extends CustomComponent_1.CustomComponent {
             constructor(props) {
                 super(props);
@@ -99,5 +103,5 @@ var Builder;
             }
         }(properties);
     }
-    Builder.createCustomFromFunction = createCustomFromFunction;
+    Builder.createCustom = createCustom;
 })(Builder = exports.Builder || (exports.Builder = {}));

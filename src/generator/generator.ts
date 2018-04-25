@@ -14,5 +14,5 @@ export const createGenerator = <D>(content: any[]): ComponentGenerator<D> => () 
   }();
 };
 
-export type ComponentGenerator<D> = (properties?: Properties) => DataDrivenComponent<Node, D>;
-export type ComponentsGenerator<D> = (properties?: Properties) => DataDrivenComponent<Node, D> | DataDrivenComponent<Node, D>[];
+export type ComponentGenerator<D> = (properties?: Properties) => DataDrivenComponent<D, Node>;
+export type ComponentsGenerator<D> = (properties?: Properties) => DataDrivenComponent<D, Node> | DataDrivenComponent<D, Node>[];

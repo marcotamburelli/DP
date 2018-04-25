@@ -7,6 +7,8 @@ import { ListContainer as ExtListContainer } from './component/ListContainer';
 import { TextComponent as ExtTextComponent } from './component/TextComponent';
 import { Listener } from './event/listener';
 import { GenericObservable, Message } from './event/types';
+import { CustomComponent } from './generator/CustomComponent';
+import { ComponentGenerator } from './generator/generator';
 import { HTML, Properties } from './util/types';
 
 export namespace dp {
@@ -16,7 +18,12 @@ export namespace dp {
     return component;
   }
 
-  export type Definition = HTML | ((props: Properties, children?: any[]) => DataDrivenComponent<any, any>) | DomBasedComponent<any>;
+  export type Definition =
+    HTML |
+    ((props: Properties, children?: any[]) => DataDrivenComponent<any, any>) |
+    ComponentGenerator<any> |
+    { new(): CustomComponent<any, any> } |
+    DomBasedComponent<any>;
 
   export type Container<D, N extends Node> = DomBasedComponent<N> & IsDataDriven<D> & IsContainer;
   export type ListContainer<D> = ExtListContainer<D>;
@@ -61,7 +68,7 @@ export namespace dp {
       default:
         if (typeof definition === 'function') {
           component = compose(
-            Builder.createCustomFromFunction(definition, properties || {}),
+            Builder.createCustom(definition, properties || {}),
             children
           );
         } else if (definition instanceof DomBasedComponent) {

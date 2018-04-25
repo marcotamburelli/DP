@@ -9,7 +9,7 @@ class PropertiesReader {
         this.nativeProperties = {};
         this.observationProperties = {};
         this.bindProperties = {};
-        Object.keys(properties).forEach(key => {
+        Object.keys(properties).filter(key => properties[key] != null).forEach(key => {
             if (!this.checkObservationProperty(key, properties) && !this.checkBindProperties(key, properties)) {
                 this.registerDataNodeProperty(key, properties);
                 this.registerAsNative(key, properties);

@@ -40,7 +40,7 @@ export abstract class CustomComponent<D, N extends Node> extends DataDrivenCompo
     return this.dataNode.getById(id) as C;
   }
 
-  protected abstract generateComponent(properties: Properties): DataDrivenComponent<N, D> | DataDrivenComponent<N, D>[];
+  protected abstract generateComponent(properties: Properties): DataDrivenComponent<D, N> | DataDrivenComponent<D, N>[];
 
   protected prepareCopy(): CustomComponent<D, N> {
     return new (this.constructor as {

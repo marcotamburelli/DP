@@ -169,7 +169,11 @@ var Builder;
         return new TextComponent_1.TextComponent(dataNodeProperties, bindProperties, nativeProperties);
     }
     Builder.createText = createText;
-    function createCustomFromFunction(generator, properties) {
+    function createCustom(generator, properties) {
+        var proto = generator.prototype;
+        if (proto && proto instanceof CustomComponent_1.CustomComponent) {
+            return new proto.constructor(properties);
+        }
         return new (function (_CustomComponent_1$Cu) {
             _inherits(_class, _CustomComponent_1$Cu);
 
@@ -189,7 +193,7 @@ var Builder;
             return _class;
         }(CustomComponent_1.CustomComponent))(properties);
     }
-    Builder.createCustomFromFunction = createCustomFromFunction;
+    Builder.createCustom = createCustom;
 })(Builder = exports.Builder || (exports.Builder = {}));
 
 },{"./component/Container":5,"./component/GroupContainer":7,"./component/HtmlComponents":8,"./component/ListContainer":9,"./component/TextComponent":10,"./generator/CustomComponent":16,"./generator/generator":17,"./util/NativeUtil":18,"./util/PropertiesReader":19,"./util/const":20}],4:[function(require,module,exports){
@@ -1562,7 +1566,7 @@ var dp;
                 break;
             default:
                 if (typeof definition === 'function') {
-                    component = compose(Builder_1.Builder.createCustomFromFunction(definition, properties || {}), children);
+                    component = compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
                 } else if (definition instanceof BaseComponent_1.DomBasedComponent) {
                     component = compose(definition, children);
                 } else {
@@ -2105,7 +2109,9 @@ var PropertiesReader = function () {
         this.nativeProperties = {};
         this.observationProperties = {};
         this.bindProperties = {};
-        Object.keys(properties).forEach(function (key) {
+        Object.keys(properties).filter(function (key) {
+            return properties[key] != null;
+        }).forEach(function (key) {
             if (!_this.checkObservationProperty(key, properties) && !_this.checkBindProperties(key, properties)) {
                 _this.registerDataNodeProperty(key, properties);
                 _this.registerAsNative(key, properties);

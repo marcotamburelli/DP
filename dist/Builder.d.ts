@@ -11,5 +11,7 @@ export declare namespace Builder {
     function createList<D>(properties: Properties, children: any[]): ListContainer<D>;
     function createGroup<D>(properties: Properties): GroupContainer<D>;
     function createText<D>(properties: Properties): TextComponent<D>;
-    function createCustomFromFunction<D>(generator: ComponentGenerator<D>, properties: Properties): CustomComponent<D, Node>;
+    function createCustom<D>(generator: ComponentGenerator<D> | {
+        new (): CustomComponent<D, any>;
+    }, properties: Properties): CustomComponent<D, any>;
 }

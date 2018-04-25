@@ -16,7 +16,7 @@ export declare abstract class DomBasedComponent<N extends Node> implements Compo
     cloneComponent<C extends DomBasedComponent<N>>(deep?: boolean): C;
     protected abstract prepareCopy(): DomBasedComponent<N>;
 }
-export declare type DataDrivenComponent<N extends Node, D> = DomBasedComponent<N> & IsDataDriven<D>;
+export declare type DataDrivenComponent<D, N extends Node> = DomBasedComponent<N> & IsDataDriven<D>;
 export declare abstract class DataDrivenComponentImpl<D, N extends Node> extends DomBasedComponent<N> implements IsDataDriven<D> {
     protected readonly domWrapper: DomWrapper<N>;
     protected readonly dataNode: DataNode;

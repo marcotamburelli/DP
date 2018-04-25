@@ -78,7 +78,7 @@ export abstract class DomBasedComponent<N extends Node> implements Component, Ha
   protected abstract prepareCopy(): DomBasedComponent<N>;
 }
 
-export type DataDrivenComponent<N extends Node, D> = DomBasedComponent<N> & IsDataDriven<D>;
+export type DataDrivenComponent<D, N extends Node> = DomBasedComponent<N> & IsDataDriven<D>;
 
 export abstract class DataDrivenComponentImpl<D, N extends Node> extends DomBasedComponent<N> implements IsDataDriven<D> {
   protected readonly dataNode: DataNode;

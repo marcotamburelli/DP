@@ -1,8 +1,11 @@
 import { JSDOM } from 'jsdom';
 import * as Observable from 'zen-observable';
 
+import { DataDrivenComponent } from '../src/component/BaseComponent';
 import { DomBinder } from '../src/component/dom/DomBinder';
 import { dp } from '../src/dp';
+import { CustomComponent } from '../src/generator/CustomComponent';
+import { Properties } from '../src/util/types';
 
 const dom = new JSDOM(`<!DOCTYPE html><p>test</p>`);
 
@@ -426,6 +429,54 @@ describe('Payload emitter in nested scopes', () => {
 
     component.setData({ data: [{ name: 'test', age: 123, id: 'button' }] });
     component.queryById<dp.Component<null, HTMLButtonElement>>('button').domNode.click();
+  });
+
+});
+
+describe('Custom Component', () => {
+  class MyCustom extends CustomComponent<TestData, HTMLDivElement> {
+    protected generateComponent(properties: Properties): DataDrivenComponent<TestData, HTMLDivElement> {
+      const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+        'div', { id: `${properties.id}.div`, align: properties.align },
+        dp.define('input', { name: 'name', bind: DomBinder.IDENTITY_BINDER }),
+        dp.define('input', { name: 'age', bind: DomBinder.INT_BINDER })
+      );
+
+      return component;
+    }
+  }
+
+  it('checks structure', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+      'div', { id: 'parent' },
+      dp.define(MyCustom as { new(): MyCustom }, { id: 'custom', align: 'left' })
+    );
+
+    const custom = component.queryById<dp.Container<TestData, HTMLDivElement>>('custom.div');
+    const customDom = custom.domNode;
+
+    expect(customDom.align).toBe('left');
+    expect(customDom.childNodes.length).toBe(2);
+  });
+
+  it('checks data', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+      'div', { id: 'parent' },
+      dp.define(MyCustom as { new(): MyCustom }, { id: 'custom' })
+    );
+
+    component.setData({ name: 'test', age: 123 });
+
+    const nameInput = component.queryByName<dp.Container<string, HTMLInputElement>>('name')[0].domNode;
+    const ageInput = component.queryByName<dp.Container<number, HTMLInputElement>>('age')[0].domNode;
+
+    expect(nameInput.value).toBe('test');
+    expect(ageInput.value).toBe('123');
+
+    nameInput.value = 'test test';
+    ageInput.value = '456';
+
+    expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
 });
