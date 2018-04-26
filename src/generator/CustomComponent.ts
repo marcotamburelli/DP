@@ -6,7 +6,7 @@ import { PropertiesReader } from '../util/PropertiesReader';
 import { Properties } from '../util/types';
 
 export abstract class CustomComponent<D, N extends Node> extends DataDrivenComponentImpl<D, Node> implements IsContainer {
-  readonly isContainer = true;
+  readonly isContainer: true = true;
 
   protected constructor(private properties: Properties = {}) {
     super(DomWrappers.group(), PropertiesReader.create(properties).dataNodeProperties);

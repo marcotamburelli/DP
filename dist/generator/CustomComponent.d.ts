@@ -3,7 +3,7 @@ import { DataDrivenComponent, DataDrivenComponentImpl } from '../component/BaseC
 import { Properties } from '../util/types';
 export declare abstract class CustomComponent<D, N extends Node> extends DataDrivenComponentImpl<D, Node> implements IsContainer {
     private properties;
-    readonly isContainer: boolean;
+    readonly isContainer: true;
     protected constructor(properties?: Properties);
     readonly id: any;
     setData(data: D): void;
