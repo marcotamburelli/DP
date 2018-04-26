@@ -151,13 +151,13 @@ export namespace Builder {
     }
 
     return new class extends CustomComponent<D, any> {
-      constructor(props: Properties) {
-        super(props);
+      constructor() {
+        super();
       }
 
       protected generateComponent() {
         return (generator as ComponentGenerator<D>)(properties);
       }
-    }(properties);
+    }();
   }
 }

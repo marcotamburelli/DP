@@ -433,6 +433,67 @@ describe('Payload emitter in nested scopes', () => {
 
 });
 
+describe('Function Component', () => {
+  interface TestEditorModel { id: number; title: string; }
+
+  function Element() {
+    const element: dp.Component<TestEditorModel, HTMLLIElement> = dp.define('li', {
+      id: { set: (id) => 'item-' + id, get: (str) => parseInt(str.split('-')[1]) }
+    }, dp.define(dp.Text, { name: 'title' }));
+
+    return element;
+  }
+
+  function Editor({ id, name }) {
+    const editor: dp.Component<TestEditorModel, HTMLDivElement> = dp.define('div', { id, name },
+      dp.define('div', { name: 'id', bind: dp.INT_BINDER }),
+      dp.define('form', null,
+        dp.define('div', null,
+          dp.define('input', { name: 'title', type: 'text' })
+        )
+      )
+    );
+
+    return editor;
+  }
+
+  it('builds HTML structure', () => {
+    const editor1 = dp.define(Editor, { name: 'editor', id: 'editor' });
+    const editor2 = dp.define(Editor, { id: 'editor' });
+
+    const component1: dp.Container<{ editor: TestEditorModel }, HTMLDivElement> = dp.define(
+      'div', null,
+      editor1
+    );
+    const component2: dp.Container<{ editor: TestEditorModel }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(
+        'div', { name: 'editor' },
+        editor2
+      )
+    );
+
+    component1.setData({ editor: { id: 1, title: 'default 1' } });
+    component2.setData({ editor: { id: 1, title: 'default 1' } });
+
+    expect(component1.getData()).toEqual({ editor: { id: 1, title: 'default 1' } });
+    expect(component2.getData()).toEqual({ editor: { id: 1, title: 'default 1' } });
+  });
+
+  it('builds List structure', () => {
+    const component: dp.Container<{ items: TestEditorModel[] }, HTMLDivElement> = dp.define(
+      'div', null,
+      dp.define(dp.List, { name: 'items' },
+        dp.define(Element, null)
+      )
+    );
+
+    component.setData({ items: [{ id: 1, title: 'default 1' }, { id: 2, title: 'default 2' }] });
+
+    expect(component.getData()).toEqual({ items: [{ id: 1, title: 'default 1' }, { id: 2, title: 'default 2' }] });
+  });
+});
+
 describe('Custom Component', () => {
   class MyCustom extends CustomComponent<TestData, HTMLDivElement> {
     protected generateComponent(properties: Properties): DataDrivenComponent<TestData, HTMLDivElement> {

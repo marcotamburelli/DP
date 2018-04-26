@@ -95,13 +95,13 @@ var Builder;
             return new proto.constructor(properties);
         }
         return new class extends CustomComponent_1.CustomComponent {
-            constructor(props) {
-                super(props);
+            constructor() {
+                super();
             }
             generateComponent() {
                 return generator(properties);
             }
-        }(properties);
+        }();
     }
     Builder.createCustom = createCustom;
 })(Builder = exports.Builder || (exports.Builder = {}));

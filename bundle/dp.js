@@ -177,10 +177,10 @@ var Builder;
         return new (function (_CustomComponent_1$Cu) {
             _inherits(_class, _CustomComponent_1$Cu);
 
-            function _class(props) {
+            function _class() {
                 _classCallCheck(this, _class);
 
-                return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this, props));
+                return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).call(this));
             }
 
             _createClass(_class, [{
@@ -191,7 +191,7 @@ var Builder;
             }]);
 
             return _class;
-        }(CustomComponent_1.CustomComponent))(properties);
+        }(CustomComponent_1.CustomComponent))();
     }
     Builder.createCustom = createCustom;
 })(Builder = exports.Builder || (exports.Builder = {}));
