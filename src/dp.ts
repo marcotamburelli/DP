@@ -1,5 +1,5 @@
 import { Builder } from './Builder';
-import { DataDrivenComponent, DomBasedComponent } from './component/BaseComponent';
+import { DomBasedComponent } from './component/BaseComponent';
 import { IsContainer, IsDataDriven } from './component/Components';
 import { DomBinder } from './component/dom/DomBinder';
 import { GroupContainer as ExtGroupContainer } from './component/GroupContainer';
@@ -11,6 +11,8 @@ import { CustomComponent } from './generator/CustomComponent';
 import { ComponentGenerator } from './generator/generator';
 import { HTML, Properties } from './util/types';
 
+export class ComponentDefinition { }
+
 export namespace dp {
   function compose(component: DomBasedComponent<any>, children: any[]) {
     children.forEach(child => component.append(child));
@@ -20,7 +22,7 @@ export namespace dp {
 
   export type Definition =
     HTML |
-    ((props: Properties, children?: any[]) => DataDrivenComponent<any, any>) |
+    { new(): ComponentDefinition } |
     ComponentGenerator<any> |
     { new(): CustomComponent<any, any> } |
     DomBasedComponent<any>;
@@ -37,52 +39,47 @@ export namespace dp {
   export const DATA_EVENT = 'DATA_EVENT';
   export const DATA_EMITTER = (eventType = DATA_EVENT) => ({ eventType });
 
-  export function List<D>(props: Properties, children: any[]) {
-    return Builder.createList<D>(props, children) as ListContainer<D>;
-  }
-
-  export function Group<D>(props: Properties) {
-    return Builder.createGroup<D>(props);
-  }
-
-  export function Text<D>(props: Properties): TextComponent<D> {
-    return Builder.createText(props);
-  }
+  export class List extends ComponentDefinition { }
+  export class Group extends ComponentDefinition { }
+  export class Text extends ComponentDefinition { }
 
   export function define<C extends DomBasedComponent<any>>(definition: Definition, properties: Properties, ...children: any[]): C {
     var component: DomBasedComponent<any>;
 
-    switch (definition) {
-      case List:
-        component = List(properties || {}, children);
-        break;
-
-      case Group:
-        component = compose(Group(properties || {}), children);
-        break;
-
-      case Text:
-        component = compose(Text(properties || {}), children);
-        break;
-
-      default:
-        if (typeof definition === 'function') {
-          component = compose(
-            Builder.createCustom(definition, properties || {}),
-            children
-          );
-        } else if (definition instanceof DomBasedComponent) {
-          component = compose(definition, children);
-        } else {
-          component = compose(
-            Builder.createComponent(definition, properties || {}, children.some(child => child instanceof DomBasedComponent)),
-            children
-          );
-        }
-        break;
+    if (typeof definition === 'function') {
+      component = createComponentFromFunction(definition, properties, children);
+    } else if (definition instanceof DomBasedComponent) {
+      component = compose(definition, children);
+    } else {
+      component = compose(
+        Builder.createComponent(definition, properties || {}, children.some(child => child instanceof DomBasedComponent)),
+        children
+      );
     }
 
     return component as C;
+  }
+
+  function createComponentFromFunction(
+    definition: (new () => ComponentDefinition) | ComponentGenerator<any> | (new () => CustomComponent<any, any>),
+    properties: Properties,
+    children: any[]
+  ) {
+    switch (definition) {
+      case List:
+        return Builder.createList(properties || {}, children);
+      case Group:
+        return compose(Builder.createGroup(properties || {}), children);
+      case Text:
+        return compose(Builder.createText(properties || {}), children);
+      default:
+        return compose(
+          Builder.createCustom(
+            definition as ComponentGenerator<any> | (new () => CustomComponent<any, any>),
+            properties || {}),
+          children
+        );
+    }
   }
 
   export function listen<P>(stream: GenericObservable<Message<P>>) {

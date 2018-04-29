@@ -45,33 +45,14 @@ var Builder;
     function createComponent(tag, properties, hasChildren) {
         const propReader = PropertiesReader_1.PropertiesReader.create(properties);
         switch (tag) {
-            case const_1.NODES.DIV:
-            case const_1.NODES.UL:
-            case const_1.NODES.OL:
-            case const_1.NODES.LI:
-            case const_1.NODES.FORM:
-                return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
-            case const_1.NODES.LABEL:
-            case const_1.NODES.OPTION:
-            case const_1.NODES.SPAN:
-            case const_1.NODES.BUTTON:
-            case const_1.NODES.A:
-            case const_1.NODES.P:
-            case const_1.NODES.H1:
-            case const_1.NODES.H2:
-            case const_1.NODES.H3:
-            case const_1.NODES.H4:
-            case const_1.NODES.H5:
-            case const_1.NODES.H6:
-            case const_1.NODES.BR:
-                return createHtmlComponent(tag, propReader);
-            case const_1.NODES.INPUT:
-            case const_1.NODES.TEXTAREA:
+            case const_1.INPUT_NODES.INPUT:
+            case const_1.INPUT_NODES.TEXTAREA:
                 return createInputComponent(propReader);
-            case const_1.NODES.SELECT:
+            case const_1.INPUT_NODES.SELECT:
                 return createSelectComponent(propReader);
+            default:
+                return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
         }
-        throw new Error(`'${tag}' not supported`);
     }
     Builder.createComponent = createComponent;
     function createList(properties, children) {

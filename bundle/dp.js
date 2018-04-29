@@ -115,33 +115,14 @@ var Builder;
     function createComponent(tag, properties, hasChildren) {
         var propReader = PropertiesReader_1.PropertiesReader.create(properties);
         switch (tag) {
-            case const_1.NODES.DIV:
-            case const_1.NODES.UL:
-            case const_1.NODES.OL:
-            case const_1.NODES.LI:
-            case const_1.NODES.FORM:
-                return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
-            case const_1.NODES.LABEL:
-            case const_1.NODES.OPTION:
-            case const_1.NODES.SPAN:
-            case const_1.NODES.BUTTON:
-            case const_1.NODES.A:
-            case const_1.NODES.P:
-            case const_1.NODES.H1:
-            case const_1.NODES.H2:
-            case const_1.NODES.H3:
-            case const_1.NODES.H4:
-            case const_1.NODES.H5:
-            case const_1.NODES.H6:
-            case const_1.NODES.BR:
-                return createHtmlComponent(tag, propReader);
-            case const_1.NODES.INPUT:
-            case const_1.NODES.TEXTAREA:
+            case const_1.INPUT_NODES.INPUT:
+            case const_1.INPUT_NODES.TEXTAREA:
                 return createInputComponent(propReader);
-            case const_1.NODES.SELECT:
+            case const_1.INPUT_NODES.SELECT:
                 return createSelectComponent(propReader);
+            default:
+                return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
         }
-        throw new Error("'" + tag + "' not supported");
     }
     Builder.createComponent = createComponent;
     function createList(properties, children) {
@@ -1515,11 +1496,23 @@ var DomWrappers;
 },{}],13:[function(require,module,exports){
 "use strict";
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 Object.defineProperty(exports, "__esModule", { value: true });
 var Builder_1 = require("./Builder");
 var BaseComponent_1 = require("./component/BaseComponent");
 var DomBinder_1 = require("./component/dom/DomBinder");
 var listener_1 = require("./event/listener");
+
+var ComponentDefinition = function ComponentDefinition() {
+    _classCallCheck(this, ComponentDefinition);
+};
+
+exports.ComponentDefinition = ComponentDefinition;
 var dp;
 (function (dp) {
     function compose(component, children) {
@@ -1535,17 +1528,47 @@ var dp;
         var eventType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : dp.DATA_EVENT;
         return { eventType: eventType };
     };
-    function List(props, children) {
-        return Builder_1.Builder.createList(props, children);
-    }
+
+    var List = function (_ComponentDefinition) {
+        _inherits(List, _ComponentDefinition);
+
+        function List() {
+            _classCallCheck(this, List);
+
+            return _possibleConstructorReturn(this, (List.__proto__ || Object.getPrototypeOf(List)).apply(this, arguments));
+        }
+
+        return List;
+    }(ComponentDefinition);
+
     dp.List = List;
-    function Group(props) {
-        return Builder_1.Builder.createGroup(props);
-    }
+
+    var Group = function (_ComponentDefinition2) {
+        _inherits(Group, _ComponentDefinition2);
+
+        function Group() {
+            _classCallCheck(this, Group);
+
+            return _possibleConstructorReturn(this, (Group.__proto__ || Object.getPrototypeOf(Group)).apply(this, arguments));
+        }
+
+        return Group;
+    }(ComponentDefinition);
+
     dp.Group = Group;
-    function Text(props) {
-        return Builder_1.Builder.createText(props);
-    }
+
+    var Text = function (_ComponentDefinition3) {
+        _inherits(Text, _ComponentDefinition3);
+
+        function Text() {
+            _classCallCheck(this, Text);
+
+            return _possibleConstructorReturn(this, (Text.__proto__ || Object.getPrototypeOf(Text)).apply(this, arguments));
+        }
+
+        return Text;
+    }(ComponentDefinition);
+
     dp.Text = Text;
     function define(definition, properties) {
         var component;
@@ -1554,31 +1577,30 @@ var dp;
             children[_key - 2] = arguments[_key];
         }
 
-        switch (definition) {
-            case List:
-                component = List(properties || {}, children);
-                break;
-            case Group:
-                component = compose(Group(properties || {}), children);
-                break;
-            case Text:
-                component = compose(Text(properties || {}), children);
-                break;
-            default:
-                if (typeof definition === 'function') {
-                    component = compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
-                } else if (definition instanceof BaseComponent_1.DomBasedComponent) {
-                    component = compose(definition, children);
-                } else {
-                    component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
-                        return child instanceof BaseComponent_1.DomBasedComponent;
-                    })), children);
-                }
-                break;
+        if (typeof definition === 'function') {
+            component = createComponentFromFunction(definition, properties, children);
+        } else if (definition instanceof BaseComponent_1.DomBasedComponent) {
+            component = compose(definition, children);
+        } else {
+            component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(function (child) {
+                return child instanceof BaseComponent_1.DomBasedComponent;
+            })), children);
         }
         return component;
     }
     dp.define = define;
+    function createComponentFromFunction(definition, properties, children) {
+        switch (definition) {
+            case List:
+                return Builder_1.Builder.createList(properties || {}, children);
+            case Group:
+                return compose(Builder_1.Builder.createGroup(properties || {}), children);
+            case Text:
+                return compose(Builder_1.Builder.createText(properties || {}), children);
+            default:
+                return compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
+        }
+    }
     function listen(stream) {
         return listener_1.Listener.create(stream);
     }
@@ -2205,29 +2227,10 @@ exports.PropertiesReader = PropertiesReader;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NODES = {
-    DIV: 'div',
-    FORM: 'form',
-    LABEL: 'label',
-    SPAN: 'span',
-    UL: 'ul',
-    OL: 'ol',
-    LI: 'li',
-    P: 'p',
-    H1: 'h1',
-    H2: 'h2',
-    H3: 'h3',
-    H4: 'h4',
-    H5: 'h5',
-    H6: 'h6',
-    IMG: 'img',
-    A: 'a',
+exports.INPUT_NODES = {
     INPUT: 'input',
     TEXTAREA: 'textarea',
-    BUTTON: 'button',
-    SELECT: 'select',
-    OPTION: 'option',
-    BR: 'br'
+    SELECT: 'select'
 };
 exports.DATA_NODE_PROPERTIES = {
     NAME: 'name'

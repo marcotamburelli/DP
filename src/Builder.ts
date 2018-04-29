@@ -11,7 +11,7 @@ import { ListContainer } from './component/ListContainer';
 import { TextComponent } from './component/TextComponent';
 import { CustomComponent } from './generator/CustomComponent';
 import { ComponentGenerator, createGenerator } from './generator/generator';
-import { NATIVE_PROPERTIES, NODES } from './util/const';
+import { INPUT_NODES, NATIVE_PROPERTIES } from './util/const';
 import { NativeUtil } from './util/NativeUtil';
 import { PropertiesReader } from './util/PropertiesReader';
 import { HTML, Properties } from './util/types';
@@ -89,37 +89,16 @@ export namespace Builder {
     const propReader = PropertiesReader.create(properties);
 
     switch (tag) {
-      case NODES.DIV:
-      case NODES.UL:
-      case NODES.OL:
-      case NODES.LI:
-      case NODES.FORM:
-        return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
-
-      case NODES.LABEL:
-      case NODES.OPTION:
-      case NODES.SPAN:
-      case NODES.BUTTON:
-      case NODES.A:
-      case NODES.P:
-      case NODES.H1:
-      case NODES.H2:
-      case NODES.H3:
-      case NODES.H4:
-      case NODES.H5:
-      case NODES.H6:
-      case NODES.BR:
-        return createHtmlComponent(tag, propReader);
-
-      case NODES.INPUT:
-      case NODES.TEXTAREA:
+      case INPUT_NODES.INPUT:
+      case INPUT_NODES.TEXTAREA:
         return createInputComponent(propReader);
 
-      case NODES.SELECT:
+      case INPUT_NODES.SELECT:
         return createSelectComponent(propReader);
-    }
 
-    throw new Error(`'${tag}' not supported`);
+      default:
+        return (hasChildren ? createContainer : createHtmlComponent)(tag, propReader);
+    }
   }
 
   export function createList<D>(properties: Properties, children: any[]) {

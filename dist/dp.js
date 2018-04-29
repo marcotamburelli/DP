@@ -4,6 +4,9 @@ const Builder_1 = require("./Builder");
 const BaseComponent_1 = require("./component/BaseComponent");
 const DomBinder_1 = require("./component/dom/DomBinder");
 const listener_1 = require("./event/listener");
+class ComponentDefinition {
+}
+exports.ComponentDefinition = ComponentDefinition;
 var dp;
 (function (dp) {
     function compose(component, children) {
@@ -14,45 +17,41 @@ var dp;
     dp.INT_BINDER = DomBinder_1.DomBinder.INT_BINDER;
     dp.DATA_EVENT = 'DATA_EVENT';
     dp.DATA_EMITTER = (eventType = dp.DATA_EVENT) => ({ eventType });
-    function List(props, children) {
-        return Builder_1.Builder.createList(props, children);
+    class List extends ComponentDefinition {
     }
     dp.List = List;
-    function Group(props) {
-        return Builder_1.Builder.createGroup(props);
+    class Group extends ComponentDefinition {
     }
     dp.Group = Group;
-    function Text(props) {
-        return Builder_1.Builder.createText(props);
+    class Text extends ComponentDefinition {
     }
     dp.Text = Text;
     function define(definition, properties, ...children) {
         var component;
-        switch (definition) {
-            case List:
-                component = List(properties || {}, children);
-                break;
-            case Group:
-                component = compose(Group(properties || {}), children);
-                break;
-            case Text:
-                component = compose(Text(properties || {}), children);
-                break;
-            default:
-                if (typeof definition === 'function') {
-                    component = compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
-                }
-                else if (definition instanceof BaseComponent_1.DomBasedComponent) {
-                    component = compose(definition, children);
-                }
-                else {
-                    component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.DomBasedComponent)), children);
-                }
-                break;
+        if (typeof definition === 'function') {
+            component = createComponentFromFunction(definition, properties, children);
+        }
+        else if (definition instanceof BaseComponent_1.DomBasedComponent) {
+            component = compose(definition, children);
+        }
+        else {
+            component = compose(Builder_1.Builder.createComponent(definition, properties || {}, children.some(child => child instanceof BaseComponent_1.DomBasedComponent)), children);
         }
         return component;
     }
     dp.define = define;
+    function createComponentFromFunction(definition, properties, children) {
+        switch (definition) {
+            case List:
+                return Builder_1.Builder.createList(properties || {}, children);
+            case Group:
+                return compose(Builder_1.Builder.createGroup(properties || {}), children);
+            case Text:
+                return compose(Builder_1.Builder.createText(properties || {}), children);
+            default:
+                return compose(Builder_1.Builder.createCustom(definition, properties || {}), children);
+        }
+    }
     function listen(stream) {
         return listener_1.Listener.create(stream);
     }
