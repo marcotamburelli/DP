@@ -12,4 +12,5 @@ export declare abstract class CustomComponent<D, N extends Node> extends DataDri
     queryById<C extends Component>(id: string): C;
     protected abstract generateComponent(properties: Properties): DataDrivenComponent<D, N> | DataDrivenComponent<D, N>[];
     protected prepareCopy(): CustomComponent<D, N>;
+    private appendImproper(child);
 }

@@ -11,10 +11,10 @@ class CustomComponent extends BaseComponent_1.DataDrivenComponentImpl {
         this.isContainer = true;
         const generated = this.generateComponent(properties);
         if (Array.isArray(generated)) {
-            generated.forEach(component => this.append(component));
+            generated.forEach(component => this.appendImproper(component));
         }
         else {
-            this.append(generated);
+            this.appendImproper(generated);
         }
     }
     get id() {
@@ -34,6 +34,10 @@ class CustomComponent extends BaseComponent_1.DataDrivenComponentImpl {
     }
     prepareCopy() {
         return new this.constructor(this.properties);
+    }
+    appendImproper(child) {
+        this.improperChildren.add(child);
+        this.append(child);
     }
 }
 exports.CustomComponent = CustomComponent;

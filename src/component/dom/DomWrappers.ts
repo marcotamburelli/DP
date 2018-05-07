@@ -168,7 +168,7 @@ export namespace DomWrappers {
       }
     }
 
-    private get domParent() {
+    private get domParent(): Node {
       var parentWrapper = this.parentDomWrapper;
 
       while (parentWrapper) {

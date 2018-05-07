@@ -14,9 +14,9 @@ export abstract class CustomComponent<D, N extends Node> extends DataDrivenCompo
     const generated = this.generateComponent(properties);
 
     if (Array.isArray(generated)) {
-      generated.forEach(component => this.append(component));
+      generated.forEach(component => this.appendImproper(component));
     } else {
-      this.append(generated);
+      this.appendImproper(generated);
     }
   }
 
@@ -46,5 +46,10 @@ export abstract class CustomComponent<D, N extends Node> extends DataDrivenCompo
     return new (this.constructor as {
       new(properties?: Properties): CustomComponent<D, N>
     })(this.properties);
+  }
+
+  private appendImproper(child) {
+    this.improperChildren.add(child);
+    this.append(child);
   }
 }

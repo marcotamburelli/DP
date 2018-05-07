@@ -6,6 +6,7 @@ import { DomWrapper } from './dom/DomWrappers';
 export declare abstract class DomBasedComponent<N extends Node> implements Component, HasDomNode<N> {
     protected parent: DomBasedComponent<any>;
     protected children: any[];
+    protected improperChildren: Set<Component>;
     protected readonly abstract observationNode: ObservationNode;
     protected readonly abstract domWrapper: DomWrapper<N>;
     readonly id: string;

@@ -540,4 +540,16 @@ describe('Custom Component', () => {
     expect(component.getData()).toEqual({ name: 'test test', age: 456 });
   });
 
+  it('checks clone', () => {
+    const component: dp.Container<TestData, HTMLDivElement> = dp.define(
+      'div', { id: 'parent' },
+      dp.define(MyCustom as { new(): MyCustom }, { id: 'custom' })
+    );
+
+    const clone = component.cloneComponent(true);
+    const divList = clone.domNode.getElementsByTagName('div');
+
+    expect(divList.length).toBe(1);
+  });
+
 });

@@ -199,6 +199,7 @@ var DomBasedComponent = function () {
         _classCallCheck(this, DomBasedComponent);
 
         this.children = [];
+        this.improperChildren = new Set();
     }
 
     _createClass(DomBasedComponent, [{
@@ -241,10 +242,15 @@ var DomBasedComponent = function () {
     }, {
         key: "cloneComponent",
         value: function cloneComponent() {
+            var _this = this;
+
             var deep = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
             var copy = this.prepareCopy();
             deep && this.children.forEach(function (child) {
+                if (_this.improperChildren.has(child)) {
+                    return;
+                }
                 if (child instanceof DomBasedComponent) {
                     copy.append(child.cloneComponent());
                 } else {
@@ -279,12 +285,12 @@ var DataDrivenComponentImpl = function (_DomBasedComponent) {
 
         _classCallCheck(this, DataDrivenComponentImpl);
 
-        var _this = _possibleConstructorReturn(this, (DataDrivenComponentImpl.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl)).call(this));
+        var _this2 = _possibleConstructorReturn(this, (DataDrivenComponentImpl.__proto__ || Object.getPrototypeOf(DataDrivenComponentImpl)).call(this));
 
-        _this.domWrapper = domWrapper;
-        _this.dataNode = new DataNode_1.DataNode(dataNodeProps, _this);
-        _this.observationNode = new ObservationNode_1.ObservationNode(_this.dataNode, observationProperties);
-        return _this;
+        _this2.domWrapper = domWrapper;
+        _this2.dataNode = new DataNode_1.DataNode(dataNodeProps, _this2);
+        _this2.observationNode = new ObservationNode_1.ObservationNode(_this2.dataNode, observationProperties);
+        return _this2;
     }
 
     _createClass(DataDrivenComponentImpl, [{
@@ -1878,10 +1884,10 @@ var CustomComponent = function (_BaseComponent_1$Data) {
         var generated = _this.generateComponent(properties);
         if (Array.isArray(generated)) {
             generated.forEach(function (component) {
-                return _this.append(component);
+                return _this.appendImproper(component);
             });
         } else {
-            _this.append(generated);
+            _this.appendImproper(generated);
         }
         return _this;
     }
@@ -1910,6 +1916,12 @@ var CustomComponent = function (_BaseComponent_1$Data) {
         key: "prepareCopy",
         value: function prepareCopy() {
             return new this.constructor(this.properties);
+        }
+    }, {
+        key: "appendImproper",
+        value: function appendImproper(child) {
+            this.improperChildren.add(child);
+            this.append(child);
         }
     }, {
         key: "id",

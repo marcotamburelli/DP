@@ -5,6 +5,7 @@ const DataNode_1 = require("./DataNode");
 class DomBasedComponent {
     constructor() {
         this.children = [];
+        this.improperChildren = new Set();
     }
     get id() {
         return this.domWrapper.id;
@@ -47,6 +48,9 @@ class DomBasedComponent {
     cloneComponent(deep = true) {
         const copy = this.prepareCopy();
         deep && this.children.forEach(child => {
+            if (this.improperChildren.has(child)) {
+                return;
+            }
             if (child instanceof DomBasedComponent) {
                 copy.append(child.cloneComponent());
             }

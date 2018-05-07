@@ -7,6 +7,7 @@ import { DomWrapper } from './dom/DomWrappers';
 export abstract class DomBasedComponent<N extends Node> implements Component, HasDomNode<N> {
   protected parent: DomBasedComponent<any>;
   protected children = [];
+  protected improperChildren = new Set<Component>();
 
   protected abstract readonly observationNode: ObservationNode;
   protected abstract readonly domWrapper: DomWrapper<N>;
@@ -65,6 +66,10 @@ export abstract class DomBasedComponent<N extends Node> implements Component, Ha
     const copy = this.prepareCopy() as C;
 
     deep && this.children.forEach(child => {
+      if (this.improperChildren.has(child)) {
+        return;
+      }
+
       if (child instanceof DomBasedComponent) {
         copy.append(child.cloneComponent());
       } else {
