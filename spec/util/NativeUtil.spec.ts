@@ -12,7 +12,7 @@ describe('Checking native utils', () => {
   it('Checking apply style', () => {
     const element = document.createElement('div');
 
-    NativeUtil.applyProperty(element, { name: 'style', value: 'background-color: red; padding-top: 12px' });
+    NativeUtil.applyProperty(element, { name: 'style', value: 'background-color: red; padding-top: 12px;' });
 
     expect(element.style.backgroundColor).toBe('red');
     expect(element.style.paddingTop).toBe('12px');
